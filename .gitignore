@@ -105,3 +105,6 @@ venv.bak/
 .DS_Store
 detection/
 images/
+yolo/images/
+yolo/MobileNetSSD_deploy.caffemodel
+yolo/MobileNetSSD_deploy.prototxt.txt
