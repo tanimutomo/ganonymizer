@@ -108,3 +108,4 @@ images/
 yolo/images/
 yolo/MobileNetSSD_deploy.caffemodel
 yolo/MobileNetSSD_deploy.prototxt.txt
+*.swp
