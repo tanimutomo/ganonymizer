@@ -56,15 +56,16 @@ def detect_person(image):
                 # cv2.rectangle(image, (start_x, start_y), (end_x, end_y), (255, 255, 255), 2)
                 
                 # mosaic
-                cut_img = image[start_y:end_y, start_x:end_x]
-                print('cut_img.shape: ', cut_img.shape)
-                cut_img = cv2.resize(cut_img,((end_x + start_x)//100, (end_y + start_y)//100))
-                print('cut_img.shape: ', cut_img.shape)
-                cut_img = cv2.resize(cut_img,(end_x - start_x, end_y - start_y),cv2.INTER_NEAREST)
-                print('cut_img.shape: ', cut_img.shape)
+                cut_img1 = image[start_y:end_y, start_x:end_x]
+                print('cut_img.shape: ', cut_img1.shape)
+                cut_img2 = cv2.resize(cut_img1,((end_x + start_x)//100, (end_y + start_y)//100))
+                print('cut_img.shape: ', cut_img2.shape)
+                print('cut_img1.shape[0]: ', cut_img1.shape[0])
+                cut_img3 = cv2.resize(cut_img2, (cut_img1.shape[1], cut_img1.shape[0]) ,cv2.INTER_NEAREST)
+                print('cut_img.shape: ', cut_img3.shape)
                 print('image.shape: ', image.shape)
                 print('image[start_y:start_y+end_y,start_x:start_x+end_x].shape: ', image[start_y:end_y, start_x:end_x].shape)
-                image[start_y:end_y, start_x:end_x]=cut_img
+                image[start_y:end_y, start_x:end_x] = cut_img3
 
                 # y = start_y - 15 if start_y - 15 > 15 else start_y + 15
                 # cv2.putText(image, label, (start_x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
