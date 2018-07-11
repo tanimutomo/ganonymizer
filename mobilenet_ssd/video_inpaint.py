@@ -34,6 +34,7 @@ def detect_person(image):
     detections = net.forward()
 # detections.shape = (1, 1, the number of the detected objects, 7)
 # detections[0, 0, i, :] = [0, class, conf, upleft_x, upleft_y, bottomright_x, bottomright_y]
+    musk = np.zeros((image.shape[0], image.shape[1], 1))
 
     for i in np.arange(0, detections.shape[2]):
         # extract the confidence(i.e., probability) associated with prediciton
@@ -59,20 +60,26 @@ def detect_person(image):
                 cut_img1 = image[start_y:end_y, start_x:end_x]
                 print('cut_img.shape: ', cut_img1.shape)
                 if cut_img1.shape[0] > 1 and cut_img1.shape[1] > 1:
-                    cut_img2 = cv2.resize(cut_img1,((end_x + start_x)//100, (end_y + start_y)//100))
-                    print('cut_img.shape: ', cut_img2.shape)
-                    print('cut_img1.shape[0]: ', cut_img1.shape[0])
-                    cut_img3 = cv2.resize(cut_img2, (cut_img1.shape[1], cut_img1.shape[0]) ,cv2.INTER_NEAREST)
-                    print('cut_img.shape: ', cut_img3.shape)
-                    print('image.shape: ', image.shape)
-                    print('image[start_y:start_y+end_y,start_x:start_x+end_x].shape: ', image[start_y:end_y, start_x:end_x].shape)
-                    image[start_y:end_y, start_x:end_x] = cut_img3
+                    musk[start_y:end_y, start_x:end_x] = np.ones((cut_img1.shape[0], cut_img1.shape[1], 1)) * 255
+                    musk = musk.astype('uint8')
+                    # image = cv2.inpaint(image, musk, 1, cv2.INPAINT_NS)
+                    # cut_img2 = cv2.resize(cut_img1,((end_x + start_x)//100, (end_y + start_y)//100))
+                    # print('cut_img.shape: ', cut_img2.shape)
+                    # print('cut_img1.shape[0]: ', cut_img1.shape[0])
+                    # cut_img3 = cv2.resize(cut_img2, (cut_img1.shape[1], cut_img1.shape[0]) ,cv2.INTER_NEAREST)
+                    # print('cut_img.shape: ', cut_img3.shape)
+                    # print('image.shape: ', image.shape)
+                    # print('image[start_y:start_y+end_y,start_x:start_x+end_x].shape: ', image[start_y:end_y, start_x:end_x].shape)
+                    # image[start_y:end_y, start_x:end_x] = cut_img3
 
                 # y = start_y - 15 if start_y - 15 > 15 else start_y + 15
                 # cv2.putText(image, label, (start_x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
                 # show the output image
-    cv2.imshow('Output', image)
+    inpaint = cv2.inpaint(image, musk, 1, cv2.INPAINT_NS)
+    # cv2.imshow('Musk', musk)
+    # cv2.imshow('Intput', image)
+    cv2.imshow('Output', inpaint)
     # cv2.waitKey(0)
 
 # video
