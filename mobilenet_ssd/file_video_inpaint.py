@@ -81,31 +81,49 @@ def detect_person(image):
     inpaint = cv2.inpaint(image, musk, 1, cv2.INPAINT_NS)
     # cv2.imshow('Musk', musk)
     # cv2.imshow('Intput', image)
+    cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
     cv2.imshow('Output', inpaint)
     # cv2.waitKey(0)
 
-# video
-window = "Push ESC key to stop this program"
-capture = cv2.VideoCapture(0)
+# video file
+cap = cv2.VideoCapture('./video/REC_170511_092657.avi')
 
-while(True):
-    key = cv2.waitKey(5)
-    if(key == 27):
-        print("exit.")
+while(cap.isOpened()):
+    ret, frame = cap.read()
+
+    detect_person(frame)
+    cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
+    cv2.imshow('frame', frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    # capturing image
-    ret, img = capture.read()
-
-    # if the capturing does not start, go back to former process.
-    if(ret == False):
-        print("Capture Failed. ")
-        break
-
-    # detect_person(img)
     time.sleep(0.050)
-    detect_person(img)
 
-capture.release()
+cap.release()
 cv2.destroyAllWindows()
+
+# video
+# window = "Push ESC key to stop this program"
+# capture = cv2.VideoCapture()
+
+# while(cap.isOpened()):
+#     key = cv2.waitKey(5)
+#     if(key == 27):
+#         print("exit.")
+#         break
+# 
+#     # capturing image
+#     ret, img = capture.read()
+# 
+#     # if the capturing does not start, go back to former process.
+#     if(ret == False):
+#         print("Capture Failed. ")
+#         break
+# 
+#     # detect_person(img)
+#     time.sleep(0.050)
+#     detect_person(img)
+# 
+# capture.release()
+# cv2.destroyAllWindows()
 
