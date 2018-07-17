@@ -9,6 +9,7 @@ from gl_gan.inpaint import gl_inpaint
 
 def detect_person(image, datamean, model, postproc):
     # print('image.shape: ', image.shape)
+    det_s = time.time()
     (h, w) = image.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (512, 512)), 1.0, (512, 512), 127.5)
 
@@ -47,6 +48,8 @@ def detect_person(image, datamean, model, postproc):
                     mask = mask.astype('uint8')
 
                 # show the output image
+    det_e = time.time()
+    print('[INFO] detection time per frame: {}'.format(det_e - det_s))
     mask = mask.astype('uint8')
     image = image.astype('uint8')
     # print('image.shape: {}'.format(image.shape))
@@ -57,12 +60,15 @@ def detect_person(image, datamean, model, postproc):
     else:
         inpaint = image
     # cv2.imshow('Output', inpaint)
+    inp_e = time.time()
+    print('[INFO] inpainting time per frame: {}'.format(inp_e - det_e))
     return inpaint, mask
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--image', default='./images/example_12.jpg')
+parser.add_argument('--save_cap_dir', type=str, default='../data/video/frames2/')
 parser.add_argument('--video_dir', type=str, default='../data/video/')
-parser.add_argument('--video_name', type=str, default='short_REC_170511_092456.avi')
+parser.add_argument('--video_name', type=str, default='vshort_REC_170511_092456.avi')
 parser.add_argument('--prototxt', default='./cfgs/deploy.prototxt', help='path to Caffe deploy prototxt file')
 parser.add_argument('--model', default='./weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel', help='path to Caffe pre-trained file')
 parser.add_argument('--confidence', type=float, default=0.2, help='minimum probability to filter weak detections')
@@ -104,28 +110,30 @@ if __name__ == '__main__':
     datamean = data.mean
 
     while(cap.isOpened()):
-        print('[INFO] count frame: {}/{}'.format(count_frame, count))
         t1 = time.time()
         ret, frame = cap.read()
         if ret:
+            print('[INFO] count frame: {}/{}'.format(count_frame, count))
             # frame = frame.astype('float32')
             # print('frame.type: {}'.format(frame.dtype))
             output, mask = detect_person(frame, datamean, model, args.postproc)
-            # output = output.astype('float32')
+            output = output * 255 # innormalization
+            output = output.astype('uint8')
             # print('output.type: {}'.format(output.dtype))
             # print('frame.shape: {}'.format(frame.shape))
             # print('frame: {}'.format(frame))
+            # print('mask: {}'.format(mask))
             # print('output: {}'.format(output))
             cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
-            # concat = cv2.vconcat([frame, output])
-            # if args.show:
-            #     cv2.imshow('Output', concat)
-            # video.append(concat)
-            # if cv2.waitKey(1) & 0xFF == ord('q'):
-            #     break
-            # cv2.imwrite('{}in_{}.png'.format(file_dir, count_frame), frame)
-            # cv2.imwrite('{}m_{}.png'.format(file_dir, count_frame), mask)
-            # cv2.imwrite('{}out_{}.png'.format(file_dir, count_frame), output)
+            concat = cv2.vconcat([frame, output])
+            if args.show:
+                cv2.imshow('Output', concat)
+            video.append(concat)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            cv2.imwrite('{}in_{}.png'.format(args.save_cap_dir, count_frame), frame)
+            cv2.imwrite('{}m_{}.png'.format(args.save_cap_dir, count_frame), mask)
+            cv2.imwrite('{}out_{}.png'.format(args.save_cap_dir, count_frame), output)
         else:
             break
         t2 = time.time()
@@ -137,7 +145,7 @@ if __name__ == '__main__':
     cap.release()
     cv2.destroyAllWindows()
 
-    outfile = '{}out7_{}'.format(file_dir, file_name)
+    outfile = '{}out_{}'.format(file_dir, file_name)
     fps = 20.0
     codecs = 'H264'
 

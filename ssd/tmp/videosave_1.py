@@ -9,7 +9,7 @@ cap = cv2.VideoCapture('{}{}'.format(infile_dir, infile))
 while(cap.isOpened()):
     ret, frame = cap.read()
     if ret:
-        if count >= 595 and count <= 805:
+        if count >= 625 and count <= 626:
             cv2.imshow('frame', frame)
             video.append(frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -19,7 +19,7 @@ while(cap.isOpened()):
     count += 1
 cap.release()
 
-outfile = '{}short_{}'.format(infile_dir, infile)
+outfile = '{}ex_{}'.format(infile_dir, infile)
 fps = 20.0
 codecs = 'H264'
 

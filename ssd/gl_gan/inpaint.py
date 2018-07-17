@@ -11,10 +11,9 @@ import torchvision.utils as vutils
 from gl_gan.utils import *
 from gl_gan.poissonblending import prepare_mask, blend
 
-
 parser = argparse.ArgumentParser()
-parser.add_argument('--input', default='none', help='Input image')
-parser.add_argument('--mask', default='none', help='Mask image')
+parser.add_argument('--input', default='../../data/video/frames/in_32.png', help='Input image')
+parser.add_argument('--mask', default='../../data/video/frames/m_32.png', help='Mask image')
 parser.add_argument('--model_path', default='completionnet_places2.t7', help='Trained model')
 parser.add_argument('--gpu', default=False, action='store_true',
                     help='use GPU')
@@ -23,8 +22,6 @@ parser.add_argument('--postproc', default=False, action='store_true',
 # print(opt)
 
 def gl_inpaint(input_img, mask, datamean, model, postproc):
-
-
 # load data
     # print('image.shape: {}'.format(image.shape))
     # input_img = cv2.imread(image)
@@ -93,6 +90,7 @@ def gl_inpaint(input_img, mask, datamean, model, postproc):
 
     out = np.array(out).transpose(1, 2, 0)
     # print('out.shape: {}'.format(out.shape))
+    # print('out: {}'.format(out))
 
     return out
 
@@ -101,18 +99,24 @@ def gl_inpaint(input_img, mask, datamean, model, postproc):
 if __name__ == '__main__':
     opt = parser.parse_args()
 
+    print('loading model...')
     # load Completion Network
-    data = load_lua('./gl_gan/completionnet_places2.t7')
+    data = load_lua('completionnet_places2.t7')
     model = data.model
     model.evaluate()
     datamean = data.mean
 
-    out = gl_inpaint(opt.input, opt.mask, datamean, model, opt.postproc)
+    print('loading images...')
+    input_img = cv2.imread(opt.input)
+    mask_img = cv2.imread(opt.mask)
+    out = gl_inpaint(input_img, mask_img, datamean, model, opt.postproc)
 
     # save images
-    out = torch.from_numpy(cvimg2tensor(out))
+    print('inpainting input image...')
+    out_tensor = torch.from_numpy(cvimg2tensor(out))
     print('save images...')
-    vutils.save_image(out, 'out.png', normalize=True)
+    vutils.save_image(out_tensor, 'out.png', normalize=True)
+    cv2.imwrite('out_cv2.png', out * 255)
     # vutils.save_image(Im, 'masked_input.png', normalize=True)
     # vutils.save_image(M_3ch, 'mask.png', normalize=True)
     # vutils.save_image(res, 'res.png', normalize=True)
