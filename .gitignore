@@ -113,4 +113,9 @@ yolo/images/
 *.avi
 *.cfg
 *.weights
+*.zip
+*.png
+*.t7
 ssd_copy/
+takuro
+data/
