@@ -51,24 +51,26 @@ def detect_person(image, datamean, model, postproc):
     det_e = time.time()
     print('[INFO] detection time per frame: {}'.format(det_e - det_s))
     mask = mask.astype('uint8')
-    image = image.astype('uint8')
+    # image = image.astype('uint8')
     # print('image.shape: {}'.format(image.shape))
     # print('mask.shape: {}'.format(mask.shape))
     # inpaint = cv2.inpaint(image, mask, 1, cv2.INPAINT_NS)
     if mask.max() > 0:
         inpaint = gl_inpaint(image, mask, datamean, model, postproc)
+        flag = True
     else:
         inpaint = image
+        flag = False
     # cv2.imshow('Output', inpaint)
     inp_e = time.time()
     print('[INFO] inpainting time per frame: {}'.format(inp_e - det_e))
-    return inpaint, mask
+    return inpaint, mask, flag
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--image', default='./images/example_12.jpg')
-parser.add_argument('--save_cap_dir', type=str, default='../data/video/frames2/')
+parser.add_argument('--save_cap_dir', type=str, default='../data/video/frames3/')
 parser.add_argument('--video_dir', type=str, default='../data/video/')
-parser.add_argument('--video_name', type=str, default='vshort_REC_170511_092456.avi')
+parser.add_argument('--video_name', type=str, default='short_REC_170511_092456.avi')
 parser.add_argument('--prototxt', default='./cfgs/deploy.prototxt', help='path to Caffe deploy prototxt file')
 parser.add_argument('--model', default='./weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel', help='path to Caffe pre-trained file')
 parser.add_argument('--confidence', type=float, default=0.2, help='minimum probability to filter weak detections')
@@ -116,9 +118,12 @@ if __name__ == '__main__':
             print('[INFO] count frame: {}/{}'.format(count_frame, count))
             # frame = frame.astype('float32')
             # print('frame.type: {}'.format(frame.dtype))
-            output, mask = detect_person(frame, datamean, model, args.postproc)
-            output = output * 255 # innormalization
-            output = output.astype('uint8')
+            output, mask, flag = detect_person(frame, datamean, model, args.postproc)
+            if flag:
+                output = output * 255 # innormalization
+                output = output.astype('uint8')
+            else:
+                output = frame
             # print('output.type: {}'.format(output.dtype))
             # print('frame.shape: {}'.format(frame.shape))
             # print('frame: {}'.format(frame))
@@ -131,8 +136,8 @@ if __name__ == '__main__':
             video.append(concat)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            cv2.imwrite('{}in_{}.png'.format(args.save_cap_dir, count_frame), frame)
-            cv2.imwrite('{}m_{}.png'.format(args.save_cap_dir, count_frame), mask)
+            # cv2.imwrite('{}in_{}.png'.format(args.save_cap_dir, count_frame), frame)
+            # cv2.imwrite('{}m_{}.png'.format(args.save_cap_dir, count_frame), mask)
             cv2.imwrite('{}out_{}.png'.format(args.save_cap_dir, count_frame), output)
         else:
             break

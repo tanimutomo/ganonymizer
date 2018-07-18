@@ -88,7 +88,12 @@ def gl_inpaint(input_img, mask, datamean, model, postproc):
         out = blend(target, source, mask, offset=(0, 0))
         # print(out)
 
+    # print(out)
     out = np.array(out).transpose(1, 2, 0)
+    out = out[:, :, [2, 1, 0]]
+    # out = out * 255
+    # out = out.transpose((1, 2, 0)).astype(np.uint8)
+    # out = cv2.cvtColor(out, cv2.COLOR_RGB2BGR)
     # print('out.shape: {}'.format(out.shape))
     # print('out: {}'.format(out))
 
