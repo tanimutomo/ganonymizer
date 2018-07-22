@@ -13,16 +13,15 @@ from completionnet_places2 import completionnet_places2
 # from gl_gan.poissonblending import prepare_mask, blend
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--input', default='./ex_images/in_25.png', help='Input image')
+parser.add_argument('--input', default='./ex_images/in25.png', help='Input image')
 parser.add_argument('--mask', default='./ex_images/mask4.png', help='Mask image')
-parser.add_argument('--output', type=str, required=True, help='Output file name')
-parser.add_argument('--cuda', type=str, default='0')
+# parser.add_argument('--output', type=str, default='out.png', help='Output file name')
+parser.add_argument('--cuda', type=str, default='1')
 parser.add_argument('--model_path', default='completionnet_places2.t7', help='Trained model')
 parser.add_argument('--gpu', default=False, action='store_true',
                     help='use GPU')
 parser.add_argument('--postproc', default=False, action='store_true',
                     help='Disable post-processing')
-# print(args)
 
 def gl_inpaint(input_img, mask, datamean, model, postproc, device):
 # load data
@@ -93,7 +92,7 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
         # print(out)
 
     print(out.shape)
-    out = out.view(out.shape[1], out.shape[2], out.shape[3])
+    out = out[0]
     out = np.array(out.cpu().detach()).transpose(1, 2, 0)
     out = out[:, :, [2, 1, 0]]
     print(out.shape)
@@ -138,8 +137,11 @@ if __name__ == '__main__':
     print('inpainting input image...')
     out_tensor = torch.from_numpy(cvimg2tensor(out))
     print('save images...')
-    vutils.save_image(out_tensor, 'out.png', normalize=True)
-    cv2.imwrite(args.output, out * 255)
+    in_file = args.input.split('/')[2].split('.')[0]
+    m_file = args.mask.split('/')[2].split('.')[0]
+    out_file = './ex_images/out_{}_{}.png'.format(in_file, m_file)
+    # vutils.save_image(out_tensor, out_file, normalize=True)
+    cv2.imwrite(out_file, out * 255)
     # vutils.save_image(Im, 'masked_input.png', normalize=True)
     # vutils.save_image(M_3ch, 'mask.png', normalize=True)
     # vutils.save_image(res, 'res.png', normalize=True)
