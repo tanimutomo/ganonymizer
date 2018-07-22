@@ -90,7 +90,6 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
         mask = input_mask
         out = blend(target, source, mask, offset=(0, 0))
         # print(out)
-
     print(out.shape)
     out = out[0]
     out = np.array(out.cpu().detach()).transpose(1, 2, 0)
@@ -118,6 +117,7 @@ if __name__ == '__main__':
     model = completionnet_places2
     param = torch.load('./completionnet_places2.pth')
     model.load_state_dict(param)
+    model.eval()
     datamean = torch.tensor([0.4560, 0.4472, 0.4155], device=device)
     # data = load_lua('completionnet_places2.t7')
     # model = data.model
@@ -129,9 +129,6 @@ if __name__ == '__main__':
     print(input_img.shape, mask_img.shape)
     print('processing images...')
     out = gl_inpaint(input_img, mask_img, datamean, model, args.postproc, device)
-    # print('mask.shape: {}'.format(mask_img.shape))
-    # print('mask.max: {}'.format(mask_img.max()))
-    # print('mask.min(): {}'.format(mask_img.min()))
 
     # save images
     print('inpainting input image...')
@@ -140,9 +137,5 @@ if __name__ == '__main__':
     in_file = args.input.split('/')[2].split('.')[0]
     m_file = args.mask.split('/')[2].split('.')[0]
     out_file = './ex_images/out_{}_{}.png'.format(in_file, m_file)
-    # vutils.save_image(out_tensor, out_file, normalize=True)
     cv2.imwrite(out_file, out * 255)
-    # vutils.save_image(Im, 'masked_input.png', normalize=True)
-    # vutils.save_image(M_3ch, 'mask.png', normalize=True)
-    # vutils.save_image(res, 'res.png', normalize=True)
     print('Done')
