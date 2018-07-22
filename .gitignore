@@ -116,6 +116,8 @@ yolo/images/
 *.zip
 *.png
 *.t7
+*.sh
+*.pth
 ssd_copy/
 takuro
 data/

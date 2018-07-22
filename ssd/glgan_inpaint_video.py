@@ -150,7 +150,7 @@ if __name__ == '__main__':
     cap.release()
     cv2.destroyAllWindows()
 
-    outfile = '{}out_{}'.format(file_dir, file_name)
+    outfile = '{}out2_{}'.format(file_dir, file_name)
     fps = 20.0
     codecs = 'H264'
 
