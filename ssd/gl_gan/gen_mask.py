@@ -15,10 +15,10 @@ import argparse
 # print(shape, v, h)
 
 shape = [720, 1280, 3]
-start_y, start_x = 480, 1040
-height, width = 240, 240
-v = np.array([start_x, start_x + width])
-h = np.array([start_y, start_y + height])
+end_y, end_x = 720, 1280
+height, width = 120, 120
+v = np.array([end_x - width, end_x])
+h = np.array([end_y - height, end_y])
 
 move_v = 0
 move_h = 0
@@ -31,6 +31,4 @@ mask = np.zeros(shape)
 # print((v[1] - v[0], h[1] - h[0], shape[2]).shape)
 mask[h[0]:h[1], v[0]:v[1], :] = np.ones((height, width, shape[2])) * 255
 
-cv2.imshow('Mask', mask)
 cv2.imwrite('./ex_images/m_v{}-{}_h{}-{}.png'.format(v[0], v[1], h[0], h[1]), mask)
-cv2.waitKey(0)
