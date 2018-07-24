@@ -11,6 +11,7 @@ from completionnet_places2 import completionnet_places2
 
 # from gl_gan.utils import *
 # from gl_gan.poissonblending import prepare_mask, blend
+# from gl_gan.pre_support import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', default='./ex_images/in25.png', help='Input image')
@@ -46,8 +47,6 @@ def pre_padding(input, mask, vi, hi, origin):
         mask = np.concatenate([mask, np.zeros(ph.shape, dtype='uint8')], axis=0)
 
     return input, mask
-
-# def interpolation(input, mask, 
 
 def cut_padding(out, origin):
     if out.shape[0] != origin[0]:
@@ -126,6 +125,7 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
 
 if __name__ == '__main__':
     from utils import *
+    from pre_support import *
     # from poissonblending import prepare_mask, blend
     args = parser.parse_args()
     device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
