@@ -5,11 +5,12 @@ import time
 from torch.utils.serialization import load_lua
 
 from gl_gan.inpaint import gl_inpaint
+from gl_gan.pre_support import *
+from gl_gan.completionnet_places2 import completionnet_places2
 
 
 def detect_person(image, datamean, model, postproc):
     # print('image.shape: ', image.shape)
-    det_s = time.time()
     (h, w) = image.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(image, (512, 512)), 1.0, (512, 512), 127.5)
 
@@ -47,24 +48,9 @@ def detect_person(image, datamean, model, postproc):
                     mask[start_y:end_y, start_x:end_x] = np.ones((cut_img1.shape[0], cut_img1.shape[1], 3)) * 255
                     mask = mask.astype('uint8')
 
-                # show the output image
-    det_e = time.time()
-    print('[INFO] detection time per frame: {}'.format(det_e - det_s))
     mask = mask.astype('uint8')
-    # image = image.astype('uint8')
-    # print('image.shape: {}'.format(image.shape))
-    # print('mask.shape: {}'.format(mask.shape))
     # inpaint = cv2.inpaint(image, mask, 1, cv2.INPAINT_NS)
-    if mask.max() > 0:
-        inpaint = gl_inpaint(image, mask, datamean, model, postproc)
-        flag = True
-    else:
-        inpaint = image
-        flag = False
-    # cv2.imshow('Output', inpaint)
-    inp_e = time.time()
-    print('[INFO] inpainting time per frame: {}'.format(inp_e - det_e))
-    return inpaint, mask, flag
+    return mask
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--image', default='./images/example_12.jpg')
@@ -91,6 +77,7 @@ if __name__ == '__main__':
     file_name = args.video_name
     video = []
     count_frame = 1
+    device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
     print('[INFO] loading video...')
     cap = cv2.VideoCapture(file_dir + file_name)
     # load our serialized model from disk
@@ -106,10 +93,11 @@ if __name__ == '__main__':
 
     # load Completion Network
     print('[INFO] loading model...')
-    data = load_lua('./gl_gan/completionnet_places2.t7')
-    model = data.model
-    model.evaluate()
-    datamean = data.mean
+    model = completionnet_places2
+    param = torch.load('./glcic/completionnet_places2.pth')
+    model.load_state_dict(param)
+    model.eval()
+    datamean = torch.tensor([0.4560, 0.4472, 0.4155], device=device)
 
     while(cap.isOpened()):
         t1 = time.time()
@@ -118,17 +106,36 @@ if __name__ == '__main__':
             print('[INFO] count frame: {}/{}'.format(count_frame, count))
             # frame = frame.astype('float32')
             # print('frame.type: {}'.format(frame.dtype))
-            output, mask, flag = detect_person(frame, datamean, model, args.postproc)
-            if flag:
+            
+            # detection privacy using SSD
+            det_s = time.time()
+            mask = detect_person(frame, datamean, model, args.postproc)
+            det_e = time.time()
+            print('[INFO] detection time per frame: {}'.format(det_e - det_s))
+
+            # pre padding
+            origin = frame.shape
+            i, j, k = np.where(mask>=10)
+            if i.max() > origin[0] - 5 and j.max() > origin[1] - 5:
+                print('[INFO] prepadding images...')
+                frame, mask = pre_padding(frame, mask, j, i, origin)
+
+            # Inpainting using glcic
+            if mask.max() > 0:
+                output = gl_inpaint(frame, mask, datamean, model, postproc)
                 output = output * 255 # innormalization
                 output = output.astype('uint8')
             else:
                 output = frame
+            inp_e = time.time()
+            print('[INFO] inpainting time per frame: {}'.format(inp_e - det_e))
+
             # print('output.type: {}'.format(output.dtype))
             # print('frame.shape: {}'.format(frame.shape))
             # print('frame: {}'.format(frame))
             # print('mask: {}'.format(mask))
             # print('output: {}'.format(output))
+
             cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
             concat = cv2.vconcat([frame, output])
             if args.show:
@@ -150,7 +157,7 @@ if __name__ == '__main__':
     cap.release()
     cv2.destroyAllWindows()
 
-    outfile = '{}out2_{}'.format(file_dir, file_name)
+    outfile = '{}out3_{}'.format(file_dir, file_name)
     fps = 20.0
     codecs = 'H264'
 

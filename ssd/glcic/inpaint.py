@@ -5,13 +5,13 @@ from torch.legacy import nn
 from torch.legacy.nn.Sequential import Sequential
 import cv2
 import numpy as np
-from torch.utils.serialization import load_lua
+# from torch.utils.serialization import load_lua
 import torchvision.utils as vutils
-from completionnet_places2 import completionnet_places2
 
-# from gl_gan.utils import *
+from completionnet_places2 import completionnet_places2
+from gl_gan.utils import *
 # from gl_gan.poissonblending import prepare_mask, blend
-# from gl_gan.pre_support import *
+from gl_gan.pre_support import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', default='./ex_images/in25.png', help='Input image')
@@ -23,39 +23,6 @@ parser.add_argument('--gpu', default=False, action='store_true',
                     help='use GPU')
 parser.add_argument('--postproc', default=False, action='store_true',
                     help='Disable post-processing')
-
-def pre_padding(input, mask, vi, hi, origin):
-    s_v, e_v, s_h, e_h = vi.min(), vi.max(), hi.min(), hi.max()
-    v_l = [origin[1]-4, origin[1]-3, origin[1]-2, origin[1]-1, s_v-1, s_v-2, s_v-3, s_v-4]
-    h_l = [origin[0]-4, origin[0]-3, origin[0]-2, origin[0]-1, s_h-1, s_h-2, s_h-3, s_h-4]
-    if e_v > origin[1] - 5:
-        pv1 = input[:, v_l[v_l.index(e_v)+1], :].reshape(-1, 1, 3)
-        pv2 = input[:, v_l[v_l.index(e_v)+2], :].reshape(-1, 1, 3)
-        pv3 = input[:, v_l[v_l.index(e_v)+3], :].reshape(-1, 1, 3)
-        pv4 = input[:, v_l[v_l.index(e_v)+4], :].reshape(-1, 1, 3)
-        pv = np.concatenate([pv1, pv2, pv3, pv4], axis=1)
-        input = np.concatenate([input, pv], axis=1)
-        mask = np.concatenate([mask, np.zeros(pv.shape, dtype='uint8')], axis=1)
-
-    if e_h > origin[0] - 5:
-        ph1 = input[h_l[h_l.index(e_h)+1], :, :].reshape(1, -1, 3)
-        ph2 = input[h_l[h_l.index(e_h)+2], :, :].reshape(1, -1, 3)
-        ph3 = input[h_l[h_l.index(e_h)+3], :, :].reshape(1, -1, 3)
-        ph4 = input[h_l[h_l.index(e_h)+4], :, :].reshape(1, -1, 3)
-        ph = np.concatenate([ph1, ph2, ph3, ph4], axis=0)
-        input = np.concatenate([input, ph], axis=0)
-        mask = np.concatenate([mask, np.zeros(ph.shape, dtype='uint8')], axis=0)
-
-    return input, mask
-
-def cut_padding(out, origin):
-    if out.shape[0] != origin[0]:
-        out = np.delete(out, [origin[0], origin[0]+1, origin[0]+2, origin[0]+3], axis=0)
-
-    if out.shape[1] != origin[1]:
-        out = np.delete(out, [origin[1], origin[1]+1, origin[1]+2, origin[1]+3], axis=1)
-
-    return out
 
 def gl_inpaint(input_img, mask, datamean, model, postproc, device):
 # load data
@@ -93,6 +60,7 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
         input = input.to(device)
 
 # evaluate
+    print(input.shape)
     res = model.forward(input)
 
 # make out
@@ -129,6 +97,7 @@ if __name__ == '__main__':
     # from poissonblending import prepare_mask, blend
     args = parser.parse_args()
     device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
+    print('[INFO] device is {}'.format(device))
 
     print('[INFO] loading model...')
     # load Completion Network
@@ -142,13 +111,29 @@ if __name__ == '__main__':
     input_img = cv2.imread(args.input)
     mask_img = cv2.imread(args.mask)
     origin = input_img.shape
+
+    # pre padding
     i, j, k = np.where(mask_img>=10)
     if i.max() > origin[0] - 5 and j.max() > origin[1] - 5:
         print('[INFO] prepadding images...')
         input_img, mask_img = pre_padding(input_img, mask_img, j, i, origin)
 
+    # pre support
+    # large_thresh = 200
+    # rec = detect_large_mask(mask_img, large_thresh)
+    # n_input = input_img.copy()
+    # n_mask = mask_img.copy()
+    # n_input, n_mask = grid_interpolation(n_input, n_mask, rec)
+
+    # resize to 256
+    # n_input = cv2.resize(n_input, (256, 256))
+    # n_mask = cv2.resize(n_mask, (256, 256))
+
     print('[INFO] processing images...')
-    out = gl_inpaint(input_img, mask_img, datamean, model, args.postproc, device)
+    out = gl_inpaint(n_input, n_mask, datamean, model, args.postproc, device)
+    # print(out.shape)
+    # out = cv2.resize(out, (origin[1], origin[0]))
+    # print(out.shape)
 
     if origin != input_img.shape:
         print('[INFO] cut padding images...')
