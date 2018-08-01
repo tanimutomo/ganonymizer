@@ -87,7 +87,6 @@ def arange_rec_out(rec_out, opp_rec, ip, ip_axis):
 
 def grid_interpolation(input, mask, rec, rec_w):
     if rec != []:
-        print('[INFO] making grid interpolation...')
         for r in rec:
             print('[INFO] detect large mask which (y, x, h, w) is {}'.format(r))
             valid_lr, valid_ud = True, True
@@ -144,12 +143,66 @@ def grid_interpolation(input, mask, rec, rec_w):
 
     return input, mask
 
-def patch(input, re_output, mask):
-    
+def sparse_patch(input, out256, mask, rec, comp_size):
+    for r in rec:
+        y, x, h, w = r
+        # input[y+int(h/4):y+int(h*3/4), x+int(w/4):x+int(w*3/4), :] = out256[y+int(h/4):y+int(h*3/4), x+int(w/4):x+int(w*3/4), :]
+        # mask[y+int(h/4):y+int(h*3/4), x+int(w/4):x+int(w*3/4), :] = 0
 
-    return re_output
-    
+        # interval = 60
+        inter_h, inter_w = int(h / 4), int(w / 4)
+        # inter_h = int(input.shape[0] / comp_size[0])
+        # inter_w = int(input.shape[1] / comp_size[1])
+        # print('[INFO] interval of interpolation is: {}'.format(interval))
+        print('[INFO] interval of interpolation is: (h: {}, w: {})'.format(inter_h, inter_w))
 
+        py = y + inter_h
+        patch_size = int(h / 8)
+        input[y+inter_h:y+inter_h+patch_size, x:x+w, :] = out256[y+inter_h:y+inter_h+patch_size, x:x+w, :]
+        mask[y+inter_h:y+inter_h+patch_size, x:x+w, :] = 0
+        input[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = out256[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :]
+        mask[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = 0
+        input[y:y+h, x+inter_w:x+inter_w+patch_size, :] = out256[y:y+h, x+inter_w:x+inter_w+patch_size, :]
+        mask[y:y+h, x+inter_w:x+inter_w+patch_size, :] = 0
+        input[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :] = out256[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :]
+        mask[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :] = 0
+
+        # while py + patch_size < y + h:
+        #     input[y+inter_h:y+inter_h+patch_size, x:x+w, :] = out256[y+inter_h:y+inter_h+patch_size, x:x+w, :]
+        #     mask[y+inter_h:y+inter_h+patch_size, x:x+w, :] = 0
+        #     input[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = out256[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :]
+        #     mask[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = 0
+        #     py += inter_h
+        #     py += 2 * inter_h
+
+        # px = x + inter_w
+        # while px + patch_size < x + w:
+        #     input[y:y+h, px:px+patch_size, :] = out256[y:y+h, px:px+patch_size, :]
+        #     mask[y:y+h, px:px+patch_size, :] = 0
+        #     px += inter_w
+            # px += 2 * inter_w
+
+        # while py + patch_size < y + h:
+        #     if indent:
+        #         px = x + patch_size
+        #     else:
+        #         px = x
+
+        #     while px + patch_size < x + w:
+        #         input[py:py+patch_size, px:px+patch_size, :] = out256[py:py+patch_size, px:px+patch_size, :]
+        #         mask[py:py+patch_size, px:px+patch_size, :] = 0
+        #         # input[py, px, :] = out256[py, px, :]
+        #         # mask[py, px, :] = 0
+        #         # input[py:py+inter_h, px:px+inter_w, :] = out256[py:py+inter_h, px:px+inter_w, :]
+        #         # mask[py:py+inter_h, px:px+inter_w, :] = 0
+        #         px += inter_w
+        #     py += inter_h
+        #     if indent:
+        #         indent = False
+        #     else:
+        #         indent = True
+    
+    return input, mask
 
 if __name__ == '__main__':
     input = (np.random.rand(40, 20, 3) * 10).astype('uint8')
@@ -167,10 +220,12 @@ if __name__ == '__main__':
     rec_w = 8
     n_input = input.copy()
     n_mask = mask.copy()
+    out256 = np.zeros(input.shape)
     rec = detect_large_mask(mask, thresh)
-    n_input, n_mask = grid_interpolation(n_input, n_mask, rec, rec_w)
+    n_input, n_mask = sparse_patch(n_input, out256, n_mask, rec, [8, 6])
+    # n_input, n_mask = grid_interpolation(n_input, n_mask, rec, rec_w)
 
-    for i in range(3):
+    for i in range(1):
         print(input[:, :, i]==n_input[:, :, i])
         print(n_mask[:, :, i])
 

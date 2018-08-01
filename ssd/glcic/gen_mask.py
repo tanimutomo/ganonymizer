@@ -16,12 +16,12 @@ import argparse
 
 shape = [720, 1280, 3]
 end_y, end_x = 720, 1280
-height, width = 120, 120
+height, width = 210, 210
 v = np.array([end_x - width, end_x])
 h = np.array([end_y - height, end_y])
 
-move_v = 0
-move_h = 0
+move_v = 800
+move_h = 200
 
 v = v - move_v
 h = h - move_h

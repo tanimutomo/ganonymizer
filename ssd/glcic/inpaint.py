@@ -8,10 +8,11 @@ import numpy as np
 # from torch.utils.serialization import load_lua
 import torchvision.utils as vutils
 
-from completionnet_places2 import completionnet_places2
-from gl_gan.utils import *
-# from gl_gan.poissonblending import prepare_mask, blend
-from gl_gan.pre_support import *
+# from glcic.completionnet_places2 import completionnet_places2
+# from glcic.utils import *
+# from glcic.pre_support import *
+
+# from glcic.poissonblending import prepare_mask, blend
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', default='./ex_images/in25.png', help='Input image')
@@ -60,7 +61,6 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
         input = input.to(device)
 
 # evaluate
-    print(input.shape)
     res = model.forward(input)
 
 # make out
@@ -81,12 +81,6 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
     out = out[0]
     out = np.array(out.cpu().detach()).transpose(1, 2, 0)
     out = out[:, :, [2, 1, 0]]
-    # print(out.shape)
-    # out = out * 255
-    # out = out.transpose((1, 2, 0)).astype(np.uint8)
-    # out = cv2.cvtColor(out, cv2.COLOR_RGB2BGR)
-    # print('out.shape: {}'.format(out.shape))
-    # print('out: {}'.format(out))
 
     return out
 
@@ -94,6 +88,7 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
 if __name__ == '__main__':
     from utils import *
     from pre_support import *
+    from completionnet_places2 import completionnet_places2
     # from poissonblending import prepare_mask, blend
     args = parser.parse_args()
     device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
@@ -119,25 +114,41 @@ if __name__ == '__main__':
         input_img, mask_img = pre_padding(input_img, mask_img, j, i, origin)
 
     # pre support
-    # large_thresh = 200
-    # rec = detect_large_mask(mask_img, large_thresh)
-    # n_input = input_img.copy()
-    # n_mask = mask_img.copy()
-    # n_input, n_mask = grid_interpolation(n_input, n_mask, rec)
+    large_thresh = 200
+    rec = detect_large_mask(mask_img, large_thresh)
+    n_input = input_img.copy()
+    n_mask = mask_img.copy()
+    # n_input, n_mask = grid_interpolation(n_input, n_mask_img, rec)
 
     # resize to 256
-    # n_input = cv2.resize(n_input, (256, 256))
-    # n_mask = cv2.resize(n_mask, (256, 256))
+    # if rec != []:
+    #     print('[INFO] sparse patch...')
+    #     # print(n_input[rec[0][0]:rec[0][0]+rec[0][2], rec[0][1]:rec[0][1]+rec[0][3], :])
+    #     input256 = cv2.resize(n_input, (256, 256))
+    #     mask256 = cv2.resize(n_mask, (256, 256))
+    #     out256 = gl_inpaint(input256, mask256, datamean, model, args.postproc, device)
+    #     cv2.imwrite('./ex_images/input256.png', input256 * 255)
+    #     cv2.imwrite('./ex_images/out256.png', out256 * 255)
+    #     cv2.imwrite('./ex_images/mask256.png', mask256 * 255)
+    #     cv2.imshow('out256', out256)
+    #     cv2.waitKey(0)
+    #     out256 = cv2.resize(out256, (origin[1], origin[0]))
+    #     out256 = (out256 * 255).astype('uint8')
+    #     # print(out256[rec[0][0]:rec[0][0]+rec[0][2], rec[0][1]:rec[0][1]+rec[0][3], :])
+    #     cv2.imshow('out256', out256)
+    #     cv2.waitKey(0)
+    #     n_input, n_mask = sparse_patch(n_input, out256, n_mask, rec, [256, 256])
 
     print('[INFO] processing images...')
     out = gl_inpaint(n_input, n_mask, datamean, model, args.postproc, device)
     # print(out.shape)
-    # out = cv2.resize(out, (origin[1], origin[0]))
     # print(out.shape)
 
     if origin != input_img.shape:
         print('[INFO] cut padding images...')
         out = cut_padding(out, origin)
+    cv2.imshow('out', out)
+    cv2.waitKey(0)
 
     # save images
     out_tensor = torch.from_numpy(cvimg2tensor(out))

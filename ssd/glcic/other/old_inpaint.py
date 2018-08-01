@@ -5,24 +5,24 @@ from torch.legacy import nn
 from torch.legacy.nn.Sequential import Sequential
 import cv2
 import numpy as np
-from torch.utils.serialization import load_lua
+# from torch.utils.serialization import load_lua
 import torchvision.utils as vutils
-from completionnet_places2 import completionnet_places2
 
+from completionnet_places2 import completionnet_places2
 # from gl_gan.utils import *
-# from gl_gan.poissonblending import prepare_mask, blend
+# # from gl_gan.poissonblending import prepare_mask, blend
+# from gl_gan.pre_support import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--input', default='./ex_images/in_25.png', help='Input image')
+parser.add_argument('--input', default='./ex_images/in25.png', help='Input image')
 parser.add_argument('--mask', default='./ex_images/mask4.png', help='Mask image')
-parser.add_argument('--output', type=str, required=True, help='Output file name')
-parser.add_argument('--cuda', type=str, default='0')
+parser.add_argument('--output', type=str, default='', help='Output file name')
+parser.add_argument('--cuda', type=str, default='1')
 parser.add_argument('--model_path', default='completionnet_places2.t7', help='Trained model')
 parser.add_argument('--gpu', default=False, action='store_true',
                     help='use GPU')
 parser.add_argument('--postproc', default=False, action='store_true',
                     help='Disable post-processing')
-# print(args)
 
 def gl_inpaint(input_img, mask, datamean, model, postproc, device):
 # load data
@@ -39,30 +39,15 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
         M[M > 0.2] = 1.0
         M = M.view(1, M.size(0), M.size(1))
         assert I.size(1) == M.size(1) and I.size(2) == M.size(2)
-
+    
     else:
-        # generate random holes
-        M = torch.FloatTensor(1, I.size(1), I.size(2)).fill_(0)
-        nHoles = np.random.randint(1, 4)
-        print('[INFO] mask is not recognized...')
-        print(nHoles)
-        print('w: ', I.size(2))
-        print('h: ', I.size(1))
-        for _ in range(nHoles):
-            mask_w = np.random.randint(32, 128)
-            mask_h = np.random.randint(32, 128)
-            assert I.size(1) > mask_h or I.size(2) > mask_w
-            px = np.random.randint(0, I.size(2)-mask_w)
-            py = np.random.randint(0, I.size(1)-mask_h)
-            M[:, py:py+mask_h, px:px+mask_w] = 1
-
+        print('[ERROR] Mask image is invalid')
 
     for i in range(3):
         I[i, :, :] = I[i, :, :] - datamean[i]
 
 # make mask_3ch
     M_3ch = torch.cat((M, M, M), 0)
-
     Im = I * (M_3ch*(-1)+1)
 
 # set up input
@@ -70,11 +55,12 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
     input = input.view(1, input.size(0), input.size(1), input.size(2)).float()
 
     if torch.cuda.is_available():
-        print('using GPU...')
+        print('[INFO] using GPU...')
         model.to(device)
         input = input.to(device)
 
 # evaluate
+    print(input.shape)
     res = model.forward(input)
 
 # make out
@@ -91,12 +77,11 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
         mask = input_mask
         out = blend(target, source, mask, offset=(0, 0))
         # print(out)
-
-    print(out.shape)
-    out = out.view(out.shape[1], out.shape[2], out.shape[3])
+    # print(out.shape)
+    out = out[0]
     out = np.array(out.cpu().detach()).transpose(1, 2, 0)
     out = out[:, :, [2, 1, 0]]
-    print(out.shape)
+    # print(out.shape)
     # out = out * 255
     # out = out.transpose((1, 2, 0)).astype(np.uint8)
     # out = cv2.cvtColor(out, cv2.COLOR_RGB2BGR)
@@ -106,41 +91,59 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
     return out
 
 
-
 if __name__ == '__main__':
     from utils import *
+    from pre_support import *
     # from poissonblending import prepare_mask, blend
     args = parser.parse_args()
     device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
-    print(device)
+    print('[INFO] device is {}'.format(device))
 
-    print('loading model...')
+    print('[INFO] loading model...')
     # load Completion Network
     model = completionnet_places2
     param = torch.load('./completionnet_places2.pth')
     model.load_state_dict(param)
+    model.eval()
     datamean = torch.tensor([0.4560, 0.4472, 0.4155], device=device)
-    # data = load_lua('completionnet_places2.t7')
-    # model = data.model
-    # model.evaluate()
 
-    print('loading images...')
+    print('[INFO] loading images...')
     input_img = cv2.imread(args.input)
     mask_img = cv2.imread(args.mask)
-    print(input_img.shape, mask_img.shape)
-    print('processing images...')
-    out = gl_inpaint(input_img, mask_img, datamean, model, args.postproc, device)
-    # print('mask.shape: {}'.format(mask_img.shape))
-    # print('mask.max: {}'.format(mask_img.max()))
-    # print('mask.min(): {}'.format(mask_img.min()))
+    origin = input_img.shape
+
+    # pre padding
+    i, j, k = np.where(mask_img>=10)
+    if i.max() > origin[0] - 5 and j.max() > origin[1] - 5:
+        print('[INFO] prepadding images...')
+        input_img, mask_img = pre_padding(input_img, mask_img, j, i, origin)
+
+    # pre support
+    # large_thresh = 200
+    # rec = detect_large_mask(mask_img, large_thresh)
+    # n_input = input_img.copy()
+    # n_mask = mask_img.copy()
+    # n_input, n_mask = grid_interpolation(n_input, n_mask, rec)
+
+    # resize to 256
+    # n_input = cv2.resize(n_input, (256, 256))
+    # n_mask = cv2.resize(n_mask, (256, 256))
+
+    print('[INFO] processing images...')
+    out = gl_inpaint(n_input, n_mask, datamean, model, args.postproc, device)
+    # print(out.shape)
+    # out = cv2.resize(out, (origin[1], origin[0]))
+    # print(out.shape)
+
+    if origin != input_img.shape:
+        print('[INFO] cut padding images...')
+        out = cut_padding(out, origin)
 
     # save images
-    print('inpainting input image...')
     out_tensor = torch.from_numpy(cvimg2tensor(out))
-    print('save images...')
-    vutils.save_image(out_tensor, 'out.png', normalize=True)
-    cv2.imwrite(args.output, out * 255)
-    # vutils.save_image(Im, 'masked_input.png', normalize=True)
-    # vutils.save_image(M_3ch, 'mask.png', normalize=True)
-    # vutils.save_image(res, 'res.png', normalize=True)
-    print('Done')
+    print('[INFO] save images...')
+    in_file = args.input.split('/')[2].split('.')[0]
+    m_file = args.mask.split('/')[2].split('.')[0]
+    out_file = './ex_images/out{}_{}_{}.png'.format(args.output, in_file, m_file)
+    cv2.imwrite(out_file, out * 255)
+    print('[INFO] Done')
