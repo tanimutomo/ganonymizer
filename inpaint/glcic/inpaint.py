@@ -8,18 +8,21 @@ import numpy as np
 # from torch.utils.serialization import load_lua
 import torchvision.utils as vutils
 
-# from glcic.completionnet_places2 import completionnet_places2
-# from glcic.utils import *
-# from glcic.pre_support import *
+from inpaint.glcic.completionnet_places2 import completionnet_places2
+from inpaint.glcic.utils import *
+from inpaint.glcic.pre_support import *
 
 # from glcic.poissonblending import prepare_mask, blend
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', default='./ex_images/in25.png', help='Input image')
-parser.add_argument('--mask', default='./ex_images/mask4.png', help='Mask image')
+parser.add_argument('--mask', default=None, help='Mask image')
+parser.add_argument('--conf', type=float, default=0.15)
 parser.add_argument('--output', type=str, default='', help='Output file name')
 parser.add_argument('--cuda', type=str, default='1')
 parser.add_argument('--model_path', default='completionnet_places2.t7', help='Trained model')
+parser.add_argument('--prototxt', default='../../detection/ssd/cfgs/deploy.prototxt', help='path to Caffe deploy prototxt file')
+parser.add_argument('--model', default='../../detection/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel', help='path to Caffe pre-trained file')
 parser.add_argument('--gpu', default=False, action='store_true',
                     help='use GPU')
 parser.add_argument('--postproc', default=False, action='store_true',
@@ -89,6 +92,7 @@ if __name__ == '__main__':
     from utils import *
     from pre_support import *
     from completionnet_places2 import completionnet_places2
+    from other.ssd512 import detect
     # from poissonblending import prepare_mask, blend
     args = parser.parse_args()
     device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
@@ -101,23 +105,56 @@ if __name__ == '__main__':
     model.load_state_dict(param)
     model.eval()
     datamean = torch.tensor([0.4560, 0.4472, 0.4155], device=device)
+    net = cv2.dnn.readNetFromCaffe(args.prototxt, args.model)
 
     print('[INFO] loading images...')
     input_img = cv2.imread(args.input)
-    mask_img = cv2.imread(args.mask)
     origin = input_img.shape
+    if args.mask == None:
+        obj_rec = []
+        mask_img, obj_rec = detect(input_img, net, args.conf, obj_rec)
+    else:
+        mask_img = cv2.imread(args.mask)
 
-    # pre padding
-    i, j, k = np.where(mask_img>=10)
-    if i.max() > origin[0] - 5 and j.max() > origin[1] - 5:
-        print('[INFO] prepadding images...')
-        input_img, mask_img = pre_padding(input_img, mask_img, j, i, origin)
 
-    # pre support
-    large_thresh = 200
-    rec = detect_large_mask(mask_img, large_thresh)
-    n_input = input_img.copy()
-    n_mask = mask_img.copy()
+    # Inpainting using glcic
+    if mask_img.max() > 0:
+        # pre padding
+        origin = input_img.shape
+        n_input = input_img.copy()
+        n_mask = mask_img.copy()
+        i, j, k = np.where(n_mask>=10)
+        flag = {'hu':False, 'hd':False, 'vl':False, 'vr':False}
+
+        if i.max() > origin[0] - 5 or j.max() > origin[1] - 5 or i.min() < 4 or j.min() < 4:
+            print('[INFO] prepadding images...')
+            n_input, n_mask, flag = pre_padding(n_input, n_mask, j, i, origin, flag)
+
+        # pre support
+        # rec = detect_large_mask(n_mask)
+
+        if obj_rec != []:
+            print('[INFO] sparse patch...')
+            input256 = cv2.resize(n_input, (256, 256))
+            mask256 = cv2.resize(n_mask, (256, 256))
+            out256 = gl_inpaint(input256, mask256, datamean, model, args.postproc, device)
+            out256 = cv2.resize(out256, (origin[1], origin[0]))
+            out256 = (out256 * 255).astype('uint8')
+            large_thresh = 200
+            n_input, n_mask = sparse_patch(n_input, out256, n_mask, obj_rec, [256, 256], large_thresh)
+
+        output = gl_inpaint(n_input, n_mask, datamean, model, args.postproc, device)
+
+        # cut pre_padding
+        if flag['hu'] or flag['hd'] or flag['vl'] or flag['vr']:
+            output = cut_padding(output, origin, flag)
+
+        output = output * 255 # innormalization
+        output = output.astype('uint8')
+
+    else:
+        output = frame
+
     # n_input, n_mask = grid_interpolation(n_input, n_mask_img, rec)
 
     # resize to 256
@@ -139,22 +176,21 @@ if __name__ == '__main__':
     #     cv2.waitKey(0)
     #     n_input, n_mask = sparse_patch(n_input, out256, n_mask, rec, [256, 256])
 
-    print('[INFO] processing images...')
-    out = gl_inpaint(n_input, n_mask, datamean, model, args.postproc, device)
-    # print(out.shape)
-    # print(out.shape)
-
-    if origin != input_img.shape:
-        print('[INFO] cut padding images...')
-        out = cut_padding(out, origin)
-    cv2.imshow('out', out)
-    cv2.waitKey(0)
+    # cv2.imshow('out', out)
+    # cv2.waitKey(0)
 
     # save images
-    out_tensor = torch.from_numpy(cvimg2tensor(out))
     print('[INFO] save images...')
-    in_file = args.input.split('/')[2].split('.')[0]
-    m_file = args.mask.split('/')[2].split('.')[0]
-    out_file = './ex_images/out{}_{}_{}.png'.format(args.output, in_file, m_file)
-    cv2.imwrite(out_file, out * 255)
+    in_file = args.input.split('/')[-1]
+    # m_file = args.mask.split('/')[2].split('.')[0]
+    out256_file = './ex2_images/256_{}'.format(in_file)
+    input_file = './ex2_images/{}'.format(in_file)
+    out_file = './ex2_images/out{}_{}'.format(args.output, in_file)
+    if args.mask == None:
+        mask_file = './ex2_images/mask_{}'.format(in_file)
+    # out_file = './ex_images/out{}_{}_{}.png'.format(args.output, in_file, m_file)
+    cv2.imwrite(out256_file, out256)
+    cv2.imwrite(input_file, input_img)
+    cv2.imwrite(mask_file, mask_img)
+    cv2.imwrite(out_file, output)
     print('[INFO] Done')
