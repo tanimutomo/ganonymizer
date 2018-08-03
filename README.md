@@ -1,2 +1,1 @@
-# face_or_human_detection
-顔と人の検出を動画と画像からOpencvを使って，軽く実装した．故に制度はかなり低い．
+# !!!GANonymizer!!!
