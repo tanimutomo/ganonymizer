@@ -103,7 +103,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 .DS_Store
-detection/
 images/
 video/
 yolo/images/
@@ -124,3 +123,4 @@ yolo/images/
 ssd_copy/
 takuro
 data/
+.gitignore
