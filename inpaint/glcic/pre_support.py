@@ -192,7 +192,7 @@ def grid_interpolation(input, mask, rec, rec_w):
 
     return input, mask
 
-def sparse_patch(input, out256, mask, rec, comp_size, thresh):
+def pseudo_mask_division(input, out256, mask, rec, comp_size, thresh):
     for r in rec:
         y, x, h, w = r
         # input[y+int(h/4):y+int(h*3/4), x+int(w/4):x+int(w*3/4), :] = out256[y+int(h/4):y+int(h*3/4), x+int(w/4):x+int(w*3/4), :]
@@ -210,6 +210,8 @@ def sparse_patch(input, out256, mask, rec, comp_size, thresh):
         py = y + inter_h
         patch_size = int(h / 8)
         if h > thresh:
+            # print('input.shape: {}'.format(input.shape))
+            # print('out256.shape: {}'.format(out256.shape))
             input[y+inter_h:y+inter_h+patch_size, x:x+w, :] = out256[y+inter_h:y+inter_h+patch_size, x:x+w, :]
             mask[y+inter_h:y+inter_h+patch_size, x:x+w, :] = 0
             input[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = out256[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :]

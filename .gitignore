@@ -123,4 +123,7 @@ yolo/images/
 ssd_copy/
 takuro
 data/
+inpaint/glcic/ex2_images/
+inpaint/glcic/ex_images/
+segmentation/opencv-semantic-segmentation/
 .gitignore

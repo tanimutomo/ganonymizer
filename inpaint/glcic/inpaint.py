@@ -12,7 +12,7 @@ from inpaint.glcic.completionnet_places2 import completionnet_places2
 from inpaint.glcic.utils import *
 from inpaint.glcic.pre_support import *
 
-# from glcic.poissonblending import prepare_mask, blend
+from inpaint.glcic.poissonblending import prepare_mask, blend
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', default='./ex_images/in25.png', help='Input image')
@@ -58,10 +58,8 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
     input = torch.cat((Im, M), 0)
     input = input.view(1, input.size(0), input.size(1), input.size(2)).float()
 
-    if torch.cuda.is_available():
-        print('[INFO] using GPU...')
-        model.to(device)
-        input = input.to(device)
+    model.to(device)
+    input = input.to(device)
 
 # evaluate
     res = model.forward(input)
@@ -72,18 +70,22 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
 
     out = res.float()*M_3ch.float() + I.float()*(M_3ch*(-1)+1).float()
 
-# post-processing
-    if postproc:
-        print('[INFO] post-postprocessing...')
-        target = input_img    # background
-        source = tensor2cvimg(out.numpy())    # foreground
-        mask = input_mask
-        out = blend(target, source, mask, offset=(0, 0))
-        # print(out)
-    # print(out.shape)
     out = out[0]
     out = np.array(out.cpu().detach()).transpose(1, 2, 0)
     out = out[:, :, [2, 1, 0]]
+    # cv2.imshow('out_before', out)
+    # cv2.waitKey(0)
+
+    # post-processing
+    if postproc:
+        print('[INFO] post-postprocessing...')
+        target = input_img    # background
+        mask = input_mask
+        out = blend(target, out, mask, offset=(0, 0))
+        # cv2.imshow('out_after', out)
+        # cv2.waitKey(0)
+#         print(out)
+#         print(out.shape)
 
     return out
 
@@ -93,7 +95,8 @@ if __name__ == '__main__':
     from pre_support import *
     from completionnet_places2 import completionnet_places2
     from other.ssd512 import detect
-    # from poissonblending import prepare_mask, blend
+    from poissonblending import prepare_mask, blend
+
     args = parser.parse_args()
     device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
     print('[INFO] device is {}'.format(device))
@@ -134,7 +137,7 @@ if __name__ == '__main__':
         # rec = detect_large_mask(n_mask)
 
         if obj_rec != []:
-            print('[INFO] sparse patch...')
+            print('[INFO] pseudo mask division...')
             input256 = cv2.resize(n_input, (256, 256))
             mask256 = cv2.resize(n_mask, (256, 256))
             out256 = gl_inpaint(input256, mask256, datamean, model, args.postproc, device)
@@ -183,13 +186,13 @@ if __name__ == '__main__':
     print('[INFO] save images...')
     in_file = args.input.split('/')[-1]
     # m_file = args.mask.split('/')[2].split('.')[0]
-    out256_file = './ex2_images/256_{}'.format(in_file)
+    # out256_file = './ex2_images/256_{}'.format(in_file)
     input_file = './ex2_images/{}'.format(in_file)
     out_file = './ex2_images/out{}_{}'.format(args.output, in_file)
     if args.mask == None:
         mask_file = './ex2_images/mask_{}'.format(in_file)
     # out_file = './ex_images/out{}_{}_{}.png'.format(args.output, in_file, m_file)
-    cv2.imwrite(out256_file, out256)
+    # cv2.imwrite(out256_file, out256)
     cv2.imwrite(input_file, input_img)
     cv2.imwrite(mask_file, mask_img)
     cv2.imwrite(out_file, output)

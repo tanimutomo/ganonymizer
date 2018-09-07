@@ -13,12 +13,12 @@ from detection.ssd.ssd512 import detect
 
 parser = argparse.ArgumentParser()
 # parser.add_argument('--image', default='./images/example_12.jpg')
-parser.add_argument('--save_cap_dir', type=str, default='./data/video/noon/')
+parser.add_argument('--save_cap_dir', default=None)
 parser.add_argument('--video', type=str, default='./data/video/vshort_REC_170511_092456.avi')
 parser.add_argument('--prototxt', default='./detection/ssd/cfgs/deploy.prototxt', help='path to Caffe deploy prototxt file')
 parser.add_argument('--model', default='./detection/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel', help='path to Caffe pre-trained file')
 parser.add_argument('--output', default='')
-parser.add_argument('--cuda', default='0')
+parser.add_argument('--cuda', default=None)
 parser.add_argument('--conf', type=float, default=0.15, help='minimum probability to filter weak detections')
 parser.add_argument('--fps', type=float, default=10.0)
 parser.add_argument('--show', action='store_true')
@@ -29,10 +29,18 @@ if __name__ == '__main__':
     video_file = args.video
     video = np.array([])
     count_frame = 1
-    device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
+    total_time_ssd = 0
+    total_time_glcic = 0
+    total_time_inpaint = 0
+
+    if args.cuda != None:
+        device = torch.device('cuda:{}'.format(args.cuda) if torch.cuda.is_available() else 'cpu')
+    else:
+        device = 'cpu'
+    print('[INFO] device is {}'.format(device))
     print('[INFO] loading video...')
     cap = cv2.VideoCapture(video_file)
-    # load our serialized model from disk
+    # load our serialized model from dis != Nonek
     print('[INFO] loading model...')
     net = cv2.dnn.readNetFromCaffe(args.prototxt, args.model)
     W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -51,6 +59,7 @@ if __name__ == '__main__':
     model.eval()
     datamean = torch.tensor([0.4560, 0.4472, 0.4155], device=device)
 
+    print('')
     while(cap.isOpened()):
         t1 = time.time()
         ret, frame = cap.read()
@@ -62,10 +71,13 @@ if __name__ == '__main__':
             obj_rec = []
             mask, obj_rec = detect(frame, net, args.conf, obj_rec)
             det_e = time.time()
-            print('[INFO] detection time per frame: {}'.format(det_e - det_s))
+            print('[TIME] detection time per frame: {}'.format(det_e - det_s))
+            total_time_ssd += det_e - det_s
 
             # Inpainting using glcic
             if mask.max() > 0:
+                inp_s = time.time()
+                print('[INFO] Removing specific objects...')
                 # pre padding
                 origin = frame.shape
                 n_input = frame.copy()
@@ -73,24 +85,37 @@ if __name__ == '__main__':
                 i, j, k = np.where(n_mask>=10)
                 flag = {'hu':False, 'hd':False, 'vl':False, 'vr':False}
 
+                large_thresh = 150
+                # rec = detect_large_mask(n_mask)
+                
                 if i.max() > origin[0] - 5 or j.max() > origin[1] - 5 or i.min() < 4 or j.min() < 4:
                     print('[INFO] prepadding images...')
                     n_input, n_mask, flag = pre_padding(n_input, n_mask, j, i, origin, flag)
 
-                # pre support
-                large_thresh = 120
-                # rec = detect_large_mask(n_mask)
+                pmd_f = False
+                for r in obj_rec:
+                    y, x, h, w = r
+                    if y < 0 or y >= n_input.shape[0] or \
+                        x < 0 or x >= n_input.shape[1] or \
+                        h > n_input.shape[0] or w > n_input.shape[1]:
+                        obj_rec.remove(r)
 
-                if obj_rec != []:
-                    print('[INFO] sparse patch...')
+                    if w > large_thresh or h > large_thresh:
+                        pmd_f = True
+
+                if pmd_f:
+                    print('[INFO] pseudo mask division...')
                     input256 = cv2.resize(n_input, (256, 256))
                     mask256 = cv2.resize(n_mask, (256, 256))
                     out256 = gl_inpaint(input256, mask256, datamean, model, args.postproc, device)
-                    out256 = cv2.resize(out256, (origin[1], origin[0]))
+                    out256 = cv2.resize(out256, (n_input.shape[1], n_input.shape[0]))
                     out256 = (out256 * 255).astype('uint8')
-                    n_input, n_mask = sparse_patch(n_input, out256, n_mask, obj_rec, [256, 256], large_thresh)
+                    n_input, n_mask = pseudo_mask_division(n_input, out256, n_mask, obj_rec, [256, 256], large_thresh)
 
+                inp_only_s = time.time()
                 output = gl_inpaint(n_input, n_mask, datamean, model, args.postproc, device)
+                inp_only_e = time.time()
+                total_time_glcic += inp_only_e - inp_only_s
 
                 # cut pre_padding
                 if flag['hu'] or flag['hd'] or flag['vl'] or flag['vr']:
@@ -99,10 +124,11 @@ if __name__ == '__main__':
                 output = output * 255 # innormalization
                 output = output.astype('uint8')
 
+                inp_e = time.time()
+                print('[TIME] inpainting time per frame: {}'.format(inp_e - inp_s))
+                total_time_inpaint += inp_e - inp_s
             else:
                 output = frame
-            inp_e = time.time()
-            print('[INFO] inpainting time per frame: {}'.format(inp_e - det_e))
 
             # cv2.namedWindow('Output', cv2.WINDOW_NORMAL)
             concat = cv2.vconcat([frame, output])
@@ -112,15 +138,19 @@ if __name__ == '__main__':
                 video = concat.copy()
             else:
                 video = np.concatenate((video, concat), axis=0)
-            cv2.imwrite('{}out_{}.png'.format(args.save_cap_dir, count_frame), output)
+            if args.save_cap_dir != None:
+                cv2.imwrite('{}out_{}.png'.format(args.save_cap_dir, count_frame), output)
         else:
             break
         t2 = time.time()
-        print('[INFO] elapsed time per frame: {}'.format(t2 - t1))
+        print('[TIME] elapsed time per frame: {}'.format(t2 - t1))
+        print('[TIME] mean time for detecting per frame: {}'.format(total_time_ssd / count_frame))
+        print('[TIME] mean time for inpainting per frame: {}'.format(total_time_glcic / count_frame))
+        print('[TIME] mean time for whole processing per frame: {}'.format((total_time_ssd + total_time_inpaint) / count_frame))
         count_frame += 1
         print('')
     t3 = time.time()
-    print('[INFO] total elapsed time for ssd and inpaint: {}'.format(t3 - t0))
+    print('[TIME] total elapsed time for processing images: {}'.format(t3 - t1))
     cap.release()
     cv2.destroyAllWindows()
 

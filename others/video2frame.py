@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-infile = '../data/video/inter10_noon.avi'
+infile = '../data/video/inter10_night.avi'
 # video = []
 cap = cv2.VideoCapture(infile)
 W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -17,7 +17,8 @@ while(cap.isOpened()):
     if ret:
         # cv2.imshow('frame', frame)
         # video.append(frame)
-        cv2.imwrite('../data/video/noon_frames/in_{}.png'.format(count), frame)
+        if count >= 1020 and count <= 1170:
+            cv2.imwrite('../data/video/night_frames/in_{}.png'.format(count), frame)
         # if cv2.waitKey(1) & 0xFF == ord('q'):
         #     break
     else:
