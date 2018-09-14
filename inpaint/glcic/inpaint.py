@@ -10,7 +10,6 @@ import torchvision.utils as vutils
 
 from inpaint.glcic.completionnet_places2 import completionnet_places2
 from inpaint.glcic.utils import *
-from inpaint.glcic.pre_support import *
 
 from inpaint.glcic.poissonblending import prepare_mask, blend
 
@@ -78,10 +77,11 @@ def gl_inpaint(input_img, mask, datamean, model, postproc, device):
 
     # post-processing
     if postproc:
-        print('[INFO] post-postprocessing...')
+        print('[INFO] Post Processing...')
         target = input_img    # background
         mask = input_mask
         out = blend(target, out, mask, offset=(0, 0))
+        out = out / 255
         # cv2.imshow('out_after', out)
         # cv2.waitKey(0)
 #         print(out)
