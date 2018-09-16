@@ -140,7 +140,7 @@ def apply_to_video(args, gano):
             print('[INFO] Count: {}/{}'.format(count, frames))
 
             # process
-            elapsed, frame, output = process_image(frame, elapsed, gano)
+            elapsed, output = process_image(args, frame, elapsed, gano)
 
             # append frame to video
             video = append_frame(args, frame, output, video, count)

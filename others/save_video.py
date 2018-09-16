@@ -12,7 +12,7 @@ fps = cap.get(cv2.CAP_PROP_FPS)
 print('[INFO] total frame: {}, fps: {}, width: {}, height: {}'.format(count, fps, W, H))
 
 count = 1
-n_w, n_h = int(W / 3), int(H / 3)
+n_w, n_h = int(W / 4), int(H / 4)
 
 while(cap.isOpened()):
     ret, frame = cap.read()
@@ -30,7 +30,7 @@ while(cap.isOpened()):
         break
 cap.release()
 
-outfile = '../data/video/ex_small_{}'.format(infile.split('/')[-1])
+outfile = '../data/video/ex_small2_{}'.format(infile.split('/')[-1])
 fps = fps
 codecs = 'H264'
 
