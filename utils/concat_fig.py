@@ -1,11 +1,13 @@
 import cv2
 import numpy as np
+import argparse
 
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--shape', type=str)
     parser.add_argument('--dir', type=str)
     parser.add_argument('--name', type=str)
+    parser.add_argument('--boundary', action='store_true')
     args = parser.parse_args()
 
     return args
@@ -32,19 +34,29 @@ def concat(args):
             if row == []:
                 row = img
             else:
-                row = np.concatenate([row, img], axis=1)
+                if args.boundary:
+                    boundary = np.zeros((row.shape[0], 3, row.shape[2]), dtype='uint8')
+                    row = np.concatenate([row, boundary, img], axis=1)
+                else:
+                    row = np.concatenate([row, img], axis=1)
+
+
 
         if output == []:
             output = row
         else:
-            output = np.concatenate([output, row], axis=0)
+            if args.boundary:
+                boundary = np.zeros((3, output.shape[1], output.shape[2]), dtype='uint8')
+                output = np.concatenate([output, boundary, row], axis=0)
+            else:
+                output = np.concatenate([output, row], axis=0)
 
     savename = dir + '/sum_img.png'
     cv2.imwrite(savename, output)
 
 
-if __name__ = '__main__':
-    args = get_argparser()
+if __name__ == '__main__':
+    args = get_parser()
     concat(args)
 
 

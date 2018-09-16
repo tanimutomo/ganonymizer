@@ -36,15 +36,10 @@ def main():
 
 def get_parser():
     parser = argparse.ArgumentParser()
-# parser.add_argument('--image', default='./images/example_12.jpg')
     parser.add_argument('--video', type=str)
     parser.add_argument('--image', type=str, help='The input image, when you apply GANonymizer to an image.')
-    parser.add_argument('--mask', type=str, help='The mask image, when you apply Only reconstruction to an image.')
-    parser.add_argument('--mask_shape', type=str, help='The ulx,uly,rdx,rdy of the mask you create')
-    parser.add_argument('--center_mask', type=int, help='The size of the mask you create')
-    parser.add_argument('--edge_mask', type=str, help='The position(edge or corner),distance(between mask and image edge),size of the mask you want to create')
-    parser.add_argument('--boxline', type=int, help='Write the bouding box at the reconstruction part')
     parser.add_argument('--output', default='')
+
     parser.add_argument('--conf', type=float, default=0.15, help='minimum probability to filter weak detections')
     parser.add_argument('--large_thresh', type=int, default=120, help='The threshold for PMD processing')
     parser.add_argument('--prepad_thresh', type=int, default=4, help='The threshold for prepadding processing')
@@ -53,9 +48,16 @@ def get_parser():
     parser.add_argument('--postproc', action='store_true')
     parser.add_argument('--cuda', default=None)
 
-    parser.add_argument('--save_cap_dir', default=None)
+    parser.add_argument('--mask', type=str, help='The mask image, when you apply Only reconstruction to an image.')
+    parser.add_argument('--manual_mask', type=str, help='The ulx,uly,rdx,rdy of the mask you create')
+    parser.add_argument('--center_mask', type=int, help='The size of the mask you create')
+    parser.add_argument('--edge_mask', type=str, help='The position(edge/corner),distance(between edges),size of the mask you want to create')
+    parser.add_argument('--boxline', type=int, help='Write the bouding box at the reconstruction part')
+    parser.add_argument('--save_outframe', default=None)
+    parser.add_argument('--save_outimage', type=str, default=None, help='{dir,filename(with extention)} that you want to save output image')
+
     parser.add_argument('--prototxt', default='./detection/ssd/cfgs/deploy.prototxt', help='path to Caffe deploy prototxt file')
-    parser.add_argument('--model', default='./detection/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel', help='path to Caffe pre-trained file')
+    parser.add_argument('--model', default='./detection/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel', help='path to Caffe pre-trained')
     parser.add_argument('--inp_param', default='./inpaint/glcic/completionnet_places2.pth')
 
     args = parser.parse_args()
@@ -107,10 +109,15 @@ def apply_to_image(args, gano):
     # process
     elapsed, output = process_image(args, input, elapsed, gano)
 
-    name = args.image.split('/')[-1].split('.')[0]
-    ext = args.image.split('/')[-1].split('.')[-1]
-    save_path = './data/images/{}_out{}.{}'.format(name, args.output, ext)
-    cv2.imwrite(save_path, output)
+    if args.save_outimage is not None:
+        dir = args.save_outimage.split(',')[0] + '/'
+        name = args.save_outimage.split(',')[1] + '.png'
+        cv2.imwrite(dir+name, output)
+    else:
+        name = args.image.split('/')[-1].split('.')[0]
+        ext = args.image.split('/')[-1].split('.')[-1]
+        save_path = './data/images/{}_out{}.{}'.format(name, args.output, ext)
+        cv2.imwrite(save_path, output)
 
 
 def apply_to_video(args, gano):
@@ -155,8 +162,8 @@ def process_image(args, input, elapsed, gano):
     # detect
     if args.mask is not None:
         mask = args.mask
-    elif args.mask_shape is not None:
-        mask, obj_rec = create_mask(input.shape, args.mask_shape)
+    elif args.manual_mask is not None:
+        mask, obj_rec = create_mask(input.shape, args.manual_mask)
     elif args.center_mask is not None:
         mask, obj_rec = center_mask(input.shape, args.center_mask)
     elif args.edge_mask is not None:
@@ -165,6 +172,8 @@ def process_image(args, input, elapsed, gano):
         obj_rec, elapsed[1] = gano.detect(input, obj_rec)
         mask = np.zeros((input.shape[0], input.shape[1], 3))
         mask = gano.create_detected_mask(input, mask, obj_rec)
+
+    cv2.imwrite('./data/images/mask.png', mask)
 
     original = input.copy()
     origin_mask = mask.copy()
@@ -196,8 +205,8 @@ def append_frame(args, input, output, video, count):
         video = concat.copy()
     else:
         video = np.concatenate((video, concat), axis=0)
-    if args.save_cap_dir != None:
-        cv2.imwrite('{}out_{}.png'.format(args.save_cap_dir, count), output)
+    if args.save_outframe != None:
+        cv2.imwrite('{}out_{}.png'.format(args.save_outframe, count), output)
 
     return video
 
@@ -297,7 +306,6 @@ class GANonymizer:
             # prepadding
             flag = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
             input, mask, flag = self.prepadding(input, mask, flag)
-            print(input.shape, mask.shape)
 
             # pseudo mask division
             input, mask = self.PMD(input, mask, obj_rec)
@@ -375,7 +383,6 @@ class GANonymizer:
             print('[INFO] Pseudo Mask Division Processing...')
             h_sml = self.calc_sml_size(input.shape[0], max)
             w_sml = self.calc_sml_size(input.shape[1], max)
-            print(h_sml, w_sml)
             
             input_sml = cv2.resize(input, (w_sml, h_sml))
             mask_sml = cv2.resize(mask, (w_sml, h_sml))
@@ -389,7 +396,6 @@ class GANonymizer:
 
     def calc_sml_size(self, origin, max):
         ratio = self.large_thresh / max
-        print('ratio: {}'.format(ratio))
         sml = int(np.floor(origin * ratio))
         sml_do2 = sml % 100
         sml_up = sml - sml_do2

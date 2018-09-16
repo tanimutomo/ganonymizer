@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-infile = '../data/video/in_soccer_2.avi'
+infile = '../data/video/inter10_noon.avi'
 video = []
 
 cap = cv2.VideoCapture(infile)
@@ -12,12 +12,12 @@ fps = cap.get(cv2.CAP_PROP_FPS)
 print('[INFO] total frame: {}, fps: {}, width: {}, height: {}'.format(count, fps, W, H))
 
 count = 1
-n_w, n_h = int(W / 4), int(H / 4)
+n_w, n_h = int(W / 3), int(H / 3)
 
 while(cap.isOpened()):
     ret, frame = cap.read()
     if ret:
-        if count >= 300 and count <= 600:
+        if count >= 1 and count <= 1500:
             frame = cv2.resize(frame, (n_w, n_h))
             # cv2.imshow('frame', frame)
             video.append(frame)
@@ -26,7 +26,7 @@ while(cap.isOpened()):
     else:
         break
     count += 1
-    if count >= 600:
+    if count >= 1500:
         break
 cap.release()
 
