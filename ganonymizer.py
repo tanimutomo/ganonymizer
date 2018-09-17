@@ -98,7 +98,7 @@ def load_video(args):
     fps = cap.get(cv2.CAP_PROP_FPS)
     print('[INFO] total frame: {}, fps: {}, width: {}, height: {}'.format(frames, fps, W, H))
 
-    return cap, fps, frames
+    return cap, fps, frames, W, H
     
 
 def apply_to_image(args, gano):
@@ -114,9 +114,12 @@ def apply_to_image(args, gano):
         name = args.save_outimage.split(',')[1] + '.png'
         cv2.imwrite(dir+name, output)
     else:
-        name = args.image.split('/')[-1].split('.')[0]
-        ext = args.image.split('/')[-1].split('.')[-1]
-        save_path = './data/images/{}_out{}.{}'.format(name, args.output, ext)
+        img_path = args.image.split('/')
+        dir = '/'.join(img_path.remove(img_path[-1])) + '/'
+        name = img_path[-1].split('.')[0]
+        ext = img_path[-1].split('.')[-1]
+        save_path = dir +  name + ext
+        print(save_path)
         cv2.imwrite(save_path, output)
 
 
@@ -124,12 +127,16 @@ def apply_to_video(args, gano):
     # set variables
     video = np.array([])
     count = 1
+
     # whole, ssd, glcic, reconst
     elapsed = [0, 0, 0, 0]
     total_time = [0, 0, 0, 0]
 
     # video data
-    cap, origin_fps, frames = load_video(args)
+    cap, origin_fps, frames, width, height = load_video(args)
+    
+    # video writer
+    writer = video_writer(args, width, height*2)
 
     while(cap.isOpened()):
         print('')
@@ -143,17 +150,21 @@ def apply_to_video(args, gano):
             elapsed, output = process_image(args, frame, elapsed, gano)
 
             # append frame to video
-            video = append_frame(args, frame, output, video, count)
+            concat = np.concatenate([frame, output], axis=0)
+            writer.write(concat)
+            if args.save_outframe != None:
+                cv2.imwrite('{}out_{}.png'.format(args.save_outframe, count), output)
 
             # print the process info per iteration
-            total_time, count = print_info_per_process(args, begin_process, elapsed, count, total_time)
+            total_time, count = print_info_per_process(args, begin_process, elapsed, count, total_time, frames)
+
+        else:
+            break
 
     ### Stop video process
     cap.release()
+    writer.release()
     cv2.destroyAllWindows()
-
-    ### Save video
-    save_video(args, video)
 
 
 def process_image(args, input, elapsed, gano):
@@ -196,22 +207,21 @@ def process_image(args, input, elapsed, gano):
     return elapsed, output
 
 
-def append_frame(args, input, output, video, count):
+def concat_inout(args, input, output, video, count):
     ### Append the output frame to the Entire video list
-    concat = cv2.vconcat([input, output])
-    concat = concat[np.newaxis, :, :, :]
-    # print('[CHECK] concat.shape: {}'.format(concat.shape))
-    if count == 1:
-        video = concat.copy()
-    else:
-        video = np.concatenate((video, concat), axis=0)
+    concat = np.concatenate([input, output], axis=0)
+    # concat = concat[np.newaxis, :, :, :]
+    # if count == 1:
+    #     video = concat.copy()
+    # else:
+    #     video = np.concatenate((video, concat), axis=0)
     if args.save_outframe != None:
         cv2.imwrite('{}out_{}.png'.format(args.save_outframe, count), output)
 
     return video
 
 
-def print_info_per_process(args, begin, elapsed, count, total):
+def print_info_per_process(args, begin, elapsed, count, total, frames):
     ### Print the elapsed time of processing
     elapsed[0] = time.time() - begin
     total[0] += elapsed[0]
@@ -222,7 +232,7 @@ def print_info_per_process(args, begin, elapsed, count, total):
     print('[TIME] Whole process time: {:.3f}'.format(elapsed[0]))
     print('-----------------------------------------------------')
 
-    if count % 10 == 0:
+    if count % 10 == 0 or count == frames:
         print('')
         print('-----------------------------------------------------')
         print('[INFO] Time Summary')
@@ -237,21 +247,16 @@ def print_info_per_process(args, begin, elapsed, count, total):
     return total, count
 
 
-def save_video(args, video):
+def video_writer(args, width, height):
     video_name = args.video.split('/')[-1]
     outfile = './data/video/out{}_{}'.format(args.output, video_name)
     fps = args.fps
-    codecs = 'H264'
-    # ret, frames, height, width, ch = video.shape
-    frames, height, width, ch = video.shape
 
-    fourcc = cv2.VideoWriter_fourcc(*codecs)
+    # video writer
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
     writer = cv2.VideoWriter(outfile, fourcc, fps, (width, height))
 
-    for i in range(frames):
-        writer.write(video[i])
-    writer.release()
-
+    return writer
 
 
 class GANonymizer:
