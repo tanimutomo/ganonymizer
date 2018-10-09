@@ -114,12 +114,16 @@ def apply_to_image(args, gano):
         name = args.save_outimage.split(',')[1] + '.png'
         cv2.imwrite(dir+name, output)
     else:
-        img_path = args.image.split('/')
-        dir = '/'.join(img_path.remove(img_path[-1])) + '/'
-        name = img_path[-1].split('.')[0]
-        ext = img_path[-1].split('.')[-1]
-        save_path = dir +  name + ext
-        print(save_path)
+        # img_path = args.image.split('/')
+        # dir = img_path.copy()
+        # dir.pop()
+        # dir = '/'.join(dir) + '/'
+        # name = img_path[-1].split('.')[0]
+        # ext = img_path[-1].split('.')[-1]
+        # save_path = dir +  name + ext
+        # print(save_path)
+        im_path = args.image.split('/')[-1]
+        save_path = './data/images/out{}_{}'.format(args.output, im_path)
         cv2.imwrite(save_path, output)
 
 
