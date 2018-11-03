@@ -105,6 +105,7 @@ def apply_to_image(args, gano):
     # whole, ssd, glcic, reconst
     elapsed = [0, 0, 0, 0]
     input = cv2.imread(args.image)
+    input = adjust_imsize(input)
 
     # process
     elapsed, output = process_image(args, input, elapsed, gano)
@@ -125,6 +126,16 @@ def apply_to_image(args, gano):
         im_path = args.image.split('/')[-1]
         save_path = './data/images/out{}_{}'.format(args.output, im_path)
         cv2.imwrite(save_path, output)
+
+
+def adjust_imsize(input):
+    height = input.shape[0]
+    width = input.shape[1]
+    new_h = height - (height % 4)
+    new_w = width - (width % 4)
+    input = cv2.resize(input, (new_w, new_h))
+
+    return input
 
 
 def apply_to_video(args, gano):
