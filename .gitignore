@@ -38,6 +38,7 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
+.nox/
 .coverage
 .coverage.*
 .cache
@@ -72,6 +73,10 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# IPython
+profile_default/
+ipython_config.py
+
 # pyenv
 .python-version
 
@@ -102,28 +107,19 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-.DS_Store
-images/
-video/
-yolo/images/
-*.caffemodel
-*.prototxt.txt
-*.swp
-*.avi
-*.cfg
-*.weights
-*.zip
-*.png
-*.t7
+.dmypy.json
+dmypy.json
 *.sh
-*.pth
-*.pkl
-*.xlsx
-*.csv
-ssd_copy/
-takuro
 data/
-inpaint/glcic/ex2_images/
-inpaint/glcic/ex_images/
-segmentation/opencv-semantic-segmentation/
-.gitignore
+*.swp
+cfgs/
+weights/
+*.pth
+*.t7
+*.png
+*.jpg
+takuro/
+segmentation/
+*.avi
+*.mp4
+*.MOV
