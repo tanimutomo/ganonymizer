@@ -13,7 +13,7 @@ wget https://www.ht.sfc.keio.ac.jp/~tanimu/ganonymizer/ssd/cfgs/deploy.prototxt 
 # SSD weights
 wget https://www.ht.sfc.keio.ac.jp/~tanimu/ganonymizer/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel -P ganonymizer/src/detection/ssd/weights
 # GLCIC weights
-wget https://www.ht.sfc.keio.ac.jp/~tanimu/ganonymizer/weights/completionnet_places2.pth -P ganonymizer/src/inpaint/glcic/weights
+wget https://www.ht.sfc.keio.ac.jp/~tanimu/ganonymizer/glcic/weights/completionnet_places2.pth -P ganonymizer/src/inpaint/glcic/weights
 ```
 In terms of SSD, We use [Weiliu's SSD model](https://github.com/weiliu89/caffe/tree/ssd). So you can download SSD's cfgs and weights from [this](https://github.com/weiliu89/caffe/tree/ssd).  
 GLCIC model we use is [Iizuka's model](https://github.com/satoshiiizuka/siggraph2017_inpainting).  
@@ -30,6 +30,6 @@ GLCIC model we use is [Iizuka's model](https://github.com/satoshiiizuka/siggraph
 [2] https://github.com/satoshiiizuka/siggraph2017_inpainting
 
 
-## Detail of the paper
+## Details of this paper
 Title: GANonymizer: Image Anonymization Method Integrating Object detection and Generative Adversarial Networks  
 Authors: Tomoki Tanimura, Makoto Kawano, Takuro Yonezawa, Jin Nakazawa
