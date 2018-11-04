@@ -123,8 +123,12 @@ dmypy.json
 ganonymizer/data/for_fig/*
 ganonymizer/data/images/*
 ganonymizer/data/videos/*
-cfgs/
-weights/
+ganonymizer/src/detection/ssd/cfgs/*
+ganonymizer/src/detection/ssd/weights/*
+ganonymizer/src/detection/yolov2/cfgs/*
+ganonymizer/src/detection/yolov2/weights/*
+ganonymizer/src/inpaint/glcic/cfgs/*
+ganonymizer/src/inpaint/glcic/weights/*
 takuro/
 segmentation/
 others/
