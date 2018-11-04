@@ -110,7 +110,15 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-!.gitkeep
+*.sh
+*.swp
+*.pth
+*.t7
+*.png
+*.jpg
+*.avi
+*.mp4
+*.MOV
 
 ganonymizer/data/for_fig/*
 ganonymizer/data/images/*
@@ -122,12 +130,6 @@ segmentation/
 others/
 generative_inpaint/
 
-*.sh
-*.swp
-*.pth
-*.t7
-*.png
-*.jpg
-*.avi
-*.mp4
-*.MOV
+!.gitkeep
+!example*
+!example*
