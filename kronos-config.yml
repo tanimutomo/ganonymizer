@@ -11,7 +11,7 @@ git_url: 'https://github.com/tanimutomo/ganonymizer.git'
 git_branch: 'demo'
 
 # project directory path
-pj_root: '/home/tanimu/Project/ganonymizer'
+pj_root: '/home/tanimu/Project'
 
 # The path of the project's data directory
 data_dir: ''

@@ -110,7 +110,11 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-data/
+!.gitkeep
+
+data/for_fig/*
+data/images/*
+data/videos/*
 cfgs/
 weights/
 takuro/

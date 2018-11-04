@@ -1,1 +1,3 @@
-tensorflow-gpu
+numpy
+cv2
+torch
