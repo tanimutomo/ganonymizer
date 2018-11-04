@@ -1,9 +1,6 @@
 # GANonymizer
 ## Preparation
 1. git clone
-```
-git clone git@github.com:tanimutomo/ganonymizer.git
-```
 2. download cfgs and weights for SSD512 and GLCIC
 ```
 # cd project root
