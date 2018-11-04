@@ -14,7 +14,6 @@ class Executer:
         self.video = config['video']
         self.image = config['image']
         self.output = config['output']
-        self.cuda = config['cuda']
         self.detect_cfgs = config['detect_cfgs']
         self.detect_weights = config['detect_weights']
         self.inpaint_weights = config['inpaint_weights']
@@ -36,7 +35,7 @@ class Executer:
         self.concat_inout = config['concat_inout']
 
     def execute(self):
-        device = set_device(self.cuda)
+        device = set_device()
         detecter, inpainter, datamean = set_networks(
                 self.detect_cfgs, self.detect_weights, self.inpaint_weights, device)
         self.ganonymizer = GANonymizer(self.conf, self.postproc, self.large_thresh,

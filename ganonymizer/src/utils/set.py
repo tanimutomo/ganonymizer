@@ -17,11 +17,7 @@ def set_networks(detect_cfgs, detect_weights, inpaint_weights, device):
 
     return detect_model, model, datamean
 
-def set_device(cuda):
-    if cuda != None:
-        device = torch.device('cuda:{}'.format(cuda) if torch.cuda.is_available() else 'cpu')
-    else:
-        device = 'cpu'
+def set_device():
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('[INFO] Device is {}'.format(device))
-    
     return device

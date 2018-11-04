@@ -24,7 +24,6 @@ def get_config():
             'fps': 10.0,
             'show': False,
             'postproc': False,
-            'cuda': False,
 
             # The mask image, when you apply Only reconstruction to an image.
             'mask': 'path_to_mask_image',
