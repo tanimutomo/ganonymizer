@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 
-def calc_sml_size(largs_thresh, origin, max):
+def calc_sml_size(large_thresh, origin, max):
     ratio = large_thresh / max
     sml = int(np.floor(origin * ratio))
     sml_do2 = sml % 100
