@@ -42,9 +42,9 @@ def get_config():
             'concat_inout': True,
 
             # path to Caffe deploy prototxt file
-            'detect_cfgs': os.path.join(os.getcwd(), 'ganonymizer/src/detection/ssd/cfgs/deploy.prototxt'),
+            'detect_cfgs': os.path.join(os.getcwd(), 'ganonymizer/src/detection/ssd/cfgs/deploy2.prototxt'),
             # path to Caffe pre-trained
-            'detect_weights': os.path.join(os.getcwd(), 'ganonymizer/src/detection/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel'),
+            'detect_weights': os.path.join(os.getcwd(), 'ganonymizer/src/detection/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_160000.caffemodel'),
             'inpaint_weights': os.path.join(os.getcwd(), 'ganonymizer/src/inpaint/glcic/weights/completionnet_places2.pth')
             }
 
