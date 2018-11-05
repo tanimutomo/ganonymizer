@@ -5,7 +5,7 @@ import cv2
 def max_mask_size(mask):
     _, col = np.where(mask[:, :, 0]!=0)
     width_max = calc_max(col)
-    transposed_mask = mask.transpose()
+    transposed_mask = mask.transpose(1, 0, 2)
     print(transposed_mask.shape)
     print(transposed_mask)
     print(transposed_mask.max())
