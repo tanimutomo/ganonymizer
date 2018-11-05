@@ -54,6 +54,7 @@ class Executer:
     def apply_to_image(self):
         # whole, yolov3, glcic, reconst
         elapsed = [0, 0, 0, 0]
+        print(self.image)
         image = cv2.imread(self.image)
         image = adjust_imsize(image)
         input = image.copy()
