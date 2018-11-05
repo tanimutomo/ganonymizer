@@ -13,9 +13,9 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-# from .utils.util import load_classes, write_results
-# from .darknet import Darknet
-# from .utils.preprocess import prep_image, inp_to_image
+from .utils.util import load_classes, write_results
+from .darknet import Darknet
+from .utils.preprocess import prep_image, inp_to_image
 
 
 def yolo_detecter(img, model, conf, nms, rec, device):    
