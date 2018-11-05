@@ -114,7 +114,6 @@ class Executer:
 
                 # process
                 input = copy.deepcopy(frame)
-                print(input.shape)
                 elapsed, output, frame_designed = self.process_image(input, elapsed)
 
                 # append frame to video
@@ -157,7 +156,6 @@ class Executer:
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
-        print(obj_rec)
         # tmp = detect_large_mask(mask)
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
@@ -169,7 +167,6 @@ class Executer:
 
         # reconstruct
         output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(input, mask, obj_rec)
-        print(output.shape)
 
         if self.boxline > 0:
             original = write_boxline(original, origin_mask, boxline)
