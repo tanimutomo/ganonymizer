@@ -60,7 +60,7 @@ def yolo_detecter(img, model, conf, nms, rec, device):
             prediction = model(Variable(batch), device)
         
         prediction = write_results(prediction, confidence, num_classes, nms = True, nms_conf = nms_thesh)
-        print(prediction.shape)
+        print(prediction)
         
         if type(prediction) == int:
             i += 1
