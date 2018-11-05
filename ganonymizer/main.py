@@ -22,7 +22,7 @@ def get_config():
             'large_thresh': 120,
             # The threshold for prepadding processing
             'prepad_thresh': 4,
-            'fps': 10.0,
+            'fps': 7.0,
             'show': False,
             'postproc': False,
 
@@ -36,7 +36,7 @@ def get_config():
             'center_mask': 0,
 
             # Write the bouding box at the reconstruction part
-            'boxline': 3,
+            'boxline': 1,
             'save_outframe': None,
             # {dir,filename(with extention)} that you want to save output image
             'save_outimage': None,

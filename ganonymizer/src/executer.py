@@ -173,7 +173,7 @@ class Executer:
 
         if self.boxline > 0:
             original = write_boxline(original, origin_mask, boxline)
-            output = write_boxline(output, origin_mask, boxline)
+            # output = write_boxline(output, origin_mask, boxline)
 
         if self.show:
             disp = np.concatenate([original, output, origin_mask], axis=1)
