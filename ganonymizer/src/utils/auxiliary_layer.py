@@ -20,18 +20,22 @@ def pre_padding(input, mask, thresh, wi, hi, size, flag):
         return input, mask, flag
     else:
         if e_h - (size[0] - 1) < thresh:
+            print('hd')
             input, mask = prepad_new(input, mask, e_h, s_h, 0, thresh)
             flag['hd'] = True
 
         if e_w - (size[1] - 1) < thresh:
+            print('wr')
             input, mask = prepad_new(input, mask, e_w, s_w, 1, thresh)
             flag['wr'] = True
 
         if s_h < thresh:
+            print('hu')
             input, mask, prepad_new(input, mask, s_h, e_h, 0, thresh)
             flag['hu'] = True
 
         if s_w < thresh:
+            print('wl')
             input, mask = prepad_new(input, mask, s_w, e_w, 1, thresh)
             flag['wl'] = True
 
