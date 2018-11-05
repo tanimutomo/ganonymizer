@@ -1,10 +1,8 @@
 import os 
 import os.path as osp
 import cv2 
-import time
 import random 
 import itertools
-import argparse
 import numpy as np
 import pandas as pd
 import pickle as pkl
@@ -35,12 +33,8 @@ def yolo_detecter(img, model, conf, nms, rec, device):
     assert inp_dim > 32
 
     #Detection phase
-    try:
-        imlist = []
-        imlist.append(images)
-    except FileNotFoundError:
-        print ("No file or directory with the name {}".format(images))
-        exit()
+    imlist = []
+    imlist.append(images)
         
     batches = list(map(prep_image, imlist, [inp_dim for x in range(len(imlist))]))
     im_batches = [x[0] for x in batches]
@@ -60,14 +54,13 @@ def yolo_detecter(img, model, conf, nms, rec, device):
     objs = {}
     
     for batch in im_batches:
-        #load the image 
-        start = time.time()
         batch = batch.to(device)
         
         with torch.no_grad():
             prediction = model(Variable(batch), device)
         
         prediction = write_results(prediction, confidence, num_classes, nms = True, nms_conf = nms_thesh)
+        print(prediction.shape)
         
         if type(prediction) == int:
             i += 1
