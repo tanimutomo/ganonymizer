@@ -154,8 +154,8 @@ class Executer:
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
-        print(obj_rec)
-        tmp = detect_large_mask(mask)
+        # print(obj_rec)
+        # tmp = detect_large_mask(mask)
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         original = input.copy()
