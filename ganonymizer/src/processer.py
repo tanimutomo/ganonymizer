@@ -56,7 +56,7 @@ class GANonymizer:
         if mask.max() > 0:
             begin_reconst = time.time()
             print('[INFO] Removing the detected objects...')
-            self.origin = input.copy().shape
+            self.origin = input.copy.deepcopy().shape
 
             # prepadding
             flag = {'hu':False, 'hd':False, 'wl':False, 'wr':False}

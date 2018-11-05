@@ -1,6 +1,7 @@
 import os
 import cv2
 import time
+import copy
 import numpy as np
 
 from .utils.set import set_networks, set_device
@@ -57,7 +58,7 @@ class Executer:
         print(self.image)
         image = cv2.imread(self.image)
         image = adjust_imsize(image)
-        input = image.copy()
+        input = image.copy.deepcopy()
 
         # process
         elapsed, output, image_designed = self.process_image(input, elapsed)
@@ -73,7 +74,7 @@ class Executer:
             cv2.imwrite(save_path, concat)
         else:
             # img_path = self.image.split('/')
-            # dir = img_path.copy()
+            # dir = img_path.copy.deepcopy()
             # dir.pop()
             # dir = '/'.join(dir) + '/'
             # name = img_path[-1].split('.')[0]
@@ -116,7 +117,7 @@ class Executer:
                 print('[INFO] Count: {}/{}'.format(count, frames))
 
                 # process
-                input = frame.copy()
+                input = frame.copy.deepcopy()
                 elapsed, output, frame_designed = self.process_image(input, elapsed)
 
                 # append frame to video
@@ -144,6 +145,7 @@ class Executer:
 
     def process_image(self, input, elapsed):
         obj_rec = []
+        print(input.shape)
 
         # detect
         if os.path.exists(self.mask):
@@ -163,8 +165,9 @@ class Executer:
         # tmp = detect_large_mask(mask)
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
-        original = input.copy()
-        origin_mask = mask.copy()
+        print(input.shape)
+        original = input.copy.deepcopy()
+        origin_mask = mask.copy.deepcopy()
         if self.boxline > 0:
             boxline = np.zeros((original.shape))
             boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
