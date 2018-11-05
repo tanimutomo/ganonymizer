@@ -3,8 +3,33 @@ import cv2
 
 
 def max_mask_size(mask):
+    _, col = np.where(mask[:, :, 0]!=0)
+    width_max = calc_max(col)
     transposed_mask = mask.transpose()
-    idx, col = np.where(mask[:, :, 0]!=0)
+    _, tcol = np.where(transposed_mask[:, :, 0]!=0)
+    height_max = calc_max(tcol)
+    
+    return width_max, height_max
+
+
+def calc_max(col):
+    count = col[0]
+    count = 0
+    length = 0
+    max = 0
+    for c in col:
+        if c == begin:
+            length += 1
+            count += 1
+        else:
+            length = 0
+            count = c + 1
+        
+        if length > max:
+            max = length
+
+    return max
+
 
 
 def calc_sml_size(large_thresh, origin, max):

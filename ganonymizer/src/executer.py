@@ -7,7 +7,7 @@ import numpy as np
 from .utils.set import set_networks, set_device
 from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout
 from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
-from .utils.auxiliary_layer import detect_large_mask
+from .utils.auxiliary_layer import max_mask_size
 from .processer import GANonymizer
 
 
@@ -158,6 +158,7 @@ class Executer:
 
         print(obj_rec)
         tmp = detect_large_mask(mask)
+        width_max, height_max = max_mask_size(mask)
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         original = copy.deepcopy(input)
