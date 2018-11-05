@@ -40,6 +40,7 @@ def pre_padding(input, mask, thresh, wi, hi, is_prepad):
             input, mask = prepad_new(input, mask, s_w, e_w, 1, thresh)
             is_prepad['wl'] = True
 
+        print('in pre_padding', input.shape, mask.shape)
         return input, mask, is_prepad
 
 
@@ -116,7 +117,7 @@ def prepad_new(input, mask, edg, opp, direction, thresh):
 
     input = input.astype('uint8')
     mask = mask.astype('uint8')
-    print(input.shape, mask.shape)
+    print('in prepad', input.shape, mask.shape)
     return input, mask
 
 
