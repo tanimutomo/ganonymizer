@@ -62,22 +62,22 @@ class GANonymizer:
             # prepadding
             flag = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
             input, mask, flag = self.prepadding(input, mask, flag)
-            print(input.shape)
+            print('check1', input.shape)
 
             # pseudo mask division
             input, mask = self.PMD(input, mask, obj_rec)
-            print(input.shape)
+            print('check2', input.shape)
 
             begin_glcic = time.time()
             output = gl_inpaint(input, mask, self.datamean, \
                     self.inpainter, self.postproc, self.device)
-            print(output.shape)
+            print('check3', output.shape)
             elapsed_glcic = time.time() - begin_glcic
             print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
 
             # cut prepadding
             output = self.cutpadding(output, flag)
-            print(output.shape)
+            print('check4', output.shape)
 
             elapsed_reconst = time.time() - begin_reconst
             print('[TIME] Reconstruction elapsed time: {:.3f}' \
