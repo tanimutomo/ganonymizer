@@ -60,11 +60,10 @@ def yolo_detecter(img, model, conf, nms, rec, device):
             prediction = model(Variable(batch), device)
         
         prediction = write_results(prediction, confidence, num_classes, nms = True, nms_conf = nms_thesh)
-        print(prediction)
         
         if type(prediction) == int:
             i += 1
-            continue
+            return []
 
         prediction[:,0] += i*batch_size
           
@@ -77,12 +76,7 @@ def yolo_detecter(img, model, conf, nms, rec, device):
             objs = [classes[int(x[-1])] for x in output if int(x[0]) == im_id]
         i += 1
 
-    try:
-        output
-    except NameError:
-        print("No detections were made")
-        exit()
-        
+
     im_dim_list = torch.index_select(im_dim_list, 0, output[:,0].long())
     
     scaling_factor = torch.min(inp_dim/im_dim_list,1)[0].view(-1,1)
