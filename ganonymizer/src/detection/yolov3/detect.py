@@ -14,7 +14,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 from .utils.util import load_classes, write_results
-from .utils.darknet import Darknet
+from .darknet import Darknet
 from .utils.preprocess import prep_image, inp_to_image
 
 
