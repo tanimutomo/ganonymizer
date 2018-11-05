@@ -6,6 +6,7 @@ import numpy as np
 from .utils.set import set_networks, set_device
 from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout
 from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
+from .utils.auxiliary_layer import detect_large_mask
 from .processer import GANonymizer
 
 
@@ -51,7 +52,7 @@ class Executer:
 
 
     def apply_to_image(self):
-        # whole, ssd, glcic, reconst
+        # whole, yolov3, glcic, reconst
         elapsed = [0, 0, 0, 0]
         image = cv2.imread(self.image)
         image = adjust_imsize(image)
@@ -88,7 +89,7 @@ class Executer:
         video = np.array([])
         count = 1
 
-        # whole, ssd, glcic, reconst
+        # whole, yolov3, glcic, reconst
         elapsed = [0, 0, 0, 0]
         total_time = [0, 0, 0, 0]
 
@@ -153,6 +154,7 @@ class Executer:
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
+        tmp = detect_large_mask(mask)
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         original = input.copy()
@@ -191,7 +193,7 @@ class Executer:
             print('')
             print('-----------------------------------------------------')
             print('[INFO] Time Summary')
-            print('[TIME] SSD average time per frame: {:.3f}'.format(total[1] / count))
+            print('[TIME] YOLO-V3 average time per frame: {:.3f}'.format(total[1] / count))
             print('[TIME] GLCIC average time per frame: {:.3f}'.format(total[2] / count))
             print('[TIME] Reconstruction average time per frame: {:.3f}'.format(total[3] / count))
             print('[TIME] Whole process average time per frame: {:.3f}'.format(total[0] / count))

@@ -13,9 +13,9 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
-from .utils.util import load_classes, write_results
-from .darknet import Darknet
-from .utils.preprocess import prep_image, inp_to_image
+# from .utils.util import load_classes, write_results
+# from .darknet import Darknet
+# from .utils.preprocess import prep_image, inp_to_image
 
 
 def yolo_detecter(img, model, conf, nms, rec, device):    
@@ -147,6 +147,7 @@ def summary(x, classes):
 
 def selection(x, rec, privacy):
     if x[2] in privacy:
+        print('[DETECT] {}'.format(x[2]))
         up = x[0][1].item()
         left = x[0][0].item()
         height = (x[1][1] - up).item()
@@ -158,7 +159,10 @@ def selection(x, rec, privacy):
 
 
 if __name__ == '__main__':
-    image = 'imgs/dog.jpg'
+    from utils.util import load_classes, write_results
+    from darknet import Darknet
+    from utils.preprocess import prep_image, inp_to_image
+    image = cv2.imread('imgs/dog.jpg')
     conf = 0.5
     nms = 0.4
     rec = []

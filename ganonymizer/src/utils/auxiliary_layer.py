@@ -152,7 +152,7 @@ def pseudo_mask_division(input, out_sml, mask, rec, thresh):
     return input, mask
 
 
-# following function is not used (2018/11/02)
+# following function have not beed used (2018/11/02)
 
 def prepad_new(input, mask, edg, opp, direction, thresh):
     begin = 0
@@ -235,6 +235,7 @@ def detect_large_mask(mask):
     rec = []
     # idx_setは縦に並んでいる数が高さになる．厳密にはマスクがある場所のyのindex
     idx_set = list(sorted(set(idx)))
+    print(idx_set)
     for i in idx_set:
         # 全マスクのyのindexに対して，いくつそのyがidxの方に並んでいるかをみて，xのindexが閾値以上並んでいる場合は，そのyのindexとxがいくつ並んでいるかを追加する．
         # if np.sum(idx == i) >= thresh:
