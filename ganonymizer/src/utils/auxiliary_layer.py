@@ -231,6 +231,8 @@ def prepad(input, mask, flag, f_name, list, line):
 
 def detect_large_mask(mask):
     idx, col = np.where(mask[:, :, 0]!=0)
+    print(idx)
+    print(col)
     seq_h, seq_w = [], []
     rec = []
     # idx_setは縦に並んでいる数が高さになる．厳密にはマスクがある場所のyのindex
