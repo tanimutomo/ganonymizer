@@ -238,6 +238,7 @@ def detect_large_mask(mask):
     # idx_setは縦に並んでいる数が高さになる．厳密にはマスクがある場所のyのindex
     idx_set = list(sorted(set(idx)))
     print(idx_set)
+    print(len(idx_set))
     for i in idx_set:
         # 全マスクのyのindexに対して，いくつそのyがidxの方に並んでいるかをみて，xのindexが閾値以上並んでいる場合は，そのyのindexとxがいくつ並んでいるかを追加する．
         # if np.sum(idx == i) >= thresh:
