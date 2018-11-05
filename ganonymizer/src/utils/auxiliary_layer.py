@@ -12,34 +12,34 @@ def calc_sml_size(large_thresh, origin, max):
 
     return sml
 
-def pre_padding(input, mask, thresh, wi, hi, size, flag):
+def pre_padding(input, mask, thresh, wi, hi, size, is_prepad):
     s_w, e_w, s_h, e_h = wi.min(), wi.max(), hi.min(), hi.max()
 
     if (e_h > size[0] - thresh+1 and s_h < thresh) or (e_w > size[1] - thresh+1 and s_w < thresh):
         print('[INFO] Not enable to pre_padding because Mask is too large')
-        return input, mask, flag
+        return input, mask, is_prepad
     else:
         if e_h - (size[0] - 1) < thresh:
             print('hd')
             input, mask = prepad_new(input, mask, e_h, s_h, 0, thresh)
-            flag['hd'] = True
+            is_prepad['hd'] = True
 
         if e_w - (size[1] - 1) < thresh:
             print('wr')
             input, mask = prepad_new(input, mask, e_w, s_w, 1, thresh)
-            flag['wr'] = True
+            is_prepad['wr'] = True
 
         if s_h < thresh:
             print('hu')
             input, mask, prepad_new(input, mask, s_h, e_h, 0, thresh)
-            flag['hu'] = True
+            is_prepad['hu'] = True
 
         if s_w < thresh:
             print('wl')
             input, mask = prepad_new(input, mask, s_w, e_w, 1, thresh)
-            flag['wl'] = True
+            is_prepad['wl'] = True
 
-        return input, mask, flag
+        return input, mask, is_prepad
 
 
 #     base = np.arange(0, thresh)
@@ -49,34 +49,46 @@ def pre_padding(input, mask, thresh, wi, hi, size, flag):
 #     wr_l = list(np.concatenate([origin[1]-base[::-1]-1, s_w-1-base], axis=0))
 # 
 #         if e_h > origin[0] - thresh+1:
-#             input, mask, flag = prepad(input, mask, flag, 'hd', hd_l, e_h)
+#             input, mask, is_prepad = prepad(input, mask, is_prepad, 'hd', hd_l, e_h)
 # 
 #         if e_w > origin[1] - thresh+1:
-#             input, mask, flag = prepad(input, mask, flag, 'wr', wr_l, e_w)
+#             input, mask, is_prepad = prepad(input, mask, is_prepad, 'wr', wr_l, e_w)
 # 
 #         if s_h < thresh:
-#             input, mask, flag = prepad(input, mask, flag, 'hu', hu_l, s_h)
+#             input, mask, is_prepad = prepad(input, mask, is_prepad, 'hu', hu_l, s_h)
 # 
 #         if s_w < thresh:
-#             input, mask, flag = prepad(input, mask, flag, 'wl', wl_l, s_w)
+#             input, mask, is_prepad = prepad(input, mask, is_prepad, 'wl', wl_l, s_w)
+
+def prepad(input, mask, is_prepad, f_name, list, line):
+    for i in range(thresh):
+        pad_raw = input[list[list.index(line)+i+1], :, :].reshape(1, -1, 3)
+        pad_raws.append(pad_raw)
+
+    prepad = np.concatenate(pad_raws, axis=0)
+    input = np.concatenate([input, prepad], axis=0)
+    mask = np.concatenate([mask, np.zeros(prepad.shape, dtype='uint8')], axis=0)
+    is_prepad[f_name] = True
+
+    return input, mask, is_prepad
 
 
-def cut_padding(out, origin, flag):
-    if flag['hu']:
+def cut_padding(out, origin, is_prepad):
+    if is_prepad['hu']:
         out = np.delete(out, [0, 1, 2, 3], axis=0)
-        flag['hu'] = False
+        is_prepad['hu'] = False
 
-    if flag['wl']:
+    if is_prepad['wl']:
         out = np.delete(out, [0, 1, 2, 3], axis=1)
-        flag['wl'] = False
+        is_prepad['wl'] = False
 
-    if flag['hd']:
+    if is_prepad['hd']:
         out = np.delete(out, [origin[0], origin[0]+1, origin[0]+2, origin[0]+3], axis=0)
-        flag['hd'] = False
+        is_prepad['hd'] = False
 
-    if flag['wr']:
+    if is_prepad['wr']:
         out = np.delete(out, [origin[1], origin[1]+1, origin[1]+2, origin[1]+3], axis=1)
-        flag['wr'] = False
+        is_prepad['wr'] = False
 
     return out
 
@@ -218,19 +230,8 @@ def concat_pad(input, mask, pad, axis, iter):
 # ph = np.concatenate([ph1, ph2, ph3, ph4], axis=0)
 # input = np.concatenate([input, ph], axis=0)
 # mask = np.concatenate([mask, np.zeros(ph.shape, dtype='uint8')], axis=0)
-# flag['hd'] = True
+# is_prepad['hd'] = True
 
-def prepad(input, mask, flag, f_name, list, line):
-    for i in range(thresh):
-        pad_raw = input[list[list.index(line)+i+1], :, :].reshape(1, -1, 3)
-        pad_raws.append(pad_raw)
-
-    prepad = np.concatenate(pad_raws, axis=0)
-    input = np.concatenate([input, prepad], axis=0)
-    mask = np.concatenate([mask, np.zeros(prepad.shape, dtype='uint8')], axis=0)
-    flag[f_name] = True
-
-    return input, mask, flag
 
 
 def detect_large_mask(mask):

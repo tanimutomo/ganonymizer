@@ -60,8 +60,8 @@ class GANonymizer:
             self.origin = copy.deepcopy(input).shape
 
             # prepadding
-            flag = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
-            input, mask, flag = self.prepadding(input, mask, flag)
+            is_prepad = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
+            input, mask, is_prepad = self.prepadding(input, mask, is_prepad)
             print('check1', input.shape)
 
             # pseudo mask division
@@ -76,7 +76,8 @@ class GANonymizer:
             print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
 
             # cut prepadding
-            output = self.cutpadding(output, flag)
+            print(is_prepad)
+            output = self.cutpadding(output, is_prepad)
             print('check4', output.shape)
 
             elapsed_reconst = time.time() - begin_reconst
@@ -90,7 +91,7 @@ class GANonymizer:
         return output, elapsed_glcic, elapsed_reconst
 
 
-    def prepadding(self, input, mask, flag):
+    def prepadding(self, input, mask, is_prepad):
         ### prepadding
         thresh = self.prepad_thresh
         i, j, k = np.where(mask>=10)
@@ -102,15 +103,15 @@ class GANonymizer:
                 (w - 1) - j.max() < thresh or \
                 i.min() < thresh or j.min() < thresh:
             print('[INFO] Prepadding Processing...')
-            input, mask, flag = pre_padding(input, mask, thresh, j, i, input.shape, flag)
+            input, mask, is_prepad = pre_padding(input, mask, thresh, j, i, input.shape, is_prepad)
 
-        return input, mask, flag
+        return input, mask, is_prepad
 
 
-    def cutpadding(self, output, flag):
+    def cutpadding(self, output, is_prepad):
         ### cut pre_padding
-        if flag['hu'] or flag['hd'] or flag['wl'] or flag['wr']:
-            output = cut_padding(output, self.origin, flag)
+        if is_prepad['hu'] or is_prepad['hd'] or is_prepad['wl'] or is_prepad['wr']:
+            output = cut_padding(output, self.origin, is_prepad)
 
         output = output * 255 # denormalization
         output = output.astype('uint8')
