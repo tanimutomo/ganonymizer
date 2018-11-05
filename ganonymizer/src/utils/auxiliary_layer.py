@@ -13,7 +13,7 @@ def max_mask_size(mask):
 
 
 def calc_max(col):
-    print(col)
+    print(type(col))
     count = col[0]
     length = 0
     max = 0
