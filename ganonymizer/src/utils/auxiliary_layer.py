@@ -40,7 +40,7 @@ def pre_padding(input, mask, thresh, wi, hi, is_prepad):
             input, mask = prepad_new(input, mask, s_w, e_w, 1, thresh)
             is_prepad['wl'] = True
 
-        return input, mask, is_prepad
+    return input, mask, is_prepad
 
 
 #     base = np.arange(0, thresh)

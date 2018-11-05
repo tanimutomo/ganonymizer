@@ -91,17 +91,14 @@ class GANonymizer:
         thresh = self.prepad_thresh
         i, j, k = np.where(mask>=10)
         h, w = input.shape[0], input.shape[1]
-        print(h, w)
-        print('max, i, j', i.max(), j.max())
-        print('min, i, j', i.min(), j.min())
         if  (h - 1) - i.max() < thresh or \
                 (w - 1) - j.max() < thresh or \
                 i.min() < thresh or j.min() < thresh:
             print('[INFO] Prepadding Processing...')
-            input_pad, mask_pad, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad)
-            print(input_pad.shape, mask_pad.shape)
+            input, mask, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad)
+            print(input.shape, mask.shape)
 
-        return input_pad, mask_pad, is_prepad
+        return input, mask, is_prepad
 
 
     def cutpadding(self, output, is_prepad):
