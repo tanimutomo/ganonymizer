@@ -94,6 +94,7 @@ class Executer:
         total_time = [0, 0, 0, 0]
 
         # video data
+        print(self.video)
         cap, origin_fps, frames, width, height = load_video(self.video)
         print('after loading video')
         
