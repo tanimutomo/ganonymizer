@@ -70,50 +70,43 @@ def prepad_new(input, mask, edg, opp, direction, thresh):
     if direction == 0:
         if edg > opp:
             if end == edg:
-                pad_width = thresh
                 pad = input[opp-1, :, :].reshape(1, -1, 3)
-                input, mask = concat_pad(input, mask, pad, direction, pad_width)
+                input, mask = concat_pad(input, mask, pad, direction)
 
             elif end - edg < thresh:
-                pad_width = edg - end + thresh
+                pad_width = thresh
                 pad = input[end, :, :].reshape(1, -1, 3)
-                input, mask = concat_pad(input, mask, pad, direction, pad_width)
+                input, mask = concat_pad(input, mask, pad, direction)
         
         elif edg < opp:
             if begin == edg:
-                pad_width = thresh
                 pad = input[opp+1, :, :].reshape(1, -1, 3)
-                input, mask = concat_pad(input, mask, pad, direction, pad_width)
+                input, mask = concat_pad(input, mask, pad, direction)
 
             elif edg - begin < thresh:
-                pad_width = thresh - edg
                 pad = input[begin, :, :].reshape(1, -1, 3)
-                input, mask = concat_pad(input, mask, pad, direction, pad_width)
+                input, mask = concat_pad(input, mask, pad, direction)
         else:
             raise RuntimeError('Not prepadding despite this image need prepadding')
 
     elif direction == 1:
         if edg > opp:
             if end == edg:
-                pad_width = thresh
                 pad = input[:, opp-1, :].reshape(-1, 1, 3)
-                input, mask = concat_pad(input, mask, pad, direction, pad_width)
+                input, mask = concat_pad(input, mask, pad, direction)
 
             elif end - edg < thresh:
-                pad_width = edg - end + thresh
                 pad = input[:, end, :].reshape(-1, 1, 3)
-                input, mask = concat_pad(input, mask, pad, direction, pad_width)
+                input, mask = concat_pad(input, mask, pad, direction)
         
         elif edg < opp:
             if begin == edg:
-                pad_width = thresh
                 pad = input[:, opp+1, :].reshape(-1, 1, 3)
-                input, mask = concat_pad(input, mask, pad, direction, pad_width)
+                input, mask = concat_pad(input, mask, pad, direction)
 
             elif edg - begin < thresh:
-                pad_width = thresh - edg
                 pad = input[:, begin, :].reshape(-1, 1, 3)
-                input, mask = concat_pad(input, mask, pad, direction, pad_width)
+                input, mask = concat_pad(input, mask, pad, direction)
         else:
             raise RuntimeError('Not prepadding despite this image need prepadding')
 
@@ -123,9 +116,9 @@ def prepad_new(input, mask, edg, opp, direction, thresh):
     return input, mask
 
 
-def concat_pad(input, mask, pad, axis, pad_width):
+def concat_pad(input, mask, pad, axis):
     mpad = np.zeros(pad.shape, dtype='uint8')
-    for i in range(pad_width):
+    for i in range(4):
         input = np.concatenate([input, pad], axis=axis)
         mask = np.concatenate([mask, mpad], axis=axis)
 
