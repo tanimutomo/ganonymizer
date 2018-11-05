@@ -58,7 +58,7 @@ class Executer:
         print(self.image)
         image = cv2.imread(self.image)
         image = adjust_imsize(image)
-        input = image.copy.deepcopy()
+        input = copy.deepcopy(image)
 
         # process
         elapsed, output, image_designed = self.process_image(input, elapsed)
@@ -74,7 +74,7 @@ class Executer:
             cv2.imwrite(save_path, concat)
         else:
             # img_path = self.image.split('/')
-            # dir = img_path.copy.deepcopy()
+            # dir = copy.deepcopy(img_path)
             # dir.pop()
             # dir = '/'.join(dir) + '/'
             # name = img_path[-1].split('.')[0]
@@ -117,7 +117,7 @@ class Executer:
                 print('[INFO] Count: {}/{}'.format(count, frames))
 
                 # process
-                input = frame.copy.deepcopy()
+                input = copy.deepcopy(frame)
                 elapsed, output, frame_designed = self.process_image(input, elapsed)
 
                 # append frame to video
@@ -166,8 +166,8 @@ class Executer:
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         print(input.shape)
-        original = input.copy.deepcopy()
-        origin_mask = mask.copy.deepcopy()
+        original = copy.deepcopy(input)
+        origin_mask = copy.deepcopy(mask)
         if self.boxline > 0:
             boxline = np.zeros((original.shape))
             boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
