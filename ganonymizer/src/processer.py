@@ -95,6 +95,9 @@ class GANonymizer:
         thresh = self.prepad_thresh
         i, j, k = np.where(mask>=10)
         h, w = input.shape[0], input.shape[1]
+        print(h, w)
+        print('max, i, j', i.max(), j.max())
+        print('min, i, j', i.min(), j.min())
         if  (h - 1) - i.max() < thresh or \
                 (w - 1) - j.max() < thresh or \
                 i.min() < thresh or j.min() < thresh:
