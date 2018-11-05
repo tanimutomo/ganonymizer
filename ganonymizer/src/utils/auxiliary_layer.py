@@ -12,19 +12,20 @@ def calc_sml_size(large_thresh, origin, max):
 
     return sml
 
-def pre_padding(input, mask, thresh, wi, hi, size, is_prepad):
+def pre_padding(input, mask, thresh, wi, hi, is_prepad):
     s_w, e_w, s_h, e_h = wi.min(), wi.max(), hi.min(), hi.max()
+    size = input.shape
 
     if (e_h > size[0] - thresh+1 and s_h < thresh) or (e_w > size[1] - thresh+1 and s_w < thresh):
         print('[INFO] Not enable to pre_padding because Mask is too large')
         return input, mask, is_prepad
     else:
-        if e_h - (size[0] - 1) < thresh:
+        if (size[0] - 1) - e_h < thresh:
             print('hd')
             input, mask = prepad_new(input, mask, e_h, s_h, 0, thresh)
             is_prepad['hd'] = True
 
-        if e_w - (size[1] - 1) < thresh:
+        if (size[1] - 1) - e_w < thresh:
             print('wr')
             input, mask = prepad_new(input, mask, e_w, s_w, 1, thresh)
             is_prepad['wr'] = True
