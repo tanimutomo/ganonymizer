@@ -55,7 +55,6 @@ class Executer:
     def apply_to_image(self):
         # whole, yolov3, glcic, reconst
         elapsed = [0, 0, 0, 0]
-        print(self.image)
         image = cv2.imread(self.image)
         image = adjust_imsize(image)
         input = copy.deepcopy(image)
@@ -96,9 +95,7 @@ class Executer:
         total_time = [0, 0, 0, 0]
 
         # video data
-        print(os.path.exists(self.video))
         cap, origin_fps, frames, width, height = load_video(self.video)
-        print('after loading video')
         
         # video writer
         if self.concat_inout:
@@ -106,7 +103,6 @@ class Executer:
         else:
             writer = video_writer(self.video, self.output, self.fps, width, height*2)
 
-        print('after creating video writer')
 
         while(cap.isOpened()):
             print('')
@@ -118,6 +114,7 @@ class Executer:
 
                 # process
                 input = copy.deepcopy(frame)
+                print(input.shape)
                 elapsed, output, frame_designed = self.process_image(input, elapsed)
 
                 # append frame to video
@@ -145,7 +142,6 @@ class Executer:
 
     def process_image(self, input, elapsed):
         obj_rec = []
-        print(input.shape)
 
         # detect
         if os.path.exists(self.mask):
@@ -165,7 +161,6 @@ class Executer:
         # tmp = detect_large_mask(mask)
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
-        print(input.shape)
         original = copy.deepcopy(input)
         origin_mask = copy.deepcopy(mask)
         if self.boxline > 0:
@@ -174,6 +169,7 @@ class Executer:
 
         # reconstruct
         output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(input, mask, obj_rec)
+        print(output.shape)
 
         if self.boxline > 0:
             original = write_boxline(original, origin_mask, boxline)
