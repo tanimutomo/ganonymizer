@@ -28,7 +28,7 @@ class GANonymizer:
         ### detection privacy using SSD
         print('[INFO] Detecting objects related to privacy...')
         begin_ssd = time.time()
-        obj_rec = yolov3_detecter(input, self.detecter, 
+        obj_rec = yolo_detecter(input, self.detecter, 
                 self.conf, self.nms, obj_rec, self.device)
         elapsed_ssd = time.time() - begin_ssd
         print('[TIME] SSD elapsed time: {:.3f}'.format(elapsed_ssd))
