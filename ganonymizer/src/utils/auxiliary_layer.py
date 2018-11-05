@@ -2,6 +2,11 @@ import numpy as np
 import cv2
 
 
+def max_mask_size(mask):
+    transposed_mask = mask.transpose()
+    idx, col = np.where(mask[:, :, 0]!=0)
+
+
 def calc_sml_size(large_thresh, origin, max):
     ratio = large_thresh / max
     sml = int(np.floor(origin * ratio))

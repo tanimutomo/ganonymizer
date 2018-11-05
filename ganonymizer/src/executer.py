@@ -156,7 +156,8 @@ class Executer:
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
-        # tmp = detect_large_mask(mask)
+        print(obj_rec)
+        tmp = detect_large_mask(mask)
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         original = copy.deepcopy(input)
@@ -191,7 +192,7 @@ class Executer:
         print('[TIME] Whole process time: {:.3f}'.format(elapsed[0]))
         print('-----------------------------------------------------')
 
-        if count % 10 == 0 or count == frames:
+        if count % 100 == 0 or count == frames:
             print('')
             print('-----------------------------------------------------')
             print('[INFO] Time Summary')
