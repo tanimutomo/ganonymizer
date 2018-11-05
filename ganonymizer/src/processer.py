@@ -1,5 +1,6 @@
 import cv2
 import time
+import copy
 import numpy as np
 
 from .utils.auxiliary_layer import calc_sml_size, pre_padding, cut_padding, pseudo_mask_division
