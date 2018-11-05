@@ -156,6 +156,7 @@ class Executer:
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
+        print(mask)
         print(obj_rec)
         tmp = detect_large_mask(mask)
         width_max, height_max = max_mask_size(mask)
