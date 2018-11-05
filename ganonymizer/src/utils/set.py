@@ -2,7 +2,7 @@ import cv2
 import torch
 
 from ..inpaint.glcic.completionnet_places2 import completionnet_places2
-from ..detection.ssd.ssd512 import ssd_detect
+from ..detection.yolov3.darknet import Darknet
 
 def set_networks(detect_cfg, detect_weight, inpaint_weight, device):
     print('[INFO] Loading model...')
