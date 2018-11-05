@@ -157,10 +157,7 @@ class Executer:
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
         if obj_rec is not []:
-            print(obj_rec)
-            tmp = detect_large_mask(mask)
             width_max, height_max = max_mask_size(mask)
-            print(width_max, height_max)
         # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         original = copy.deepcopy(input)
@@ -170,7 +167,8 @@ class Executer:
             boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
         # reconstruct
-        output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(input, mask, obj_rec)
+        output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
+                input, mask, obj_rec, width_max, height_max)
 
         if self.boxline > 0:
             original = write_boxline(original, origin_mask, boxline)

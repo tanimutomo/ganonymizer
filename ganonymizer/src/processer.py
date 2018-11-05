@@ -52,7 +52,7 @@ class GANonymizer:
         return mask
     
 
-    def reconstruct(self, input, mask, obj_rec):
+    def reconstruct(self, input, mask, obj_rec, width_max, height_max):
         ### Inpainting using glcic
         if mask.max() > 0:
             begin_reconst = time.time()
@@ -64,7 +64,7 @@ class GANonymizer:
             input, mask, is_prepad = self.prepadding(input, mask, is_prepad)
 
             # pseudo mask division
-            input, mask = self.PMD(input, mask, obj_rec)
+            input, mask = self.PMD(input, mask, obj_rec, width_max, height_max)
 
             begin_glcic = time.time()
             output = gl_inpaint(input, mask, self.datamean, \
@@ -111,10 +111,10 @@ class GANonymizer:
         return output 
 
 
-    def PMD(self, input, mask, obj_rec):
+    def PMD(self, input, mask, obj_rec, width_max, height_max):
         ### pseudo mask division
         is_pmd = False
-        max = 0
+        # max = 0
         # old_recs = len(obj_rec)
         # for r in obj_rec:
         #     y, x, h, w = r
@@ -129,16 +129,16 @@ class GANonymizer:
             y, x, h, w = r
             if w > self.large_thresh and h > self.large_thresh:
                 is_pmd = True
-                square_size = min([w, h])
-                if square_size > max:
-                    max = square_size
+        #         square_size = min([w, h])
+        #         if square_size > max:
+        #             max = square_size
         #         print(r)
         
 
         if is_pmd:
             print('[INFO] Pseudo Mask Division Processing...')
-            h_sml = calc_sml_size(self.large_thresh, input.shape[0], max)
-            w_sml = calc_sml_size(self.large_thresh, input.shape[1], max)
+            h_sml = calc_sml_size(self.large_thresh, input.shape[0], height_max)
+            w_sml = calc_sml_size(self.large_thresh, input.shape[1], width_max)
             
             input_sml = cv2.resize(input, (w_sml, h_sml))
             mask_sml = cv2.resize(mask, (w_sml, h_sml))

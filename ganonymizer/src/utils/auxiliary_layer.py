@@ -14,7 +14,7 @@ def max_mask_size(mask):
 
 def calc_max(col):
     count = col[0]
-    length = 0
+    length = 1
     max = 0
     for c in col:
         if c == count:
