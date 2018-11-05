@@ -53,7 +53,7 @@ class Executer:
     def apply_to_image(self):
         # whole, ssd, glcic, reconst
         elapsed = [0, 0, 0, 0]
-        input = self.image
+        input = cv2.imread(self.image)
         input = adjust_imsize(input)
 
         # process
