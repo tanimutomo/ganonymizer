@@ -21,28 +21,21 @@ def pre_padding(input, mask, thresh, wi, hi, is_prepad):
         return input, mask, is_prepad
     else:
         if (size[0] - 1) - e_h < thresh:
-            print('hd')
             input, mask = prepad_new(input, mask, e_h, s_h, 0, thresh)
             is_prepad['hd'] = True
 
         if (size[1] - 1) - e_w < thresh:
-            print('wr')
             input, mask = prepad_new(input, mask, e_w, s_w, 1, thresh)
-            print('in if, pre_padding', input.shape, mask.shape)
             is_prepad['wr'] = True
 
         if s_h < thresh:
-            print('hu')
             input, mask = prepad_new(input, mask, s_h, e_h, 0, thresh)
-            print('in if, pre_padding', input.shape, mask.shape)
             is_prepad['hu'] = True
 
         if s_w < thresh:
-            print('wl')
             input, mask = prepad_new(input, mask, s_w, e_w, 1, thresh)
             is_prepad['wl'] = True
 
-        print('in pre_padding', input.shape, mask.shape)
         return input, mask, is_prepad
 
 
@@ -112,7 +105,6 @@ def prepad_new(input, mask, edg, opp, direction, thresh):
 
     input = input.astype('uint8')
     mask = mask.astype('uint8')
-    print('in prepad', input.shape, mask.shape)
     return input, mask
 
 

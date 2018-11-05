@@ -32,7 +32,7 @@ class GANonymizer:
         obj_rec = yolo_detecter(input, self.detecter, 
                 self.conf, self.nms, obj_rec, self.device)
         elapsed_ssd = time.time() - begin_ssd
-        print('[TIME] SSD elapsed time: {:.3f}'.format(elapsed_ssd))
+        print('[TIME] YOLO-V3 elapsed time: {:.3f}'.format(elapsed_ssd))
         
         return obj_rec, elapsed_ssd
 
@@ -96,7 +96,6 @@ class GANonymizer:
                 i.min() < thresh or j.min() < thresh:
             print('[INFO] Prepadding Processing...')
             input, mask, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad)
-            print('in prepadding', input.shape, mask.shape)
 
         return input, mask, is_prepad
 
