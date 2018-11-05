@@ -20,7 +20,7 @@ def set_networks(detect_cfg, detect_weight, inpaint_weight, device):
     inpainter.to(device)
     datamean = torch.tensor([0.4560, 0.4472, 0.4155], device=device)
 
-    return detect_model, model, datamean
+    return detecter, inpainter, datamean
 
 def set_device():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
