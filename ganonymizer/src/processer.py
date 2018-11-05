@@ -62,23 +62,18 @@ class GANonymizer:
             # prepadding
             is_prepad = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
             input, mask, is_prepad = self.prepadding(input, mask, is_prepad)
-            print('check1', input.shape)
 
             # pseudo mask division
             input, mask = self.PMD(input, mask, obj_rec)
-            print('check2', input.shape)
 
             begin_glcic = time.time()
             output = gl_inpaint(input, mask, self.datamean, \
                     self.inpainter, self.postproc, self.device)
-            print('check3', output.shape)
             elapsed_glcic = time.time() - begin_glcic
             print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
 
             # cut prepadding
-            print(is_prepad)
             output = self.cutpadding(output, is_prepad)
-            print('check4', output.shape)
 
             elapsed_reconst = time.time() - begin_reconst
             print('[TIME] Reconstruction elapsed time: {:.3f}' \
@@ -103,10 +98,10 @@ class GANonymizer:
                 (w - 1) - j.max() < thresh or \
                 i.min() < thresh or j.min() < thresh:
             print('[INFO] Prepadding Processing...')
-            input, mask, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad)
-        print(input.shape, mask.shape)
+            input_pad, mask_pad, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad)
+            print(input_pad.shape, mask_pad.shape)
 
-        return input, mask, is_prepad
+        return input_pad, mask_pad, is_prepad
 
 
     def cutpadding(self, output, is_prepad):
