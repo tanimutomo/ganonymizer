@@ -19,13 +19,15 @@ from .utils.preprocess import prep_image, inp_to_image
 
 
 def yolo_detecter(img, model, conf, nms, rec, device):    
+    yolov3_path = 'ganonymizer/src/detection/yolov3'
     images = img
     batch_size = 1
     confidence = conf
     nms_thesh = nms
 
     num_classes = 80
-    classes = load_classes('data/coco.names') 
+    classes = load_classes(os.path.join(
+        os.getcwd(), yolov3_path, 'data/coco.names') 
 
     model.net_info["height"] = 416
     inp_dim = int(model.net_info["height"])
@@ -100,7 +102,7 @@ def yolo_detecter(img, model, conf, nms, rec, device):
         output[i, [1,3]] = torch.clamp(output[i, [1,3]], 0.0, im_dim_list[i,0])
         output[i, [2,4]] = torch.clamp(output[i, [2,4]], 0.0, im_dim_list[i,1])
         
-    colors = pkl.load(open("pallete", "rb"))
+    colors = pkl.load(open(os.path.join(os.getcwd(), yolov3_path, "pallete"), "rb"))
 
     privacy = ['person', 'bicycle', 'car', 'motorbike', 'bus', 'truck']
 
