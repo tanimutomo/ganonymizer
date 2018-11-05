@@ -166,7 +166,7 @@ class Executer:
         original = input.copy()
         origin_mask = mask.copy()
         if self.boxline > 0:
-            boxline = np.zeros((input.shape))
+            boxline = np.zeros((original.shape))
             boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
         # reconstruct
