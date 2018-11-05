@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         wget \
         zlib1g-dev \
         libffi-dev \
-        lib-ssl-dev \
+        libssl-dev \
         nano \
         ca-certificates \
         libgtk2.0-dev \
