@@ -156,9 +156,10 @@ class Executer:
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
-        print(obj_rec)
         if obj_rec != []:
             width_max, height_max = max_mask_size(mask)
+        else:
+            width_max, height_max = 0, 0
         # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         original = copy.deepcopy(input)
