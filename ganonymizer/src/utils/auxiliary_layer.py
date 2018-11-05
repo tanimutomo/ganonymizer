@@ -28,11 +28,12 @@ def pre_padding(input, mask, thresh, wi, hi, is_prepad):
         if (size[1] - 1) - e_w < thresh:
             print('wr')
             input, mask = prepad_new(input, mask, e_w, s_w, 1, thresh)
+            print('in if, pre_padding', input.shape, mask.shape)
             is_prepad['wr'] = True
 
         if s_h < thresh:
             print('hu')
-            input, mask, prepad_new(input, mask, s_h, e_h, 0, thresh)
+            input, mask = prepad_new(input, mask, s_h, e_h, 0, thresh)
             print('in if, pre_padding', input.shape, mask.shape)
             is_prepad['hu'] = True
 
