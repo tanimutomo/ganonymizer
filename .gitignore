@@ -124,6 +124,9 @@ ganonymizer/data/images/*
 ganonymizer/data/videos/*
 ganonymizer/src/detection/ssd/cfgs/*
 ganonymizer/src/detection/ssd/weights/*
+ganonymizer/src/detection/yolov3/cfgs/*
+ganonymizer/src/detection/yolov3/imgs/*
+ganonymizer/src/detection/yolov3/weights/*
 ganonymizer/src/inpaint/glcic/cfgs/*
 ganonymizer/src/inpaint/glcic/weights/*
 takuro/

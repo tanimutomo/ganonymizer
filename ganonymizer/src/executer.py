@@ -20,6 +20,7 @@ class Executer:
 
         self.fps = config['fps']
         self.conf = config['conf']
+        self.nms = config['nms']
         self.postproc = config['postproc']
         self.large_thresh = config['large_thresh']
         self.prepad_thresh = config['prepad_thresh']
@@ -38,7 +39,7 @@ class Executer:
         device = set_device()
         detecter, inpainter, datamean = set_networks(
                 self.detect_cfgs, self.detect_weights, self.inpaint_weights, device)
-        self.ganonymizer = GANonymizer(self.conf, self.postproc, self.large_thresh,
+        self.ganonymizer = GANonymizer(self.conf, self.nms, self.postproc, self.large_thresh,
                 self.prepad_thresh, device, detecter, inpainter, datamean)
 
         if os.path.exists(self.video):

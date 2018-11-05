@@ -4,12 +4,13 @@ import numpy as np
 
 from .utils.auxiliary_layer import calc_sml_size, pre_padding, cut_padding, pseudo_mask_division
 from .inpaint.glcic.completion import gl_inpaint
-from .detection.ssd.ssd512 import ssd_detect
+from .detection.yolov3.detect import yolo_detecter
 
 class GANonymizer:
-    def __init__(self, conf, postproc, large_thresh, prepad_thresh, 
+    def __init__(self, conf, nms, postproc, large_thresh, prepad_thresh, 
             device, detecter, inpainter, datamean):
         self.conf = conf
+        self.nms = nms
         self.device = device
         self.detecter = detecter
         self.inpainter = inpainter
@@ -27,7 +28,8 @@ class GANonymizer:
         ### detection privacy using SSD
         print('[INFO] Detecting objects related to privacy...')
         begin_ssd = time.time()
-        obj_rec = ssd_detect(input, self.detecter, self.conf, obj_rec)
+        obj_rec = yolov3_detecter(input, self.detecter, 
+                self.conf, self.nms, obj_rec, self.device)
         elapsed_ssd = time.time() - begin_ssd
         print('[TIME] SSD elapsed time: {:.3f}'.format(elapsed_ssd))
         
