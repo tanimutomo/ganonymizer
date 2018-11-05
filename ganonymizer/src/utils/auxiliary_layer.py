@@ -40,7 +40,7 @@ def pre_padding(input, mask, thresh, wi, hi, is_prepad):
             input, mask = prepad_new(input, mask, s_w, e_w, 1, thresh)
             is_prepad['wl'] = True
 
-    return input, mask, is_prepad
+        return input, mask, is_prepad
 
 
 #     base = np.arange(0, thresh)
@@ -114,8 +114,10 @@ def prepad_new(input, mask, edg, opp, direction, thresh):
         else:
             raise RuntimeError('Not prepadding despite this image need prepadding')
 
+    input = input.astype('uint8')
+    mask = mask.astype('uint8')
     print(input.shape, mask.shape)
-    return input.astype('uint8'), mask.astype('uint8')
+    return input, mask
 
 
 def concat_pad(input, mask, pad, axis, pad_width):
