@@ -104,6 +104,7 @@ class GANonymizer:
                 i.min() < thresh or j.min() < thresh:
             print('[INFO] Prepadding Processing...')
             input, mask, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad)
+        print(input.shape, mask.shape)
 
         return input, mask, is_prepad
 
