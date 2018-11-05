@@ -5,7 +5,6 @@ from torch.autograd import Variable
 import numpy as np
 import cv2 
 
-import matplotlib.pyplot as plt
 from .utils.util import count_parameters as count
 from .utils.util import convert2cpu as cpu
 from .utils.util import predict_transform
