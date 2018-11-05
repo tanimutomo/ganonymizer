@@ -6,6 +6,10 @@ def max_mask_size(mask):
     _, col = np.where(mask[:, :, 0]!=0)
     width_max = calc_max(col)
     transposed_mask = mask.transpose()
+    print(transposed_mask.shape)
+    print(transposed_mask)
+    print(transposed_mask.max())
+    print(transposed_mask.min())
     _, tcol = np.where(transposed_mask[:, :, 0]!=0)
     height_max = calc_max(tcol)
     
