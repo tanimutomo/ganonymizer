@@ -37,7 +37,7 @@ def yolo_detecter(img, model, conf, nms, rec, device):
     #Detection phase
     try:
         imlist = []
-        imlist.append(osp.join(osp.realpath('.'), images))
+        imlist.append(images)
     except FileNotFoundError:
         print ("No file or directory with the name {}".format(images))
         exit()
@@ -114,7 +114,7 @@ def yolo_detecter(img, model, conf, nms, rec, device):
 
 
 def prep_image(img, inp_dim):
-    orig_im = cv2.imread(img)
+    orig_im = img
     dim = orig_im.shape[1], orig_im.shape[0]
     img = (letterbox_image(orig_im, (inp_dim, inp_dim)))
     img_ = img[:,:,::-1].transpose((2,0,1)).copy()
