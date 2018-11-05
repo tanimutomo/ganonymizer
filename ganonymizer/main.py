@@ -36,7 +36,7 @@ def get_config():
             'center_mask': 0,
 
             # Write the bouding box at the reconstruction part
-            'boxline': 1,
+            'boxline': 3,
             'save_outframe': None,
             # {dir,filename(with extention)} that you want to save output image
             'save_outimage': None,
