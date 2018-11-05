@@ -76,6 +76,7 @@ def yolo_detecter(img, model, conf, nms, rec, device):
         prediction[:,0] += i*batch_size
           
         output = prediction
+        print(output)
         write = 1
         
         for im_num, image in enumerate(imlist[i*batch_size: min((i +  1)*batch_size, len(imlist))]):
