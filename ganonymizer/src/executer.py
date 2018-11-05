@@ -53,18 +53,19 @@ class Executer:
     def apply_to_image(self):
         # whole, ssd, glcic, reconst
         elapsed = [0, 0, 0, 0]
-        input = cv2.imread(self.image)
-        input = adjust_imsize(input)
+        image = cv2.imread(self.image)
+        image = adjust_imsize(image)
+        input = image.copy()
 
         # process
-        elapsed, output, original = self.process_image(input, elapsed)
+        elapsed, output, image_designed = self.process_image(input, elapsed)
 
         if self.save_outimage is not None:
             dir = self.save_outimage.split(',')[0] + '/'
             name = self.save_outimage.split(',')[1] + '.png'
             cv2.imwrite(dir+name, output)
         elif self.concat_inout:
-            concat = concat_inout(input, original, output)
+            concat = concat_inout(image, image_designed, output)
             in_name = self.image.split('/')[-1]
             save_path = os.path.join(os.getcwd(), 'ganonymizer/data/images/concat{}_{}'.format(self.output, in_name))
             cv2.imwrite(save_path, concat)
@@ -109,11 +110,12 @@ class Executer:
                 print('[INFO] Count: {}/{}'.format(count, frames))
 
                 # process
-                elapsed, output, original = self.process_image(frame, elapsed)
+                input = frame.copy()
+                elapsed, output, frame_designed = self.process_image(input, elapsed)
 
                 # append frame to video
                 if self.concat_inout:
-                    concat = concat_inout(frame, original, output)
+                    concat = concat_inout(frame, frame_designed, output)
                 else:
                     concat = np.concatenate([frame, output], axis=0)
 
