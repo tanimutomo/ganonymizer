@@ -33,6 +33,7 @@ def pre_padding(input, mask, thresh, wi, hi, is_prepad):
         if s_h < thresh:
             print('hu')
             input, mask, prepad_new(input, mask, s_h, e_h, 0, thresh)
+            print('in if, pre_padding', input.shape, mask.shape)
             is_prepad['hu'] = True
 
         if s_w < thresh:
