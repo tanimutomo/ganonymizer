@@ -95,12 +95,15 @@ class Executer:
 
         # video data
         cap, origin_fps, frames, width, height = load_video(self.video)
+        print('after loading video')
         
         # video writer
         if self.concat_inout:
             writer = video_writer(self.video, self.output, self.fps, width*3, height*2)
         else:
             writer = video_writer(self.video, self.output, self.fps, width, height*2)
+
+        print('after creating video writer')
 
         while(cap.isOpened()):
             print('')
