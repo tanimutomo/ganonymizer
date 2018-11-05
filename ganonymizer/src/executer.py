@@ -160,6 +160,7 @@ class Executer:
             print(obj_rec)
             tmp = detect_large_mask(mask)
             width_max, height_max = max_mask_size(mask)
+            print(width_max, height_max)
         # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         original = copy.deepcopy(input)
