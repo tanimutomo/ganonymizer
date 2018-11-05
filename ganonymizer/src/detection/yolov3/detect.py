@@ -27,7 +27,7 @@ def yolo_detecter(img, model, conf, nms, rec, device):
 
     num_classes = 80
     classes = load_classes(os.path.join(
-        os.getcwd(), yolov3_path, 'data/coco.names') 
+        os.getcwd(), yolov3_path, 'data/coco.names')) 
 
     model.net_info["height"] = 416
     inp_dim = int(model.net_info["height"])
