@@ -6,6 +6,7 @@ import numpy as np
 from .utils.set import set_networks, set_device
 from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout
 from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
+from .utils.auxiliary_layer import detect_large_mask
 from .processer import GANonymizer
 
 
@@ -14,13 +15,13 @@ class Executer:
         self.video = config['video']
         self.image = config['image']
         self.output = config['output']
-        self.cuda = config['cuda']
         self.detect_cfgs = config['detect_cfgs']
         self.detect_weights = config['detect_weights']
         self.inpaint_weights = config['inpaint_weights']
 
         self.fps = config['fps']
         self.conf = config['conf']
+        self.nms = config['nms']
         self.postproc = config['postproc']
         self.large_thresh = config['large_thresh']
         self.prepad_thresh = config['prepad_thresh']
@@ -36,10 +37,10 @@ class Executer:
         self.concat_inout = config['concat_inout']
 
     def execute(self):
-        device = set_device(self.cuda)
+        device = set_device()
         detecter, inpainter, datamean = set_networks(
                 self.detect_cfgs, self.detect_weights, self.inpaint_weights, device)
-        self.ganonymizer = GANonymizer(self.conf, self.postproc, self.large_thresh,
+        self.ganonymizer = GANonymizer(self.conf, self.nms, self.postproc, self.large_thresh,
                 self.prepad_thresh, device, detecter, inpainter, datamean)
 
         if os.path.exists(self.video):
@@ -51,20 +52,21 @@ class Executer:
 
 
     def apply_to_image(self):
-        # whole, ssd, glcic, reconst
+        # whole, yolov3, glcic, reconst
         elapsed = [0, 0, 0, 0]
-        input = cv2.imread(self.image)
-        input = adjust_imsize(input)
+        image = cv2.imread(self.image)
+        image = adjust_imsize(image)
+        input = image.copy()
 
         # process
-        elapsed, output, original = self.process_image(input, elapsed)
+        elapsed, output, image_designed = self.process_image(input, elapsed)
 
         if self.save_outimage is not None:
             dir = self.save_outimage.split(',')[0] + '/'
             name = self.save_outimage.split(',')[1] + '.png'
             cv2.imwrite(dir+name, output)
         elif self.concat_inout:
-            concat = concat_inout(input, original, output)
+            concat = concat_inout(image, image_designed, output)
             in_name = self.image.split('/')[-1]
             save_path = os.path.join(os.getcwd(), 'ganonymizer/data/images/concat{}_{}'.format(self.output, in_name))
             cv2.imwrite(save_path, concat)
@@ -87,7 +89,7 @@ class Executer:
         video = np.array([])
         count = 1
 
-        # whole, ssd, glcic, reconst
+        # whole, yolov3, glcic, reconst
         elapsed = [0, 0, 0, 0]
         total_time = [0, 0, 0, 0]
 
@@ -109,11 +111,12 @@ class Executer:
                 print('[INFO] Count: {}/{}'.format(count, frames))
 
                 # process
-                elapsed, output, original = self.process_image(frame, elapsed)
+                input = frame.copy()
+                elapsed, output, frame_designed = self.process_image(input, elapsed)
 
                 # append frame to video
                 if self.concat_inout:
-                    concat = concat_inout(frame, original, output)
+                    concat = concat_inout(frame, frame_designed, output)
                 else:
                     concat = np.concatenate([frame, output], axis=0)
 
@@ -151,6 +154,8 @@ class Executer:
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
+        print(obj_rec)
+        tmp = detect_large_mask(mask)
         cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
         original = input.copy()
@@ -189,7 +194,7 @@ class Executer:
             print('')
             print('-----------------------------------------------------')
             print('[INFO] Time Summary')
-            print('[TIME] SSD average time per frame: {:.3f}'.format(total[1] / count))
+            print('[TIME] YOLO-V3 average time per frame: {:.3f}'.format(total[1] / count))
             print('[TIME] GLCIC average time per frame: {:.3f}'.format(total[2] / count))
             print('[TIME] Reconstruction average time per frame: {:.3f}'.format(total[3] / count))
             print('[TIME] Whole process average time per frame: {:.3f}'.format(total[0] / count))

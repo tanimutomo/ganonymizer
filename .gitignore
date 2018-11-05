@@ -2,7 +2,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
 # C extensions
 *.so
 
@@ -110,14 +109,6 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-data/
-cfgs/
-weights/
-takuro/
-segmentation/
-others/
-generative_inpaint/
-
 *.sh
 *.swp
 *.pth
@@ -127,3 +118,22 @@ generative_inpaint/
 *.avi
 *.mp4
 *.MOV
+
+ganonymizer/data/for_fig/*
+ganonymizer/data/images/*
+ganonymizer/data/videos/*
+ganonymizer/src/detection/ssd/cfgs/*
+ganonymizer/src/detection/ssd/weights/*
+ganonymizer/src/detection/yolov3/cfgs/*
+ganonymizer/src/detection/yolov3/imgs/*
+ganonymizer/src/detection/yolov3/weights/*
+ganonymizer/src/inpaint/glcic/cfgs/*
+ganonymizer/src/inpaint/glcic/weights/*
+takuro/
+segmentation/
+others/
+generative_inpaint/
+yolov2/
+
+!example*
+!.gitkeep

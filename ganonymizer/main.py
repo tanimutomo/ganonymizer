@@ -10,13 +10,14 @@ def main():
 
 def get_config():
     config = {
-            'video': '', # os.path.join(os.getcwd(), 'ganonymizer/data/video/ex_small4_inter10_noon.avi'),
+            'video': '', # os.path.join(os.getcwd(), 'ganonymizer/data/videos/ex_small4_inter10_noon.avi'),
             # The input image, when you apply GANonymizer to an image.
-            'image': os.path.join(os.getcwd(), 'ganonymizer/data/images/in_2034_res.png'),
+            'image': os.path.join(os.getcwd(), 'ganonymizer/data/images/example_01.jpg'),
             'output': '0',
 
             # minimum probability to filter weak detections
-            'conf': 0.15,
+            'conf': 0.5,
+            'nms': 0.4,
             # The threshold for PMD processing
             'large_thresh': 120,
             # The threshold for prepadding processing
@@ -24,7 +25,6 @@ def get_config():
             'fps': 10.0,
             'show': False,
             'postproc': False,
-            'cuda': False,
 
             # The mask image, when you apply Only reconstruction to an image.
             'mask': 'path_to_mask_image',
@@ -43,10 +43,10 @@ def get_config():
             'concat_inout': True,
 
             # path to Caffe deploy prototxt file
-            'detect_cfgs': os.path.join(os.getcwd(), 'ganonymizer/src/detection/ssd/cfgs/deploy.prototxt'),
+            'detect_cfgs': os.path.join(os.getcwd(), 'ganonymizer/src/detection/yolov3/cfgs/yolov3.cfg'),
             # path to Caffe pre-trained
-            'detect_weights': os.path.join(os.getcwd(), 'ganonymizer/src/detection/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel'),
-            'inpaint_weights': os.path.join(os.getcwd(), 'ganonymizer/src/inpaint/glcic/completionnet_places2.pth')
+            'detect_weights': os.path.join(os.getcwd(), 'ganonymizer/src/detection/yolov3/weights/yolov3.weights'),
+            'inpaint_weights': os.path.join(os.getcwd(), 'ganonymizer/src/inpaint/glcic/weights/completionnet_places2.pth')
             }
 
     return config
