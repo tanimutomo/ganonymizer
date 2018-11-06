@@ -9,7 +9,6 @@ def main():
     demo.display(True)
     demo.send()
     demo.execute()
-    time.sleep(3)
     demo.get()
     demo.display(False)
 
@@ -19,7 +18,7 @@ class RealTimeDemo:
         self.local_img = './ganonymizer/data/images/tmp1.png'
         self.remote_img = 'chasca:Project/ganonymizer/ganonymizer/data/images/tmp1.png'
         self.local_out = './ganonymizer/data/images/out0_tmp1.png'
-        self.remote_out = 'chasca:Project/ganonymizer/ganonymizer/data/out0_images/tmp1.png'
+        self.remote_out = 'chasca:Project/ganonymizer/ganonymizer/data/images/out0_tmp1.png'
 
     def capture(self):
         print('capture')

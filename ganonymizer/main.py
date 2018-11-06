@@ -40,7 +40,7 @@ def get_config():
             'save_outframe': None,
             # {dir,filename(with extention)} that you want to save output image
             'save_outimage': None,
-            'concat_inout': True,
+            'concat_inout': False,
 
             # path to Caffe deploy prototxt file
             'detect_cfgs': os.path.join(os.getcwd(), 'ganonymizer/src/detection/yolov3/cfgs/yolov3.cfg'),
