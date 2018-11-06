@@ -6,11 +6,12 @@ import subprocess
 def main():
     demo = RealTimeDemo()
     demo.capture()
+    demo.display(True)
     demo.send()
     demo.execute()
     time.sleep(3)
     demo.get()
-    demo.display()
+    demo.display(False)
 
 
 class RealTimeDemo:
@@ -21,6 +22,7 @@ class RealTimeDemo:
         self.remote_out = 'chasca:Project/ganonymizer/ganonymizer/data/out0_images/tmp1.png'
 
     def capture(self):
+        print('capture')
         capture = cv2.VideoCapture(0)
 
         # キャプチャ処理
@@ -46,6 +48,7 @@ class RealTimeDemo:
         cv2.destroyAllWindows()
 
     def send(self):
+        print('send')
         cmd = ['scp', 
                 self.local_img,
                 self.remote_img]
@@ -53,6 +56,7 @@ class RealTimeDemo:
         print (runcmd)
 
     def get(self):
+        print('get')
         cmd = ['scp', 
                 self.remote_out,
                 self.local_out]
@@ -60,6 +64,7 @@ class RealTimeDemo:
         print (runcmd)
 
     def execute(self):
+        print('execute')
         cmd = ['kronos', 
                 'job',
                 '--m',
@@ -67,11 +72,15 @@ class RealTimeDemo:
         runcmd = subprocess.check_call(cmd)
         print (runcmd)
 
-    def display_img(self):
+    def display(self, img):
+        print('display')
         window = "Push ESC key to stop this program"
-        output = cv2.imread(self.local_out)
-        cv2.imshow(window, output)
-        key = cv2.waitKey(5)
-        if(key == 27):
-            print("exit.")
-            break
+        if img:
+            img = cv2.imread(self.local_img)
+        else:
+            img = cv2.imread(self.local_out)
+        cv2.imshow(window, img)
+        cv2.waitKey(0)
+
+if __name__ == '__main__':
+    main()
