@@ -76,10 +76,11 @@ class RealTimeDemo:
         window = "Push ESC key to stop this program"
         if img:
             img = cv2.imread(self.local_img)
+            cv2.imshow(window, img)
         else:
             img = cv2.imread(self.local_out)
-        cv2.imshow(window, img)
-        cv2.waitKey(0)
+            cv2.imshow(window, img)
+            key = cv2.waitKey(0)
 
 if __name__ == '__main__':
     main()
