@@ -32,8 +32,7 @@ def detect_deeplabv3(input, network, device):
     with torch.no_grad(): # (corresponds to setting volatile=True in all variables, this is done during inference to reduce memory consumption)
         # normalize the img (with mean and std for the pretrained ResNet):
 
-        img = copy.deepcopy(input)
-        img = img/255.0
+        img = input/255.0
         img = img - np.array([0.485, 0.456, 0.406])
         img = img/np.array([0.229, 0.224, 0.225]) # (shape: (512, 1024, 3))
         img = np.transpose(img, (2, 0, 1)) # (shape: (3, 512, 1024))

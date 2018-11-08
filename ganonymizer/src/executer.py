@@ -158,6 +158,8 @@ class Executer:
             mask, obj_rec = center_mask(input.shape, self.center_mask)
         elif self.segmentation:
             mask, elapsed[1] = self.ganonymizer.segment(input)
+            print(input.shape)
+            print(mask)
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                     input, mask, obj_rec)
