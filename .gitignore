@@ -109,16 +109,6 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-*.sh
-*.swp
-*.pth
-*.t7
-*.png
-*.jpg
-*.avi
-*.mp4
-*.MOV
-
 ganonymizer/data/for_fig/*
 ganonymizer/data/images/*
 ganonymizer/data/videos/*
@@ -130,10 +120,22 @@ ganonymizer/src/detection/yolov3/weights/*
 ganonymizer/src/inpaint/glcic/cfgs/*
 ganonymizer/src/inpaint/glcic/weights/*
 takuro/
-segmentation/
+opencv-semantic-segmentation/
+ganonymizer/src/segmentation/deeplabv3/image/
 others/
 generative_inpaint/
 yolov2/
+
+*.sh
+*.swp
+*.pth
+*.t7
+*.png
+*.jpg
+*.jpeg
+*.avi
+*.mp4
+*.MOV
 
 !example*
 !.gitkeep

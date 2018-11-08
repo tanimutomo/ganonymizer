@@ -6,10 +6,12 @@ import numpy as np
 from .utils.auxiliary_layer import calc_sml_size, pre_padding, cut_padding, pseudo_mask_division
 from .inpaint.glcic.completion import gl_inpaint
 from .detection.yolov3.detect import yolo_detecter
+from .segmentation.deeplabv3.segment import detect_deeplabv3, create_mask
 
 class GANonymizer:
-    def __init__(self, conf, nms, postproc, large_thresh, prepad_thresh, 
-            device, detecter, inpainter, datamean):
+    def __init__(self, segmentation, conf, nms, postproc, large_thresh,
+            prepad_thresh, device, detecter, inpainter, datamean):
+        self.segmentation = segmentation
         self.conf = conf
         self.nms = nms
         self.device = device
@@ -24,6 +26,16 @@ class GANonymizer:
         self.time_glcic = 0
         self.time_reconstruct = 0
 
+    
+    def segment(self, input):
+        print('[INFO] Detecting objects related to privacy...')
+        begin_seg = time.time()
+        pred = detect_deeplabv3(input, self.detecter, self.device)
+        mask = create_mask(pred)
+        elapsed_seg = time.time() - begin_seg
+        print('[TIME] DeepLabV3 elapsed time: {:.3f}'.format(elapsed_seg))
+
+        return mask, elapsed_seg
 
     def detect(self, input, obj_rec):
         ### detection privacy using SSD
@@ -52,28 +64,35 @@ class GANonymizer:
         return mask
     
 
-    def reconstruct(self, input, mask, obj_rec, width_max, height_max):
+    def reconstruct(self, input, mask, obj_rec, width_max=None, height_max=None):
         ### Inpainting using glcic
         if mask.max() > 0:
             begin_reconst = time.time()
             print('[INFO] Removing the detected objects...')
             self.origin = copy.deepcopy(input).shape
 
-            # prepadding
-            is_prepad = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
-            input, mask, is_prepad = self.prepadding(input, mask, is_prepad)
+            if self.segmentation:
+                begin_glcic = time.time()
+                output = gl_inpaint(input, mask, self.datamean, \
+                        self.inpainter, self.postproc, self.device)
+                elapsed_glcic = time.time() - begin_glcic
+                print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
+            else:
+                # prepadding
+                is_prepad = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
+                input, mask, is_prepad = self.prepadding(input, mask, is_prepad)
 
-            # pseudo mask division
-            input, mask = self.PMD(input, mask, obj_rec, width_max, height_max)
+                # pseudo mask division
+                input, mask = self.PMD(input, mask, obj_rec, width_max, height_max)
 
-            begin_glcic = time.time()
-            output = gl_inpaint(input, mask, self.datamean, \
-                    self.inpainter, self.postproc, self.device)
-            elapsed_glcic = time.time() - begin_glcic
-            print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
+                begin_glcic = time.time()
+                output = gl_inpaint(input, mask, self.datamean, \
+                        self.inpainter, self.postproc, self.device)
+                elapsed_glcic = time.time() - begin_glcic
+                print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
 
-            # cut prepadding
-            output = self.cutpadding(output, is_prepad)
+                # cut prepadding
+                output = self.cutpadding(output, is_prepad)
 
             elapsed_reconst = time.time() - begin_reconst
             print('[TIME] Reconstruction elapsed time: {:.3f}' \

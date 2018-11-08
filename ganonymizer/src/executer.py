@@ -16,9 +16,13 @@ class Executer:
         self.video = config['video']
         self.image = config['image']
         self.output = config['output']
-        self.detect_cfgs = config['detect_cfgs']
-        self.detect_weights = config['detect_weights']
-        self.inpaint_weights = config['inpaint_weights']
+        self.segmentation = config['segmentation']
+        self.detect_cfg = config['detect_cfgs']
+        self.detect_weight = config['detect_weights']
+        self.segmentation_weight = config['segmentation_weight']
+        self.res_type = config['resnet_type']
+        self.res_path = config['resnet_path']
+        self.inpaint_weight = config['inpaint_weights']
 
         self.fps = config['fps']
         self.conf = config['conf']
@@ -39,9 +43,9 @@ class Executer:
 
     def execute(self):
         device = set_device()
-        detecter, inpainter, datamean = set_networks(
-                self.detect_cfgs, self.detect_weights, self.inpaint_weights, device)
-        self.ganonymizer = GANonymizer(self.conf, self.nms, self.postproc, self.large_thresh,
+        detecter, inpainter, datamean = set_networks(self.segmentation, self.detect_cfg, self.detect_weight, 
+                self.segmentation_weight, self.res_type, self.res_path, self.inpaint_weight, device)
+        self.ganonymizer = GANonymizer(self.segmentation, self.conf, self.nms, self.postproc, self.large_thresh,
                 self.prepad_thresh, device, detecter, inpainter, datamean)
 
         if os.path.exists(self.video):
@@ -140,6 +144,7 @@ class Executer:
 
 
     def process_image(self, input, elapsed):
+        original = copy.deepcopy(input)
         obj_rec = []
 
         # detect
@@ -151,30 +156,35 @@ class Executer:
             mask, obj_rec = edge_mask(input.shape, self.edge_mask)
         elif self.center_mask is not 0:
             mask, obj_rec = center_mask(input.shape, self.center_mask)
+        elif self.segmentation:
+            mask, elapsed[1] = self.ganonymizer.segment(input)
+            # reconstruct
+            output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
+                    input, mask, obj_rec)
         else:
             obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
+            origin_mask = copy.deepcopy(mask)
 
-        if obj_rec != []:
-            width_max, height_max = max_mask_size(mask)
-        else:
-            width_max, height_max = 0, 0
-        # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
+            if obj_rec != []:
+                width_max, height_max = max_mask_size(mask)
+            else:
+                width_max, height_max = 0, 0
+            # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
-        original = copy.deepcopy(input)
-        origin_mask = copy.deepcopy(mask)
-        if self.boxline > 0:
-            boxline = np.zeros((original.shape))
-            boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
+            origin_mask = copy.deepcopy(mask)
+            if self.boxline > 0:
+                boxline = np.zeros((original.shape))
+                boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
-        # reconstruct
-        output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
-                input, mask, obj_rec, width_max, height_max)
+            # reconstruct
+            output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
+                    input, mask, obj_rec, width_max, height_max)
 
-        if self.boxline > 0:
-            original = write_boxline(original, origin_mask, boxline)
-            # output = write_boxline(output, origin_mask, boxline)
+            if self.boxline > 0:
+                original = write_boxline(original, origin_mask, boxline)
+                # output = write_boxline(output, origin_mask, boxline)
 
         if self.show:
             disp = np.concatenate([original, output, origin_mask], axis=1)
