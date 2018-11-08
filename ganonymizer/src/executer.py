@@ -65,6 +65,7 @@ class Executer:
 
         # process
         elapsed, output, image_designed = self.process_image(input, elapsed)
+        print('in apply to image', output.max())
 
         if self.save_outimage is not None:
             dir = self.save_outimage.split(',')[0] + '/'
@@ -161,6 +162,7 @@ class Executer:
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                     input, mask, obj_rec)
+            print('in process image', output.max())
         else:
             obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
             mask = np.zeros((input.shape[0], input.shape[1], 3))
