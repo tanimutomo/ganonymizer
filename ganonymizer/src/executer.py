@@ -157,9 +157,7 @@ class Executer:
         elif self.center_mask is not 0:
             mask, obj_rec = center_mask(input.shape, self.center_mask)
         elif self.segmentation:
-            print(np.sum(input))
             mask, elapsed[1] = self.ganonymizer.segment(input)
-            print(np.sum(input))
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                     input, mask, obj_rec)
