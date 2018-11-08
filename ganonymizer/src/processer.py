@@ -102,6 +102,9 @@ class GANonymizer:
             output = input
             elapsed_glcic, elapsed_reconst = 0.0, 0.0
 
+        output = output * 255 # denormalization
+        output = output.astype('uint8')
+
         return output, elapsed_glcic, elapsed_reconst
 
 
@@ -123,9 +126,6 @@ class GANonymizer:
         ### cut pre_padding
         if is_prepad['hu'] or is_prepad['hd'] or is_prepad['wl'] or is_prepad['wr']:
             output = cut_padding(output, self.origin, is_prepad)
-
-        output = output * 255 # denormalization
-        output = output.astype('uint8')
 
         return output 
 
