@@ -1,14 +1,17 @@
 import cv2
 import time
+import copy
 import numpy as np
 
 from .utils.auxiliary_layer import calc_sml_size, pre_padding, cut_padding, pseudo_mask_division
 from .inpaint.glcic.completion import gl_inpaint
 from .detection.yolov3.detect import yolo_detecter
+from .segmentation.deeplabv3.segment import detect_deeplabv3, create_mask
 
 class GANonymizer:
-    def __init__(self, conf, nms, postproc, large_thresh, prepad_thresh, 
-            device, detecter, inpainter, datamean):
+    def __init__(self, segmentation, conf, nms, postproc, large_thresh,
+            prepad_thresh, device, detecter, inpainter, datamean):
+        self.segmentation = segmentation
         self.conf = conf
         self.nms = nms
         self.device = device
@@ -23,6 +26,16 @@ class GANonymizer:
         self.time_glcic = 0
         self.time_reconstruct = 0
 
+    
+    def segment(self, input):
+        print('[INFO] Detecting objects related to privacy...')
+        begin_seg = time.time()
+        pred = detect_deeplabv3(input, self.detecter, self.device)
+        mask = create_mask(pred)
+        elapsed_seg = time.time() - begin_seg
+        print('[TIME] DeepLabV3 elapsed time: {:.3f}'.format(elapsed_seg))
+
+        return mask, elapsed_seg
 
     def detect(self, input, obj_rec):
         ### detection privacy using SSD
@@ -31,7 +44,7 @@ class GANonymizer:
         obj_rec = yolo_detecter(input, self.detecter, 
                 self.conf, self.nms, obj_rec, self.device)
         elapsed_ssd = time.time() - begin_ssd
-        print('[TIME] SSD elapsed time: {:.3f}'.format(elapsed_ssd))
+        print('[TIME] YOLO-V3 elapsed time: {:.3f}'.format(elapsed_ssd))
         
         return obj_rec, elapsed_ssd
 
@@ -51,28 +64,35 @@ class GANonymizer:
         return mask
     
 
-    def reconstruct(self, input, mask, obj_rec):
+    def reconstruct(self, input, mask, obj_rec, width_max=None, height_max=None):
         ### Inpainting using glcic
         if mask.max() > 0:
             begin_reconst = time.time()
             print('[INFO] Removing the detected objects...')
-            self.origin = input.copy().shape
+            self.origin = copy.deepcopy(input).shape
 
-            # prepadding
-            flag = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
-            input, mask, flag = self.prepadding(input, mask, flag)
+            if self.segmentation:
+                begin_glcic = time.time()
+                output = gl_inpaint(input, mask, self.datamean, \
+                        self.inpainter, self.postproc, self.device)
+                elapsed_glcic = time.time() - begin_glcic
+                print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
+            else:
+                # prepadding
+                is_prepad = {'hu':False, 'hd':False, 'wl':False, 'wr':False}
+                input, mask, is_prepad = self.prepadding(input, mask, is_prepad)
 
-            # pseudo mask division
-            input, mask = self.PMD(input, mask, obj_rec)
+                # pseudo mask division
+                input, mask = self.PMD(input, mask, obj_rec, width_max, height_max)
 
-            begin_glcic = time.time()
-            output = gl_inpaint(input, mask, self.datamean, \
-                    self.inpainter, self.postproc, self.device)
-            elapsed_glcic = time.time() - begin_glcic
-            print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
+                begin_glcic = time.time()
+                output = gl_inpaint(input, mask, self.datamean, \
+                        self.inpainter, self.postproc, self.device)
+                elapsed_glcic = time.time() - begin_glcic
+                print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
 
-            # cut prepadding
-            output = self.cutpadding(output, flag)
+                # cut prepadding
+                output = self.cutpadding(output, is_prepad)
 
             elapsed_reconst = time.time() - begin_reconst
             print('[TIME] Reconstruction elapsed time: {:.3f}' \
@@ -82,10 +102,13 @@ class GANonymizer:
             output = input
             elapsed_glcic, elapsed_reconst = 0.0, 0.0
 
+        output = output * 255 # denormalization
+        output = output.astype('uint8')
+
         return output, elapsed_glcic, elapsed_reconst
 
 
-    def prepadding(self, input, mask, flag):
+    def prepadding(self, input, mask, is_prepad):
         ### prepadding
         thresh = self.prepad_thresh
         i, j, k = np.where(mask>=10)
@@ -94,26 +117,23 @@ class GANonymizer:
                 (w - 1) - j.max() < thresh or \
                 i.min() < thresh or j.min() < thresh:
             print('[INFO] Prepadding Processing...')
-            input, mask, flag = pre_padding(input, mask, thresh, j, i, input.shape, flag)
+            input, mask, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad)
 
-        return input, mask, flag
+        return input, mask, is_prepad
 
 
-    def cutpadding(self, output, flag):
+    def cutpadding(self, output, is_prepad):
         ### cut pre_padding
-        if flag['hu'] or flag['hd'] or flag['wl'] or flag['wr']:
-            output = cut_padding(output, self.origin, flag)
-
-        output = output * 255 # denormalization
-        output = output.astype('uint8')
+        if is_prepad['hu'] or is_prepad['hd'] or is_prepad['wl'] or is_prepad['wr']:
+            output = cut_padding(output, self.origin, is_prepad)
 
         return output 
 
 
-    def PMD(self, input, mask, obj_rec):
+    def PMD(self, input, mask, obj_rec, width_max, height_max):
         ### pseudo mask division
-        pmd_f = False
-        max = 0
+        is_pmd = False
+        # max = 0
         # old_recs = len(obj_rec)
         # for r in obj_rec:
         #     y, x, h, w = r
@@ -127,17 +147,17 @@ class GANonymizer:
         for r in obj_rec:
             y, x, h, w = r
             if w > self.large_thresh and h > self.large_thresh:
-                pmd_f = True
-                square_size = min([w, h])
-                if square_size > max:
-                    max = square_size
+                is_pmd = True
+        #         square_size = min([w, h])
+        #         if square_size > max:
+        #             max = square_size
         #         print(r)
         
 
-        if pmd_f:
+        if is_pmd:
             print('[INFO] Pseudo Mask Division Processing...')
-            h_sml = calc_sml_size(self.large_thresh, input.shape[0], max)
-            w_sml = calc_sml_size(self.large_thresh, input.shape[1], max)
+            h_sml = calc_sml_size(self.large_thresh, input.shape[0], height_max)
+            w_sml = calc_sml_size(self.large_thresh, input.shape[1], width_max)
             
             input_sml = cv2.resize(input, (w_sml, h_sml))
             mask_sml = cv2.resize(mask, (w_sml, h_sml))

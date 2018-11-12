@@ -1,12 +1,13 @@
 import os
 import cv2
 import time
+import copy
 import numpy as np
 
 from .utils.set import set_networks, set_device
 from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout
 from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
-from .utils.auxiliary_layer import detect_large_mask
+from .utils.auxiliary_layer import max_mask_size, detect_large_mask
 from .processer import GANonymizer
 
 
@@ -15,9 +16,13 @@ class Executer:
         self.video = config['video']
         self.image = config['image']
         self.output = config['output']
-        self.detect_cfgs = config['detect_cfgs']
-        self.detect_weights = config['detect_weights']
-        self.inpaint_weights = config['inpaint_weights']
+        self.segmentation = config['segmentation']
+        self.detect_cfg = config['detect_cfgs']
+        self.detect_weight = config['detect_weights']
+        self.segmentation_weight = config['segmentation_weight']
+        self.res_type = config['resnet_type']
+        self.res_path = config['resnet_path']
+        self.inpaint_weight = config['inpaint_weights']
 
         self.fps = config['fps']
         self.conf = config['conf']
@@ -38,9 +43,9 @@ class Executer:
 
     def execute(self):
         device = set_device()
-        detecter, inpainter, datamean = set_networks(
-                self.detect_cfgs, self.detect_weights, self.inpaint_weights, device)
-        self.ganonymizer = GANonymizer(self.conf, self.nms, self.postproc, self.large_thresh,
+        detecter, inpainter, datamean = set_networks(self.segmentation, self.detect_cfg, self.detect_weight, 
+                self.segmentation_weight, self.res_type, self.res_path, self.inpaint_weight, device)
+        self.ganonymizer = GANonymizer(self.segmentation, self.conf, self.nms, self.postproc, self.large_thresh,
                 self.prepad_thresh, device, detecter, inpainter, datamean)
 
         if os.path.exists(self.video):
@@ -56,7 +61,7 @@ class Executer:
         elapsed = [0, 0, 0, 0]
         image = cv2.imread(self.image)
         image = adjust_imsize(image)
-        input = image.copy()
+        input = copy.deepcopy(image)
 
         # process
         elapsed, output, image_designed = self.process_image(input, elapsed)
@@ -72,7 +77,7 @@ class Executer:
             cv2.imwrite(save_path, concat)
         else:
             # img_path = self.image.split('/')
-            # dir = img_path.copy()
+            # dir = copy.deepcopy(img_path)
             # dir.pop()
             # dir = '/'.join(dir) + '/'
             # name = img_path[-1].split('.')[0]
@@ -102,6 +107,7 @@ class Executer:
         else:
             writer = video_writer(self.video, self.output, self.fps, width, height*2)
 
+
         while(cap.isOpened()):
             print('')
             begin_process = time.time()
@@ -111,7 +117,7 @@ class Executer:
                 print('[INFO] Count: {}/{}'.format(count, frames))
 
                 # process
-                input = frame.copy()
+                input = copy.deepcopy(frame)
                 elapsed, output, frame_designed = self.process_image(input, elapsed)
 
                 # append frame to video
@@ -138,6 +144,7 @@ class Executer:
 
 
     def process_image(self, input, elapsed):
+        original = copy.deepcopy(input)
         obj_rec = []
 
         # detect
@@ -149,27 +156,35 @@ class Executer:
             mask, obj_rec = edge_mask(input.shape, self.edge_mask)
         elif self.center_mask is not 0:
             mask, obj_rec = center_mask(input.shape, self.center_mask)
+        elif self.segmentation:
+            mask, elapsed[1] = self.ganonymizer.segment(input)
+            # reconstruct
+            output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
+                    input, mask, obj_rec)
         else:
             obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
+            origin_mask = copy.deepcopy(mask)
 
-        print(obj_rec)
-        tmp = detect_large_mask(mask)
-        cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
+            if obj_rec != []:
+                width_max, height_max = max_mask_size(mask)
+            else:
+                width_max, height_max = 0, 0
+            # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
-        original = input.copy()
-        origin_mask = mask.copy()
-        if self.boxline > 0:
-            boxline = np.zeros((input.shape))
-            boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
+            origin_mask = copy.deepcopy(mask)
+            if self.boxline > 0:
+                boxline = np.zeros((original.shape))
+                boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
-        # reconstruct
-        output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(input, mask, obj_rec)
+            # reconstruct
+            output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
+                    input, mask, obj_rec, width_max, height_max)
 
-        if self.boxline > 0:
-            original = write_boxline(original, origin_mask, boxline)
-            output = write_boxline(output, origin_mask, boxline)
+            if self.boxline > 0:
+                original = write_boxline(original, origin_mask, boxline)
+                # output = write_boxline(output, origin_mask, boxline)
 
         if self.show:
             disp = np.concatenate([original, output, origin_mask], axis=1)
@@ -190,7 +205,7 @@ class Executer:
         print('[TIME] Whole process time: {:.3f}'.format(elapsed[0]))
         print('-----------------------------------------------------')
 
-        if count % 10 == 0 or count == frames:
+        if count % 100 == 0 or count == frames:
             print('')
             print('-----------------------------------------------------')
             print('[INFO] Time Summary')
