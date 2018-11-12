@@ -1,4 +1,5 @@
 # GANonymizer
+Editing now.
 ## Preparation
 1. git clone
 2. download cfgs and weights for SSD512 and GLCIC
