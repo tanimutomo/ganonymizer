@@ -10,10 +10,10 @@ def main():
 
 def get_config():
     config = {
-            'video': os.path.join(os.getcwd(), 'ganonymizer/data/videos/ex_small6_inter10_noon.avi'),
+            'video': '', # os.path.join(os.getcwd(), 'ganonymizer/data/videos/ex_small6_inter10_noon.avi'),
             # The input image, when you apply GANonymizer to an image.
-            'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/in_127.png'),
-            'output': '3',
+            'image': os.path.join(os.getcwd(), 'ganonymizer/data/images/in_127.png'),
+            'output': '1',
 
             'segmentation': False,
             # minimum probability to filter weak detections
@@ -41,7 +41,7 @@ def get_config():
             'save_outframe': None,
             # {dir,filename(with extention)} that you want to save output image
             'save_outimage': None,
-            'concat_inout': True,
+            'concat_inout': False,
 
             # path to Caffe deploy prototxt file
             'detect_cfgs': os.path.join(os.getcwd(), 'ganonymizer/src/detection/yolov3/cfgs/yolov3.cfg'),
