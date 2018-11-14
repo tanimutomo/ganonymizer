@@ -10,10 +10,10 @@ def main():
 
 def get_config():
     config = {
-            'video': '', # os.path.join(os.getcwd(), 'ganonymizer/data/videos/noon.avi'),
+            'video': os.path.join(os.getcwd(), 'ganonymizer/data/videos/half_noon.avi'),
             # The input image, when you apply GANonymizer to an image.
-            'image': os.path.join(os.getcwd(), 'ganonymizer/data/images/in_127.png'),
-            'output': '1',
+            'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/in_127.png'),
+            'output': '0',
 
             'segmentation': False,
             # minimum probability to filter weak detections
@@ -23,7 +23,7 @@ def get_config():
             'large_thresh': 120,
             # The threshold for prepadding processing
             'prepad_thresh': 4,
-            'fps': 7.0,
+            'fps': 30.0,
             'show': False,
             'postproc': False,
 
@@ -37,7 +37,7 @@ def get_config():
             'center_mask': 0,
 
             # Write the bouding box at the reconstruction part
-            'boxline': 0,
+            'boxline': 3,
             'save_outframe': None,
             # {dir,filename(with extention)} that you want to save output image
             'save_outimage': None,
