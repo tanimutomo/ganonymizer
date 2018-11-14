@@ -38,3 +38,12 @@ def load_video(video):
 
     return cap, fps, frames, W, H
 
+def extend_rec(obj_rec, input):
+    print(input.shape)
+    for rec in obj_rec:
+        rec[2] = rec[2] + int(rec[2] * 0.1)
+        if rec[0] + rec[2] >= input.shpae[0]:
+            rec[2] = input.shape[0] - rec[0] - 1
+
+    return obj_rec
+

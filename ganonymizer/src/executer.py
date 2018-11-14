@@ -5,7 +5,7 @@ import copy
 import numpy as np
 
 from .utils.set import set_networks, set_device
-from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout
+from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout, extend_rec
 from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
 from .utils.auxiliary_layer import max_mask_size, detect_large_mask
 from .processer import GANonymizer
@@ -163,6 +163,7 @@ class Executer:
                     input, mask, obj_rec)
         else:
             obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
+            obj_rec = extend_rec(obj_rec, input)
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
             origin_mask = copy.deepcopy(mask)
