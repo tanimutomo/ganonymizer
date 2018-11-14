@@ -13,7 +13,7 @@ def get_config():
             'video': os.path.join(os.getcwd(), 'ganonymizer/data/videos/ex_small6_inter10_noon.avi'),
             # The input image, when you apply GANonymizer to an image.
             'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/in_127.png'),
-            'output': '2',
+            'output': '3',
 
             'segmentation': False,
             # minimum probability to filter weak detections
