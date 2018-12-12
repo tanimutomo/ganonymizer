@@ -1,9 +1,9 @@
 # GANonymizer
 ## Note
 This code is based on the following repository. Also we use the pre-trained models used in that repository.
-[1] https://github.com/weiliu89/caffe/tree/ssd  
-[2] https://github.com/satoshiiizuka/siggraph2017_inpainting
-[3] https://github.com/ayooshkathuria/pytorch-yolo-v3
+1. https://github.com/weiliu89/caffe/tree/ssd 
+2. https://github.com/satoshiiizuka/siggraph2017_inpainting
+3. https://github.com/ayooshkathuria/pytorch-yolo-v3
 
 ## Preparation
 1. git clone
@@ -30,9 +30,9 @@ GLCIC model we use is [Iizuka's model](https://github.com/satoshiiizuka/siggraph
 
 ## Reference
 The followings are the main reference paper.
-[1] https://dl.acm.org/citation.cfm?id=3073659
-[2] https://link.springer.com/chapter/10.1007%2F978-3-319-46448-0_2
-[3] https://arxiv.org/abs/1804.02767
+1. https://dl.acm.org/citation.cfm?id=3073659
+2. https://link.springer.com/chapter/10.1007%2F978-3-319-46448-0_2
+3. https://arxiv.org/abs/1804.02767
 
 
 ## Details of this paper
