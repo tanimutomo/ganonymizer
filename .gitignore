@@ -124,7 +124,7 @@ opencv-semantic-segmentation/
 ganonymizer/src/segmentation/deeplabv3/image/
 others/
 generative_inpaint/
-yolov2/
+ganonymizer/src/detection/yolov2/
 
 *.sh
 *.swp
