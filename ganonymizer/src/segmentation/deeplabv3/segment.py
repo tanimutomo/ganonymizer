@@ -63,13 +63,13 @@ def calc_bbox(pred, mask):
     bbox_mask = np.where(mask[:,:,0] == 255, pred, 0)
     bbox = find_objects(bbox_mask)
     print(bbox)
-    while True:
-        try:
-            bbox.remove(None)
-        except:
-            break
+    # while True:
+    #     try:
+    #         bbox.remove(None)
+    #     except:
+    #         break
 
-    for 
+    # for 
     return bbox
 
 
