@@ -163,6 +163,7 @@ class Executer:
                     input, mask, obj_rec)
             if self.boxline > 0:
                 print('check2')
+                origin_mask = copy.deepcopy(mask)
                 boxline = create_boxline(mask, obj_rec, self.boxline, original)
                 original = write_boxline(original, origin_mask, boxline)
         else:
