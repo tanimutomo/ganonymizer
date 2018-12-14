@@ -32,7 +32,7 @@ class GANonymizer:
         begin_seg = time.time()
         pred = detect_deeplabv3(input, self.detecter, self.device)
         mask = create_mask(pred)
-        obj_rec = calc_bbox(pred, mask)
+        obj_rec = calc_bbox(pred, mask, obj_rec)
         elapsed_seg = time.time() - begin_seg
         print('[TIME] DeepLabV3 elapsed time: {:.3f}'.format(elapsed_seg))
 
