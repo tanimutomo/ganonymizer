@@ -6,7 +6,7 @@ import numpy as np
 from .utils.auxiliary_layer import calc_sml_size, pre_padding, cut_padding, pseudo_mask_division
 from .inpaint.glcic.completion import gl_inpaint
 from .detection.yolov3.detect import yolo_detecter
-from .segmentation.deeplabv3.segment import detect_deeplabv3, create_mask
+from .segmentation.deeplabv3.segment import detect_deeplabv3, create_mask, calc_bbox
 
 class GANonymizer:
     def __init__(self, segmentation, conf, nms, postproc, large_thresh,
@@ -32,10 +32,12 @@ class GANonymizer:
         begin_seg = time.time()
         pred = detect_deeplabv3(input, self.detecter, self.device)
         mask = create_mask(pred)
+        bbox = calc_bbox(pred, mask)
         elapsed_seg = time.time() - begin_seg
         print('[TIME] DeepLabV3 elapsed time: {:.3f}'.format(elapsed_seg))
 
         return mask, elapsed_seg
+
 
     def detect(self, input, obj_rec):
         ### detection privacy using SSD
