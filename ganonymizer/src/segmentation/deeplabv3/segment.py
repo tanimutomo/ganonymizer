@@ -61,6 +61,7 @@ def detect_deeplabv3(input, network, device):
 
 def calc_bbox(pred, mask):
     bbox_mask = np.where(mask[:,:,0] == 255, pred, 0)
+    print(bbox.shape)
     bbox = find_objects(bbox_mask)
     print(bbox)
     # while True:
