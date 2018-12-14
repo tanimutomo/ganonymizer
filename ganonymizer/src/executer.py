@@ -163,7 +163,7 @@ class Executer:
                     input, mask, obj_rec)
             if self.boxline > 0:
                 print('check2')
-                boxline = create_boxline(mask, obj_rec, self.boxline)
+                boxline = create_boxline(mask, obj_rec, self.boxline, original)
                 original = write_boxline(original, origin_mask, boxline)
         else:
             obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
