@@ -70,14 +70,14 @@ def calc_bbox(pred, mask, obj_rec):
             break
     print(bbox)
 
-    # for ys, xs in bbox:
-    #     y = ys.start
-    #     x = xs.start
-    #     h = ys.step - y
-    #     w = xs.step - x
-    #     obj_rec.append([y, x, h, w])
+    for ys, xs in bbox:
+        y = ys.start
+        x = xs.start
+        h = ys.stop - y
+        w = xs.stop - x
+        obj_rec.append([y, x, h, w])
 
-    # return obj_rec
+    return obj_rec
 
 
 def create_mask(pred):
