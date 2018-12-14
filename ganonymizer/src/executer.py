@@ -157,7 +157,7 @@ class Executer:
         elif self.center_mask is not 0:
             mask, obj_rec = center_mask(input.shape, self.center_mask)
         elif self.segmentation:
-            mask, elapsed[1] = self.ganonymizer.segment(input)
+            mask, obj_rec, elapsed[1] = self.ganonymizer.segment(input, obj_rec)
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                     input, mask, obj_rec)
@@ -175,15 +175,16 @@ class Executer:
             # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
             origin_mask = copy.deepcopy(mask)
-            if self.boxline > 0:
-                boxline = np.zeros((original.shape))
-                boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
+            # if self.boxline > 0:
+            #     boxline = np.zeros((original.shape))
+            #     boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                     input, mask, obj_rec, width_max, height_max)
 
             if self.boxline > 0:
+                boxline = create_boxline(mask, obj_rec, self.boxline)
                 original = write_boxline(original, origin_mask, boxline)
                 # output = write_boxline(output, origin_mask, boxline)
 

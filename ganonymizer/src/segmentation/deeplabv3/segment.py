@@ -59,19 +59,25 @@ def detect_deeplabv3(input, network, device):
         return pred_label_img
 
 
-def calc_bbox(pred, mask):
+def calc_bbox(pred, mask, obj_rec):
     bbox_mask = np.where(mask[:,:,0] == 255, pred, 0)
     print(bbox_mask.shape)
     bbox = find_objects(bbox_mask)
+    while True:
+        try:
+            bbox.remove(None)
+        except:
+            break
     print(bbox)
-    # while True:
-    #     try:
-    #         bbox.remove(None)
-    #     except:
-    #         break
 
-    # for 
-    return bbox
+    for ys, xs in bbox:
+        y = ys[0]
+        x = xs[0]
+        h = ys[1] - y
+        w = xs[1] - x
+        obj_rec.append([y, x, h, w])
+
+    return obj_rec
 
 
 def create_mask(pred):

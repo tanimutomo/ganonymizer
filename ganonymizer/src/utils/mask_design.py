@@ -64,6 +64,7 @@ def write_boxline(input, mask, boxline):
 
 
 def create_boxline(mask, obj_rec, boxline, width):
+    boxline = np.zeros((original.shape))
     for rec in obj_rec:
         ul_y, ul_x, dr_y, dr_x = \
                 rec[0], rec[1], rec[0] + rec[2], rec[1] + rec[3]

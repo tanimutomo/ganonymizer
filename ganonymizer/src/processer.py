@@ -27,16 +27,16 @@ class GANonymizer:
         self.time_reconstruct = 0
 
     
-    def segment(self, input):
+    def segment(self, input, obj_rec):
         print('[INFO] Detecting objects related to privacy...')
         begin_seg = time.time()
         pred = detect_deeplabv3(input, self.detecter, self.device)
         mask = create_mask(pred)
-        bbox = calc_bbox(pred, mask)
+        obj_rec = calc_bbox(pred, mask)
         elapsed_seg = time.time() - begin_seg
         print('[TIME] DeepLabV3 elapsed time: {:.3f}'.format(elapsed_seg))
 
-        return mask, elapsed_seg
+        return mask, obj_rec, elapsed_seg
 
 
     def detect(self, input, obj_rec):
