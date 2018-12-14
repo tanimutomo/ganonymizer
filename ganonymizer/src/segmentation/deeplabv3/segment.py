@@ -75,6 +75,8 @@ def calc_bbox(pred, mask, obj_rec):
         w = xs.stop - x
         obj_rec.append([y, x, h, w])
 
+    print('obj_rec: ', obj_rec)
+
     return obj_rec
 
 
