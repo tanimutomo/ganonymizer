@@ -61,14 +61,12 @@ def detect_deeplabv3(input, network, device):
 
 def calc_bbox(pred, mask, obj_rec):
     bbox_mask = np.where(mask[:,:,0] == 255, pred, 0)
-    print(bbox_mask.shape)
     bbox = find_objects(bbox_mask)
     while True:
         try:
             bbox.remove(None)
         except:
             break
-    print(bbox)
 
     for ys, xs in bbox:
         y = ys.start
