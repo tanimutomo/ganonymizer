@@ -71,10 +71,10 @@ def calc_bbox(pred, mask, obj_rec):
     print(bbox)
 
     for ys, xs in bbox:
-        y = ys[0]
-        x = xs[0]
-        h = ys[1] - y
-        w = xs[1] - x
+        y = ys.start
+        x = xs.start
+        h = ys.step - y
+        w = xs.step - x
         obj_rec.append([y, x, h, w])
 
     return obj_rec
