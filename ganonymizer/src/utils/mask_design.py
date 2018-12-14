@@ -63,7 +63,7 @@ def write_boxline(input, mask, boxline):
     return output.astype('uint8')
 
 
-def create_boxline(mask, obj_rec, boxline, width):
+def create_boxline(mask, obj_rec, width):
     boxline = np.zeros((original.shape))
     for rec in obj_rec:
         ul_y, ul_x, dr_y, dr_x = \
