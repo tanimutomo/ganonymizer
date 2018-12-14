@@ -161,6 +161,10 @@ class Executer:
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                     input, mask, obj_rec)
+            if self.boxline > 0:
+                print('check2')
+                boxline = create_boxline(mask, obj_rec, self.boxline)
+                original = write_boxline(original, origin_mask, boxline)
         else:
             obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
             obj_rec = extend_rec(obj_rec, input)
@@ -175,10 +179,9 @@ class Executer:
             # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
             origin_mask = copy.deepcopy(mask)
-            if self.boxline > 0:
-                print('check1')
-                boxline = np.zeros((original.shape))
-                boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
+            # if self.boxline > 0:
+            #     boxline = np.zeros((original.shape))
+            #     boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
