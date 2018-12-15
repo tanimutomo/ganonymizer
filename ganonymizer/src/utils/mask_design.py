@@ -56,8 +56,8 @@ def edge_mask(size, mask_info):
 
 
 def write_boxline(input, mask, boxline):
-    print('input: ', input.max, input.min)
-    print('mask', mask.max, mask.min)
+    print('input: ', np.max(input), np.min(input))
+    print('mask: ', np.max(mask), np.min(mask))
     output = input + boxline
     for i, ch in enumerate([0, 151, 239]):
         output[:,:,i] = np.where(output[:,:,i] > 255, ch, output[:,:,i]) 
