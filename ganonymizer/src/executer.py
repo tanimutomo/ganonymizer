@@ -189,7 +189,7 @@ class Executer:
                     input, mask, obj_rec, width_max, height_max)
 
             if self.boxline > 0:
-                boxline = create_boxline(mask, obj_rec, self.boxline)
+                boxline = create_boxline(mask, obj_rec, self.boxline, original)
                 original = write_boxline(original, origin_mask, boxline)
                 # output = write_boxline(output, origin_mask, boxline)
 
