@@ -15,7 +15,7 @@ def get_config():
             'image': os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
             'output': '1',
 
-            'segmentation': True,
+            'segmentation': False,
             # minimum probability to filter weak detections
             'conf': 0.5,
             'nms': 0.4,

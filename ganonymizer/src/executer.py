@@ -179,7 +179,7 @@ class Executer:
                 width_max, height_max = 0, 0
             # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
-            origin_mask = copy.deepcopy(mask)
+            # origin_mask = copy.deepcopy(mask)
             # if self.boxline > 0:
             #     boxline = np.zeros((original.shape))
             #     boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
@@ -189,8 +189,7 @@ class Executer:
                     input, mask, obj_rec, width_max, height_max)
 
             if self.boxline > 0:
-                print('check2')
-                # boxline = create_boxline(mask, obj_rec, self.boxline)
+                boxline = create_boxline(mask, obj_rec, self.boxline)
                 original = write_boxline(original, origin_mask, boxline)
                 # output = write_boxline(output, origin_mask, boxline)
 
