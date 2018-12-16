@@ -72,6 +72,9 @@ def create_boxline(mask, obj_rec, width, original):
                 rec[0], rec[1], rec[0] + rec[2], rec[1] + rec[3]
         boxline[ul_y-width:dr_y+width, ul_x-width:dr_x+width, :] = 255
     
+    cv2.imwrite('./ganonymizer/data/images/boxline_od.png', boxline)
+    cv2.imwrite('./ganonymizer/data/images/mask_od.png', mask)
+    cv2.imwrite('./ganonymizer/data/images/boxline-mask_od.png', boxline - mask)
     return boxline - mask
 
 
