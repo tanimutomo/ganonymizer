@@ -124,8 +124,8 @@ def get_config():
     return config
 
 if __name__ == '__main__':
-    # main()
+    main()
     # v2f()
-    evaluate()
+    # evaluate()
 
 
