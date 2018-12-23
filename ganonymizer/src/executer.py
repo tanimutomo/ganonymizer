@@ -5,7 +5,7 @@ import copy
 import numpy as np
 
 from .utils.set import set_networks, set_device
-from .utils.utils import video_writer, load_video, adjust_imsize, concat_all, extend_rec, create_rand_mask
+from .utils.utils import video_writer, load_video, adjust_imsize, concat_all, extend_rec, CreateRandMask, check_mask_position
 from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
 from .utils.auxiliary_layer import max_mask_size, detect_large_mask
 from .processer import GANonymizer
