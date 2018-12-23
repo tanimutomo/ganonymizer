@@ -56,7 +56,7 @@ def get_config():
 
             # select from [edge, large, None]
             # make a random mask and save its mask for evaluating the ESP or GFP
-            'random_mask': 'edge',
+            'random_mask': 'large',
 
             # if you use local masks in video processing, specify the directory where series masks are saved.
             # the mask filename should be mask_{count_num}.png.
