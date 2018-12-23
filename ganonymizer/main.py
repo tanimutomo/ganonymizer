@@ -37,11 +37,11 @@ def get_config():
             'center_mask': 0,
 
             # Write the bouding box at the reconstruction part
-            'boxline': 3,
+            'boxline': 0,
+            'concat_inout': False,
             'save_outframe': None,
             # {dir,filename(with extention)} that you want to save output image
             'save_outimage': None,
-            'concat_inout': True,
 
             # path to Caffe deploy prototxt file
             'detect_cfgs': os.path.join(os.getcwd(), 'ganonymizer/src/detection/yolov3/cfgs/yolov3.cfg'),
