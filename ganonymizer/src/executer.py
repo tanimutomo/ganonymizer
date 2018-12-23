@@ -195,7 +195,7 @@ class Executer:
             if self.random_mask in ['edge', 'large']:
                 print('[INFO] Create random {} mask...'.format(self.random_mask))
                 start_calc_random_mask = time.time()
-                loop_count = 1
+                loop_count = 0
                 rand_mask_creater = CreateRandMask(mask.shape[0], mask.shape[1])
                 while True:
                     loop_count += 1
