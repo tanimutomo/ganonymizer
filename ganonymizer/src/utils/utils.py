@@ -82,6 +82,7 @@ def check_mask_position(rand_mask, mask):
     print('min: ', np.min(rand_mask))
 
     print('--GT mask--')
+    print('shape: ', mask.shape)
     print('max: ', np.max(mask))
     print('min: ', np.min(mask))
 
@@ -91,6 +92,7 @@ def check_mask_position(rand_mask, mask):
     sum_masks = rand_mask + mask
 
     print('--sum masks--')
+    print('shape: ', sum_masks.shape)
     print('max: ', np.max(sum_masks))
     print('min: ', np.min(sum_masks))
 
