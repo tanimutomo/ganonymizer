@@ -237,7 +237,7 @@ class Executer:
                 # print('[TIME] CreateRandMask elapsed time: {:.3f}'.format(
                 #     time.time() - start_calc_random_mask))
 
-            origin_mask = copy.deepcopy(mask)
+        origin_mask = copy.deepcopy(mask)
 
         if obj_rec != []:
             width_max, height_max = max_mask_size(mask)
