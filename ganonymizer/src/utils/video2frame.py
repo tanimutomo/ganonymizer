@@ -20,7 +20,7 @@ def vid2frm(infile, out_dir):
             # cv2.imshow('frame', frame)
             # video.append(frame)
             # if count >= 1020 and count <= 1170:
-            cv2.imwrite(os.path.join(out_dir, '{}.png'.format(count), frame))
+            cv2.imwrite(os.path.join(out_dir, '{}.png'.format(count)), frame)
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
         else:
