@@ -29,7 +29,7 @@ def get_config():
             # The input image, when you apply GANonymizer to an image.
             'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
 
-            'output': '_gfp_on',
+            'output': '_gfp_off_pp',
 
 
             # For network configuration
@@ -50,7 +50,7 @@ def get_config():
 
             'show': False,
 
-            'postproc': False,
+            'postproc': True,
 
 
             # For mask setting (this configs mainly for evaluating GANonymizer, ESP and GFP)
