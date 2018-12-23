@@ -196,13 +196,13 @@ class Executer:
                 print('[INFO] Create random {} mask...'.format(self.random_mask))
                 start_calc_random_mask = time.time()
                 loop_count = 1
-                rand_mask = np.zeros((input.shape[0], input.shape[1], 3))
                 rand_mask_creater = CreateRandMask(rand_mask.shape[0], rand_mask.shape[1])
                 while True:
                     if self.random_mask == 'edge':
                         rand_mask_creater.edge_sampling()
                     elif self.random_mask == 'large':
                         rand_mask_creater.large_sampling()
+                    rand_mask = np.zeros((input.shape[0], input.shape[1], 3))
                     rand_mask = rand_mask_creater.create_mask(rand_mask)
 
                     if check_mask_position(rand_mask, mask):
