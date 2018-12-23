@@ -13,10 +13,6 @@ class CreateRandMask:
         self.position = random.choice([0, 1, 2, 3, 4, 5, 6, 7])
         self.distance = random.choice([0, 1, 2, 3])
         self.masksize = random.randint(50, 200)
-        print('--sample--')
-        print('position: ', self.position)
-        print('distance: ', self.distance)
-        print('masksize: ', self.masksize)
         self.calc_center_from_edge()
 
     def large_sampling(self):
@@ -26,10 +22,6 @@ class CreateRandMask:
                 random.randint(int(self.masksize / 2), self.width - self.masksize)
                 ]
         self.calc_center_from_large()
-
-        print('--sample--')
-        print('position: ', self.position)
-        print('masksize: ', self.masksize)
 
     def calc_center_from_edge(self):
         self.center = [0, 0] # [h, w]
@@ -47,22 +39,14 @@ class CreateRandMask:
         else:
             self.center[1] = self.distance + int(self.masksize / 2)
 
-        print('--center--')
-        print('center: ', self.center)
-
     def calc_center_from_large(self):
         self.center = self.position
-        print('--center--')
-        print('center: ', self.center)
 
     def create_mask(self, rand_mask):
         tl_y = self.center[0] - int(self.masksize / 2)
         tl_x = self.center[1] - int(self.masksize / 2)
         br_y = self.center[0] + int(self.masksize / 2)
         br_x = self.center[1] + int(self.masksize / 2)
-
-        print('--bbox--')
-        print('bbox: {}, {}, {}, {}'.format(tl_y, tl_x, br_y, br_x))
 
         mask_part = rand_mask[tl_y:br_y, tl_x:br_x]
         if mask_part.shape[0] > 0 and mask_part.shape[1] > 0:
@@ -76,40 +60,13 @@ class CreateRandMask:
 def check_mask_position(rand_mask, mask):
     assert rand_mask.shape == mask.shape
 
-    print('--rand_mask--')
-    print('shape: ', rand_mask.shape)
-    print('max: ', np.max(rand_mask))
-    print('min: ', np.min(rand_mask))
-    # print('--rand_mask + rand_mask--')
-    # print('max: ', np.max(rand_mask + rand_mask))
-    # print('--rand_mask * 2--')
-    # print('max: ', np.max(rand_mask * 2))
-    # print('--np.add(rand_mask, rand_mask)--')
-    # print('max: ', np.max(np.add(rand_mask, rand_mask)))
-
-    # print('--GT mask--')
-    # print('shape: ', mask.shape)
-    # print('max: ', np.max(mask))
-    # print('min: ', np.min(mask))
-    # print('--GT_mask + GT_mask--')
-    # print('max: ', np.max(mask + mask))
-    # print('--GT mask * 2--')
-    # print('max: ', np.max(mask * 2))
-    # print('--np.add(GT_mask, GT_mask)--')
-    # print('max: ', np.max(np.add(mask, mask)))
-
     if np.max(rand_mask) == 0:
         print('Checks is False')
         return False
     sum_masks = rand_mask.astype('uint16') + mask.astype('uint16')
 
-    print('--sum masks--')
-    print('sum_masks max: ', np.max(sum_masks))
-
     if np.max(sum_masks) == 510:
-        print('Checks is False')
         return False
-    print('Checks is True')
     return True
 
 

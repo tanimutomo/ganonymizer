@@ -198,6 +198,7 @@ class Executer:
                 loop_count = 1
                 rand_mask_creater = CreateRandMask(mask.shape[0], mask.shape[1])
                 while True:
+                    loop_count += 1
                     if self.random_mask == 'edge':
                         rand_mask_creater.edge_sampling()
                     elif self.random_mask == 'large':
@@ -207,14 +208,31 @@ class Executer:
 
                     if check_mask_position(rand_mask, mask):
                         break
-                    loop_count += 1
-                    print('loop_count: ', loop_count)
+                    
                     if loop_count >= 100:
+                        rand_mask = np.zeros((input.shape[0], input.shape[1], 3))
                         break
 
+                if self.random_mask == 'edge':
+                    print('[INFO] Random {} Mask: position: {} masksize: {} distance: {} loop: {}'.format(
+                        random_mask, 
+                        rand_mask_creater.position,
+                        rand_mask_creater.masksize,
+                        rand_mask_creater.distance,
+                        loop_count
+                        )
+
+                elif self.random_mask == 'large':
+                    print('[INFO] Random {} Mask: position: {} masksize: {} loop: {}'.format(
+                        random_mask, 
+                        rand_mask_creater.position,
+                        rand_mask_creater.masksize,
+                        loop_count
+                        )
+
                 mask = rand_mask
-                print('[TIME] CreateRandMask elapsed time: {:.3f}'.format(
-                    time.time() - start_calc_random_mask))
+                # print('[TIME] CreateRandMask elapsed time: {:.3f}'.format(
+                #     time.time() - start_calc_random_mask))
 
             origin_mask = copy.deepcopy(mask)
 
