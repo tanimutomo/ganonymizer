@@ -2,14 +2,16 @@ import os
 
 from .src.executer import Executer
 
-def main():
+def v2f():
     from .src.utils.video2frame import vid2frm
     infile = 'ganonymizer/data/videos/inter10_noon.avi'
-    vid2frm(infile)
+    out_dir = 'ganonymizer/data/videos/noon/input'
+    vid2frm(infile, out_dir)
 
-    # config = get_config()
-    # executer = Executer(config)
-    # executer.execute()
+def main():
+    config = get_config()
+    executer = Executer(config)
+    executer.execute()
 
 
 def get_config():
@@ -115,6 +117,7 @@ def get_config():
     return config
 
 if __name__ == '__main__':
-    main()
+    # main()
+    v2f()
 
 

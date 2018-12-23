@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def vid2frm(infile):
+def vid2frm(infile, out_dir):
     cap = cv2.VideoCapture(infile)
     W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -19,7 +19,7 @@ def vid2frm(infile):
             # cv2.imshow('frame', frame)
             # video.append(frame)
             # if count >= 1020 and count <= 1170:
-            cv2.imwrite('ganonymizer/data/videos/noon/in_{}.png'.format(count), frame)
+            cv2.imwrite(os.path.join(out_dir, '{}.png'.format(count), frame))
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
         else:
