@@ -28,7 +28,7 @@ class AverageMeter:
         self.avg = self.sum / self.count
 
 
-def PSNRSSIMCalcurator:
+class PSNRSSIMCalcurator:
     def __init__(self, data_dir):
         self.dir = data_dir
         self.doc_path = os.path.join(data_dir, 'summary.txt')
