@@ -80,23 +80,23 @@ def check_mask_position(rand_mask, mask):
     print('shape: ', rand_mask.shape)
     print('max: ', np.max(rand_mask))
     print('min: ', np.min(rand_mask))
-    print('--rand_mask + rand_mask--')
-    print('max: ', np.max(rand_mask + rand_mask))
-    print('--rand_mask * 2--')
-    print('max: ', np.max(rand_mask * 2))
-    print('--np.add(rand_mask, rand_mask)--')
-    print('max: ', np.max(np.add(rand_mask, rand_mask)))
+    # print('--rand_mask + rand_mask--')
+    # print('max: ', np.max(rand_mask + rand_mask))
+    # print('--rand_mask * 2--')
+    # print('max: ', np.max(rand_mask * 2))
+    # print('--np.add(rand_mask, rand_mask)--')
+    # print('max: ', np.max(np.add(rand_mask, rand_mask)))
 
-    print('--GT mask--')
-    print('shape: ', mask.shape)
-    print('max: ', np.max(mask))
-    print('min: ', np.min(mask))
-    print('--GT_mask + GT_mask--')
-    print('max: ', np.max(mask + mask))
-    print('--GT mask * 2--')
-    print('max: ', np.max(mask * 2))
-    print('--np.add(GT_mask, GT_mask)--')
-    print('max: ', np.max(np.add(mask, mask)))
+    # print('--GT mask--')
+    # print('shape: ', mask.shape)
+    # print('max: ', np.max(mask))
+    # print('min: ', np.min(mask))
+    # print('--GT_mask + GT_mask--')
+    # print('max: ', np.max(mask + mask))
+    # print('--GT mask * 2--')
+    # print('max: ', np.max(mask * 2))
+    # print('--np.add(GT_mask, GT_mask)--')
+    # print('max: ', np.max(np.add(mask, mask)))
 
     if np.max(rand_mask) == 0:
         print('Checks is False')
@@ -104,11 +104,7 @@ def check_mask_position(rand_mask, mask):
     sum_masks = rand_mask.astype('uint16') + mask.astype('uint16')
 
     print('--sum masks--')
-    print('shape: ', sum_masks.shape)
-    print('max: ', np.max(sum_masks))
-    print('min: ', np.min(sum_masks))
-
-    assert np.max(sum_masks) <= 255
+    print('sum_masks max: ', np.max(sum_masks))
 
     if np.max(sum_masks) == 510:
         print('Checks is False')
