@@ -17,8 +17,8 @@ data_dir: ''
 origin_data: ''
 
 # If you fix the GPU server and GPU number you use, please specify them
-fix_server: 'chasca'
-fix_gpu: [0]
+fix_server: 'bacchus'
+fix_gpu: [1]
 
 # ssh config path
 ssh_config_path: '~/.ssh/config'
