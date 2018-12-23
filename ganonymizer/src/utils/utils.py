@@ -2,6 +2,29 @@ import os
 import cv2
 import random
 import numpy as np
+from scipy.ndimage.measurements import find_objects
+
+
+def find_bbox(mask, obj_rec):
+    bbox = find_objects(mask / 255)
+    print('bbox: ', bbox)
+    while True:
+        try:
+            bbox.remove(None)
+        except:
+            break
+
+    for ys, xs in bbox:
+        y = ys.start
+        x = xs.start
+        h = ys.stop - y
+        w = xs.stop - x
+        obj_rec.append([y, x, h, w])
+
+    print('obj_rec: ', obj_rec)
+
+    return obj_rec
+
 
 class CreateRandMask:
     def __init__(self, height, width):
