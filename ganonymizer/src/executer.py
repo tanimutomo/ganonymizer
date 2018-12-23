@@ -149,7 +149,7 @@ class Executer:
                 if self.save_outframe != None:
                     cv2.imwrite('{}out_{}.png'.format(self.save_outframe, count), output)
                 if self.save_mask is not None:
-                    cv2.imwrite(os.path.join(self.save_mask, 'mask_{}.png'.format(count), mask)
+                    cv2.imwrite(os.path.join(self.save_mask, 'mask_{}.png'.format(count), mask))
 
                 # print the process info per iteration
                 total_time, count = self.print_info_per_process(begin_process, elapsed, count, total_time, frames)
@@ -193,6 +193,8 @@ class Executer:
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
 
             if self.random_mask in ['edge', 'large']:
+                print('[INFO] Create random {} mask...'.format(self.random_mask))
+                start_calc_random_mask = time.time()
                 rand_mask = np.zeros((input.shape[0], input.shape[1], 3))
                 rand_mask_creater = CreateRandMask(rand_mask.shape[0], rand_mask.shape[1])
                 while True:
@@ -206,6 +208,8 @@ class Executer:
                         break
 
                 mask = rand_mask
+                print('[TIME] CalcRandMask elapsed time: {:.3f}'.format(
+                    time.time() - start_calc_random_mask))
 
             origin_mask = copy.deepcopy(mask)
 
