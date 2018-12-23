@@ -27,6 +27,10 @@ class CreateRandMask:
                 ]
         self.calc_center_from_large()
 
+        print('--sample--')
+        print('position: ', self.position)
+        print('masksize: ', self.masksize)
+
     def calc_center_from_edge(self):
         self.center = [0, 0] # [h, w]
         if self.position in [0, 1, 7]:
@@ -48,6 +52,8 @@ class CreateRandMask:
 
     def calc_center_from_large(self):
         self.center = self.position
+        print('--center--')
+        print('center: ', self.center)
 
     def create_mask(self, rand_mask):
         tl_y = self.center[0] - int(self.masksize / 2)
@@ -86,6 +92,8 @@ def check_mask_position(rand_mask, mask):
     print('--sum masks--')
     print('max: ', np.max(sum_masks))
     print('min: ', np.min(sum_masks))
+
+    assert np.max(sum_masks) > 255
 
     if np.max(sum_masks) == 510:
         print('Checks is False')
