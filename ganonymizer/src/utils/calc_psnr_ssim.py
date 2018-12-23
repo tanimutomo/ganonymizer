@@ -64,7 +64,7 @@ class PSNRSSIMCalcurator:
             self.ssim_gfp_off.update(compare_ssim(input, out_gfp_off, multichannel=True))
             self.ssim_gfp_on.update(compare_ssim(input, out_gfp_on, multichannel=True))
 
-            if count % 10 == 0:
+            if self.count % 10 == 0:
                 print('count: ', self.count)
                 print('elapsed_time: ', time.time() - self.start)
 
