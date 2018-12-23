@@ -3,9 +3,13 @@ import os
 from .src.executer import Executer
 
 def main():
-    config = get_config()
-    executer = Executer(config)
-    executer.execute()
+    from .src.utils.video2frame import vid2frm
+    infile = '../data/videos/inter10_noon.avi'
+    vid2frm(infile)
+
+    # config = get_config()
+    # executer = Executer(config)
+    # executer.execute()
 
 
 def get_config():
