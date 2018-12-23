@@ -89,11 +89,12 @@ def check_mask_position(rand_mask, mask):
         print('Checks is False')
         return False
     sum_masks = rand_mask + mask
+
     print('--sum masks--')
     print('max: ', np.max(sum_masks))
     print('min: ', np.min(sum_masks))
 
-    assert np.max(sum_masks) > 255
+    assert np.max(sum_masks) <= 255
 
     if np.max(sum_masks) == 510:
         print('Checks is False')
