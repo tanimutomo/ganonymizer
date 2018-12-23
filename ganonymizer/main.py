@@ -22,7 +22,7 @@ def get_config():
             # The input image, when you apply GANonymizer to an image.
             'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
 
-            'output': '_gfp_no',
+            'output': '_gfp_off',
 
 
             # For network configuration
@@ -117,7 +117,7 @@ def get_config():
     return config
 
 if __name__ == '__main__':
-    # main()
-    v2f()
+    main()
+    # v2f()
 
 
