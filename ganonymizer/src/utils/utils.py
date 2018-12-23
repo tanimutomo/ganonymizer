@@ -51,7 +51,7 @@ class CreateRandMask:
             # mask = mask.astype('uint8')
 
         rand_mask = rand_mask.astype('uint8')
-        return mask
+        return rand_mask
 
 
 def check_mask_position(rand_mask, mask):
