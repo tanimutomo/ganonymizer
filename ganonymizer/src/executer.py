@@ -215,7 +215,7 @@ class Executer:
 
                 if self.random_mask == 'edge':
                     print('[INFO] Random {} Mask: position: {} masksize: {} distance: {} loop: {}'.format(
-                        random_mask, 
+                        self.random_mask, 
                         rand_mask_creater.position,
                         rand_mask_creater.masksize,
                         rand_mask_creater.distance,
@@ -224,7 +224,7 @@ class Executer:
 
                 elif self.random_mask == 'large':
                     print('[INFO] Random {} Mask: position: {} masksize: {} loop: {}'.format(
-                        random_mask, 
+                        self.random_mask, 
                         rand_mask_creater.position,
                         rand_mask_creater.masksize,
                         loop_count
