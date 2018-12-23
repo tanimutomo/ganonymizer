@@ -220,7 +220,7 @@ class Executer:
                         rand_mask_creater.masksize,
                         rand_mask_creater.distance,
                         loop_count
-                        )
+                        ))
 
                 elif self.random_mask == 'large':
                     print('[INFO] Random {} Mask: position: {} masksize: {} loop: {}'.format(
@@ -228,7 +228,7 @@ class Executer:
                         rand_mask_creater.position,
                         rand_mask_creater.masksize,
                         loop_count
-                        )
+                        ))
 
                 mask = rand_mask
                 # print('[TIME] CreateRandMask elapsed time: {:.3f}'.format(
