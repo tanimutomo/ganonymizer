@@ -209,7 +209,7 @@ class Executer:
                         break
                     loop_count += 1
                     print('loop_count: ', loop_count)
-                    if loopcount >= 100:
+                    if loop_count >= 100:
                         break
 
                 mask = rand_mask
