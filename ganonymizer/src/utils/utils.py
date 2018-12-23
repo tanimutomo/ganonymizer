@@ -29,15 +29,18 @@ class CreateRandMask:
 
     def calc_center_from_edge(self):
         self.center = [0, 0] # [h, w]
-
         if self.position in [0, 1, 7]:
             self.center[0] = self.distance + int(self.masksize / 2)
-        elif self.position in [3, 4, 5]:
+        elif self.position in [2, 6]:
+            self.center[0] = int(self.height / 2)
+        else:
             self.center[0] = self.height - (self.distance + int(self.masksize / 2))
 
-        if self.position in [1, 2, 3]:
+        if self.position in [0, 4]:
+            self.center[1] = int(self.width / 2)
+        elif self.position in [1, 2, 3]:
             self.center[1] = self.width - (self.distance + int(self.masksize / 2))
-        elif self.position in [5, 6, 7]:
+        else:
             self.center[1] = self.distance + int(self.masksize / 2)
 
         print('--center--')
