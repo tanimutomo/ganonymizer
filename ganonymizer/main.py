@@ -4,8 +4,8 @@ from .src.executer import Executer
 
 def v2f():
     from .src.utils.video2frame import vid2frm
-    infile = 'ganonymizer/data/videos/noon/out_gfp_off_inter10_noon.avi'
-    out_dir = 'ganonymizer/data/videos/noon/out_gfp_off'
+    infile = 'ganonymizer/data/videos/noon/out_gfp_on_inter10_noon.avi'
+    out_dir = 'ganonymizer/data/videos/noon/out_gfp_on'
     vid2frm(infile, out_dir)
 
 def main():
