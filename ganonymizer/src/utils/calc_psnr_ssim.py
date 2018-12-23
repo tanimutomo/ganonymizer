@@ -5,8 +5,7 @@ from skimage.measure import compare_ssim, compare_psnr
 
 
 def main():
-    data_dir = '../../data/videos/noon'
-    summary_sheet = '../../data/docs'
+    data_dir = 'ganonymizer/data/videos/noon'
     calc = Calcurator(data_dir, summary_sheet)
     calc.calcurate()
     calc.summary()
@@ -29,43 +28,55 @@ class AverageMeter:
         self.avg = self.sum / self.count
 
 
-def Calcurator:
-    def __init__(self, data_dir, sheet):
+def PSNRSSIMCalcurator:
+    def __init__(self, data_dir):
         self.dir = data_dir
-        self.doc_path = sheet
+        self.doc_path = os.path.join(data_dir, 'summary.txt')
         self.count = 1
         self.start = time.time()
 
-        self.psnr_in_out = AverageMeter()
-        self.psnr_in_out_esp = AverageMeter()
-        self.psnr_in_out_gfp = AverageMeter()
-        self.ssim_in_out = AverageMeter()
-        self.ssim_in_out_esp = AverageMeter()
-        self.ssim_in_out_gfp = AverageMeter()
+        self.psnr_esp_off = AverageMeter()
+        self.psnr_esp_on = AverageMeter()
+        self.psnr_gfp_off = AverageMeter()
+        self.psnr_gfp_on = AverageMeter()
+
+        self.ssim_esp_off = AverageMeter()
+        self.ssim_esp_on = AverageMeter()
+        self.ssim_gfp_off = AverageMeter()
+        self.ssim_gfp_on = AverageMeter()
+
         
     def calcurate(self):
         for i in range(10):
-            input = cv2.imread(os.path.join(self.dir, 'in_{}.png'.format(self.count)))
-            out = cv2.imread(os.path.join(self.dir, 'out_{}.png'.format(self.count)))
-            out_esp = cv2.imread(os.path.join(self.dir, 'out_esp_{}.png'.format(self.count)))
-            out_gfp = cv2.imread(os.path.join(self.dir, 'out_gfp_{}.png'.format(self.count)))
+            input = cv2.imread(os.path.join(self.dir, 'input', '{}.png'.format(self.count)))
+            out_esp_off = cv2.imread(os.path.join(self.dir, 'out_esp_off', '{}.png'.format(self.count)))
+            out_gfp_off = cv2.imread(os.path.join(self.dir, 'out_gfp_off', '{}.png'.format(self.count)))
+            out_esp_on = cv2.imread(os.path.join(self.dir, 'out_esp_on', '{}.png'.format(self.count)))
+            out_gfp_on = cv2.imread(os.path.join(self.dir, 'out_gfp_on', '{}.png'.format(self.count)))
 
-            self.psnr_in_out.update(compare_psnr(input, out))
-            self.psnr_in_out_esp.update(compare_psnr(input, out_esp))
-            self.psnr_in_out_gfp.update(compare_psnr(input, out_gfp))
-            self.ssim_in_out.update(compare_ssim(input, out))
-            self.ssim_in_out_esp.update(compare_ssim(input, out_esp))
-            self.ssim_in_out_gfp.update(compare_ssim(input, out_gfp))
+            self.psnr_esp_off.update(compare_psnr(input, out_esp_off))
+            self.psnr_esp_on.update(compare_ssim(input, out_esp_on))
+            self.psnr_gfp_off.update(compare_psnr(input, out_gfp_off))
+            self.psnr_gfp_on.update(compare_ssim(input, out_gfp_on))
 
-            if count % 100 == 0:
+            self.ssim_esp_off.update(compare_psnr(input, out_esp_off))
+            self.ssim_esp_on.update(compare_ssim(input, out_esp_on))
+            self.ssim_gfp_off.update(compare_psnr(input, out_gfp_off))
+            self.ssim_gfp_on.update(compare_ssim(input, out_gfp_on))
+
+            if count % 10 == 0:
                 print('count: ', self.count)
                 print('elapsed_time: ', time.time() - self.start)
-                print('psnr_in_out: ', self.psnr_in_out.avg)
-                print('psnr_in_out_esp: ', self.psnr_in_out_esp.avg)
-                print('psnr_in_out_gfp: ', self.psnr_in_out_gfp.avg)
-                print('ssim_in_out: ', self.ssim_in_out.avg)
-                print('ssim_in_out_esp: ', self.ssim_in_out_esp.avg)
-                print('ssim_in_out_gfp: ', self.ssim_in_out_gfp.avg)
+
+                print('psnr_esp_off: ', self.psnr_esp_off.avg)
+                print('psnr_esp_on: ', self.psnr_esp_on.avg)
+                print('psnr_gfp_off: ', self.psnr_gfp_off.avg)
+                print('psnr_gfp_on: ', self.psnr_gfp_on.avg)
+
+                print('ssim_esp_off: ', self.ssim_esp_off.avg)
+                print('ssim_esp_on: ', self.ssim_esp_on.avg)
+                print('ssim_gfp_off: ', self.ssim_gfp_off.avg)
+                print('ssim_gfp_on: ', self.ssim_gfp_on.avg)
 
             self.count += 1
 
@@ -75,12 +86,14 @@ def Calcurator:
                 '--SUMMARY about noon frames--',
                 'Total images: {}'.format(self.count),
                 'Elapsed Time: {}'.format(time.time() - self.start),
-                'psnr_in_out: {}'.format(self.psnr_in_out.avg),
-                'psnr_in_out_esp: {}'.format(self.psnr_in_out_esp.avg),
-                'psnr_in_out_gfp: {}'.format(self.psnr_in_out_gfp.avg),
-                'ssim_in_out: {}'.format(self.ssim_in_out.avg),
-                'ssim_in_out_esp: {}'.format(self.ssim_in_out_esp.avg),
-                'ssim_in_out_gfp: {}'.format(self.ssim_in_out_gfp.avg)
+                'psnr_esp_off: {}'.format(self.psnr_esp_off.avg),
+                'psnr_esp_on: {}'.format(self.psnr_esp_on.avg),
+                'psnr_gfp_off: {}'.format(self.psnr_gfp_off.avg),
+                'psnr_gfp_on: {}'.format(self.psnr_gfp_on.avg),
+                'ssim_esp_off: {}'.format(self.ssim_esp_off.avg),
+                'ssim_esp_on: {}'.format(self.ssim_esp_on.avg),
+                'ssim_gfp_off: {}'.format(self.ssim_gfp_off.avg),
+                'ssim_gfp_on: {}'.format(self.ssim_gfp_on.avg)
                 ]
 
         with open(self.doc_path, mode='w') as f:

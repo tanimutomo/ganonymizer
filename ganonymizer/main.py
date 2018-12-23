@@ -2,6 +2,13 @@ import os
 
 from .src.executer import Executer
 
+
+def evaluate():
+    from .src.utils.calc_psnr_ssim import AverageMeter, PSNRSSIMCalcurator
+    data_dir = 'ganonymizer/data/videos/noon'
+    calcurator = PSNRSSIMCalcurator(data_dir)
+    calcurator.calcurate()
+
 def v2f():
     from .src.utils.video2frame import vid2frm
     infile = 'ganonymizer/data/videos/noon/out_gfp_on_inter10_noon.avi'
@@ -118,6 +125,7 @@ def get_config():
 
 if __name__ == '__main__':
     # main()
-    v2f()
+    # v2f()
+    evaluate()
 
 
