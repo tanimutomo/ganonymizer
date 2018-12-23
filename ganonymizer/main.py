@@ -4,8 +4,8 @@ from .src.executer import Executer
 
 def v2f():
     from .src.utils.video2frame import vid2frm
-    infile = 'ganonymizer/data/videos/inter10_noon.avi'
-    out_dir = 'ganonymizer/data/videos/noon/input'
+    infile = 'ganonymizer/data/videos/noon/out_esp_off_inter10_noon.avi'
+    out_dir = 'ganonymizer/data/videos/noon/out_esp_off'
     vid2frm(infile, out_dir)
 
 def main():
@@ -117,7 +117,7 @@ def get_config():
     return config
 
 if __name__ == '__main__':
-    main()
-    # v2f()
+    # main()
+    v2f()
 
 
