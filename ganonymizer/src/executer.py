@@ -134,7 +134,7 @@ class Executer:
                     mask = cv2.imread(os.path.join(self.use_local_masks, 'mask_{}.png'.format(count)))
                     elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask)
                 else:
-                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask)
+                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed)
 
                 # append frame to video
                 if self.concat_all:
