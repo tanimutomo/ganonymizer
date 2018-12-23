@@ -68,13 +68,14 @@ def write_boxline(input, mask, boxline):
 def create_boxline(mask, obj_rec, width, original):
     boxline = np.zeros((original.shape))
     for rec in obj_rec:
-        ul_y, ul_x, dr_y, dr_x = \
+        tl_y, tl_x, br_y, br_x = \
                 rec[0], rec[1], rec[0] + rec[2], rec[1] + rec[3]
-        boxline[ul_y-width:dr_y+width, ul_x-width:dr_x+width, :] = 255
+        boxline[tl_y-width:br_y+width, tl_x-width:br_x+width, :] = 255
     
     cv2.imwrite('./ganonymizer/data/images/for_seg_bbox/boxline_seg.png', boxline)
     cv2.imwrite('./ganonymizer/data/images/for_seg_bbox/mask_seg.png', mask)
     cv2.imwrite('./ganonymizer/data/images/for_seg_bbox/boxline-mask_seg.png', boxline - mask)
+
     return boxline - mask
 
 
