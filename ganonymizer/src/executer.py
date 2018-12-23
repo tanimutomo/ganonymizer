@@ -5,7 +5,7 @@ import copy
 import numpy as np
 
 from .utils.set import set_networks, set_device
-from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout, extend_rec
+from .utils.utils import video_writer, load_video, adjust_imsize, concat_all, extend_rec, create_rand_mask
 from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
 from .utils.auxiliary_layer import max_mask_size, detect_large_mask
 from .processer import GANonymizer
@@ -39,7 +39,12 @@ class Executer:
         self.boxline = config['boxline']
         self.save_outframe = config['save_outframe']
         self.save_outimage = config['save_outimage']
+        self.save_mask = config['save_mask']
+        self.concat_all = config['concat_all']
         self.concat_inout = config['concat_inout']
+        self.random_mask = config['random_mask']
+        self.use_local_masks = config['use_local_masks']
+
 
     def execute(self):
         device = set_device()
@@ -64,14 +69,19 @@ class Executer:
         input = copy.deepcopy(image)
 
         # process
-        elapsed, output, image_designed = self.process_image(input, elapsed)
+        if os.path.exists(self.mask):
+            mask = cv2.imread(self.mask)
+            elapsed, output, image_designed = self.process_input(input, elapsed, mask)
+        else:
+            elapsed, output, image_designed = self.process_input(input, elapsed)
+
 
         if self.save_outimage is not None:
             dir = self.save_outimage.split(',')[0] + '/'
             name = self.save_outimage.split(',')[1] + '.png'
             cv2.imwrite(dir+name, output)
-        elif self.concat_inout:
-            concat = concat_inout(image, image_designed, output)
+        elif self.concat_all:
+            concat = concat_all(image, image_designed, output)
             in_name = self.image.split('/')[-1]
             save_path = os.path.join(os.getcwd(), 'ganonymizer/data/images/concat{}_{}'.format(self.output, in_name))
             cv2.imwrite(save_path, concat)
@@ -102,10 +112,12 @@ class Executer:
         cap, origin_fps, frames, width, height = load_video(self.video)
         
         # video writer
-        if self.concat_inout:
+        if self.concat_all:
             writer = video_writer(self.video, self.output, self.fps, width*3, height*2)
-        else:
+        elif self.concat_inout:
             writer = video_writer(self.video, self.output, self.fps, width, height*2)
+        else:
+            writer = video_writer(self.video, self.output, self.fps, width, height)
 
 
         while(cap.isOpened()):
@@ -118,18 +130,26 @@ class Executer:
 
                 # process
                 input = copy.deepcopy(frame)
-                elapsed, output, frame_designed = self.process_image(input, elapsed)
+                if self.use_local_masks is not None:
+                    mask = cv2.imread(os.path.join(self.use_local_masks, 'mask_{}.png'.format(count))
+                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask)
+                else:
+                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask)
 
                 # append frame to video
-                if self.concat_inout:
-                    concat = concat_inout(frame, frame_designed, output)
-                else:
+                if self.concat_all:
+                    concat = concat_all(frame, frame_designed, output)
+                elif self.concat_inout:
                     concat = np.concatenate([frame, output], axis=0)
+                else:
+                    concat = output
 
                 writer.write(concat)
 
                 if self.save_outframe != None:
                     cv2.imwrite('{}out_{}.png'.format(self.save_outframe, count), output)
+                if self.save_mask is not None:
+                    cv2.imwrite(os.path.join(self.save_mask, 'mask_{}.png'.format(count), mask)
 
                 # print the process info per iteration
                 total_time, count = self.print_info_per_process(begin_process, elapsed, count, total_time, frames)
@@ -143,13 +163,13 @@ class Executer:
         cv2.destroyAllWindows()
 
 
-    def process_image(self, input, elapsed):
+    def process_input(self, input, elapsed, mask=None):
         original = copy.deepcopy(input)
         obj_rec = []
 
         # detect
-        if os.path.exists(self.mask):
-            mask = cv2.imread(self.mask)
+        if mask is not None:
+            pass
         elif len(self.manual_mask) > 0:
             mask, obj_rec = create_mask(input.shape, self.manual_mask)
         elif len(self.edge_mask) > 0:
@@ -159,46 +179,52 @@ class Executer:
         elif self.segmentation:
             mask, obj_rec, elapsed[1] = self.ganonymizer.segment(input, obj_rec)
             # reconstruct
-            output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
-                    input, mask, obj_rec)
-            if self.boxline > 0:
-                print('check2')
-                origin_mask = copy.deepcopy(mask)
-                boxline = create_boxline(mask, obj_rec, self.boxline, original)
-                original = write_boxline(original, origin_mask, boxline)
+            # output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
+            #         input, mask, obj_rec)
+            # if self.boxline > 0:
+            #     origin_mask = copy.deepcopy(mask)
+            #     boxline = create_boxline(mask, obj_rec, self.boxline, original)
+            #     original = write_boxline(original, origin_mask, boxline)
+
         else:
             obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
             obj_rec = extend_rec(obj_rec, input)
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
+
+            if self.random_mask in ['edge', 'large']:
+                rand_mask = np.zeros((input.shape[0], input.shape[1], 3))
+                rand_mask = create_rand_mask(rand_mask, mask, self.random_mask)
+                mask = rand_mask
+
             origin_mask = copy.deepcopy(mask)
 
-            if obj_rec != []:
-                width_max, height_max = max_mask_size(mask)
-            else:
-                width_max, height_max = 0, 0
-            # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
+        if obj_rec != []:
+            width_max, height_max = max_mask_size(mask)
+        else:
+            width_max, height_max = 0, 0
+        # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
-            # origin_mask = copy.deepcopy(mask)
-            # if self.boxline > 0:
-            #     boxline = np.zeros((original.shape))
-            #     boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
+        # origin_mask = copy.deepcopy(mask)
+        # if self.boxline > 0:
+        #     boxline = np.zeros((original.shape))
+        #     boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
-            # reconstruct
-            output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
-                    input, mask, obj_rec, width_max, height_max)
+        # reconstruct
+        output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
+                input, mask, obj_rec, width_max, height_max)
 
-            if self.boxline > 0:
-                boxline = create_boxline(mask, obj_rec, self.boxline, original)
-                original = write_boxline(original, origin_mask, boxline)
-                # output = write_boxline(output, origin_mask, boxline)
+        if self.boxline > 0:
+            boxline = create_boxline(mask, obj_rec, self.boxline, original)
+            original = write_boxline(original, origin_mask, boxline)
+            # output = write_boxline(output, origin_mask, boxline)
 
         if self.show:
             disp = np.concatenate([original, output, origin_mask], axis=1)
             cv2.imshow('Display', disp)
             cv2.waitKey(0)
 
-        return elapsed, output, original
+        return elapsed, output, original, origin_mask
 
 
     def print_info_per_process(self, begin, elapsed, count, total, frames):

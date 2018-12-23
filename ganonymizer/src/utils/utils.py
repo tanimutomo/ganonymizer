@@ -1,6 +1,45 @@
 import os
 import cv2
+import random
 import numpy as np
+
+class CreateRandEdgeMask:
+    def __init__(self, rand_mask, mask):
+        self.height = rand_mask.shape[0]
+        self.width = rand_mask.shape[1]
+    
+    def edge_sampling(self):
+        # 0(top), 1(top-left), 2(left), 3(bottom-left), 4(bottom), 5(bottom-right), 6(right), 7(top-right)
+        self.position = random.choise([0, 1, 2, 3, 4, 5, 6, 7])
+        self.distance = random.choise([0, 1, 2, 3])
+        self.masksize = random.randint(50, 200)
+
+    def large_sampling(self):
+        self.masksize = random.randint(120, 400)
+        self.position = [
+                random.randint(int(self.masksize / 2), self.height - self.masksize),
+                random.randint(int(self.masksize / 2), self.width - self.masksize)
+                ]
+
+    def calc_center_from_edge(self):
+        self.center = [0, 0] # [h, w]
+
+        if self.position in [0, 1, 7]:
+            self.center[0] = self.distance + int(self.masksize / 2)
+        elif self.position in [3, 4, 5]:
+            self.center[0] = self.height - (self.distance + int(self.masksize / 2))
+
+        if self.position in [1, 2, 3]:
+            self.center[1] = self.width - (self.distance + int(self.masksize / 2))
+        elif self.position in [5, 6, 7]:
+            self.center[1] = self.distance + int(self.masksize / 2)
+
+    def calc_center_from_large(self):
+        self.center = self.position
+
+    def create_mask(self):
+        pass
+
 
 def video_writer(video, output_name, fps, width, height):
     video_name = video.split('/')[-1]
@@ -12,7 +51,7 @@ def video_writer(video, output_name, fps, width, height):
 
     return writer
 
-def concat_inout(input, original, output):
+def concat_all(input, original, output):
     output_f2 = cv2.resize(output, None, fx=2, fy=2)
     concat = np.concatenate([input, original], axis=0)
     concat = np.concatenate([concat, output_f2], axis=1)

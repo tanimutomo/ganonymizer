@@ -53,11 +53,11 @@ class GANonymizer:
     
     def create_detected_mask(self, input, mask, obj_rec):
         for rec in obj_rec:
-            ul_y, ul_x, dr_y, dr_x = \
+            tl_y, tl_x, br_y, br_x = \
                     rec[0], rec[1], rec[0] + rec[2], rec[1] + rec[3]
-            cut_img = input[ul_y:dr_y, ul_x:dr_x]
+            cut_img = input[tl_y:br_y, tl_x:br_x]
             if cut_img.shape[0] > 1 and cut_img.shape[1] > 1:
-                mask[ul_y:dr_y, ul_x:dr_x] = np.ones((cut_img.shape[0], cut_img.shape[1], 3)) * 255
+                mask[tl_y:br_y, tl_x:br_x] = np.ones((cut_img.shape[0], cut_img.shape[1], 3)) * 255
                 mask = mask.astype('uint8')
 
         mask = mask.astype('uint8')
