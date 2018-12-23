@@ -55,14 +55,14 @@ class PSNRSSIMCalcurator:
             out_gfp_on = cv2.imread(os.path.join(self.dir, 'out_gfp_on', '{}.png'.format(self.count)))
 
             self.psnr_esp_off.update(compare_psnr(input, out_esp_off))
-            self.psnr_esp_on.update(compare_ssim(input, out_esp_on))
+            self.psnr_esp_on.update(compare_psnr(input, out_esp_on))
             self.psnr_gfp_off.update(compare_psnr(input, out_gfp_off))
-            self.psnr_gfp_on.update(compare_ssim(input, out_gfp_on))
+            self.psnr_gfp_on.update(compare_psnr(input, out_gfp_on))
 
-            self.ssim_esp_off.update(compare_psnr(input, out_esp_off))
-            self.ssim_esp_on.update(compare_ssim(input, out_esp_on))
-            self.ssim_gfp_off.update(compare_psnr(input, out_gfp_off))
-            self.ssim_gfp_on.update(compare_ssim(input, out_gfp_on))
+            self.ssim_esp_off.update(compare_ssim(input, out_esp_off, multichannel=True))
+            self.ssim_esp_on.update(compare_ssim(input, out_esp_on, multichannel=True))
+            self.ssim_gfp_off.update(compare_ssim(input, out_gfp_off, multichannel=True))
+            self.ssim_gfp_on.update(compare_ssim(input, out_gfp_on, multichannel=True))
 
             if count % 10 == 0:
                 print('count: ', self.count)
