@@ -32,7 +32,6 @@ class PSNRSSIMCalcurator:
     def __init__(self, data_dir):
         self.dir = data_dir
         self.doc_path = os.path.join(data_dir, 'summary.txt')
-        self.count = 1
         self.start = time.time()
 
         self.psnr_esp_off = AverageMeter()
@@ -47,12 +46,12 @@ class PSNRSSIMCalcurator:
 
         
     def calcurate(self):
-        for i in range(10):
-            input = cv2.imread(os.path.join(self.dir, 'input', '{}.png'.format(self.count)))
-            out_esp_off = cv2.imread(os.path.join(self.dir, 'out_esp_off', '{}.png'.format(self.count)))
-            out_gfp_off = cv2.imread(os.path.join(self.dir, 'out_gfp_off', '{}.png'.format(self.count)))
-            out_esp_on = cv2.imread(os.path.join(self.dir, 'out_esp_on', '{}.png'.format(self.count)))
-            out_gfp_on = cv2.imread(os.path.join(self.dir, 'out_gfp_on', '{}.png'.format(self.count)))
+        for i in range(1, 3200):
+            input = cv2.imread(os.path.join(self.dir, 'input', '{}.png'.format(i)))
+            out_esp_off = cv2.imread(os.path.join(self.dir, 'out_esp_off', '{}.png'.format(i)))
+            out_gfp_off = cv2.imread(os.path.join(self.dir, 'out_gfp_off', '{}.png'.format(i)))
+            out_esp_on = cv2.imread(os.path.join(self.dir, 'out_esp_on', '{}.png'.format(i)))
+            out_gfp_on = cv2.imread(os.path.join(self.dir, 'out_gfp_on', '{}.png'.format(i)))
 
             self.psnr_esp_off.update(compare_psnr(input, out_esp_off))
             self.psnr_esp_on.update(compare_psnr(input, out_esp_on))
@@ -64,36 +63,35 @@ class PSNRSSIMCalcurator:
             self.ssim_gfp_off.update(compare_ssim(input, out_gfp_off, multichannel=True))
             self.ssim_gfp_on.update(compare_ssim(input, out_gfp_on, multichannel=True))
 
-            if self.count % 10 == 0:
-                print('count: ', self.count)
+            if i % 100 == 0:
+                print('----------------------SUMMARY----------------------')
+                print('count: ', i)
                 print('elapsed_time: ', time.time() - self.start)
 
-                print('psnr_esp_off: ', self.psnr_esp_off.avg)
-                print('psnr_esp_on: ', self.psnr_esp_on.avg)
-                print('psnr_gfp_off: ', self.psnr_gfp_off.avg)
-                print('psnr_gfp_on: ', self.psnr_gfp_on.avg)
+                print('PSNR_ESP_OFF: ', self.psnr_esp_off.avg)
+                print('PSNR_ESP_ON: ', self.psnr_esp_on.avg)
+                print('PSNR_GFP_OFF: ', self.psnr_gfp_off.avg)
+                print('PSNR_GFP_ON: ', self.psnr_gfp_on.avg)
 
-                print('ssim_esp_off: ', self.ssim_esp_off.avg)
-                print('ssim_esp_on: ', self.ssim_esp_on.avg)
-                print('ssim_gfp_off: ', self.ssim_gfp_off.avg)
-                print('ssim_gfp_on: ', self.ssim_gfp_on.avg)
-
-            self.count += 1
+                print('SSIM_ESP_OFF: ', self.ssim_esp_off.avg)
+                print('SSIM_ESP_ON: ', self.ssim_esp_on.avg)
+                print('SSIM_GFP_OFF: ', self.ssim_gfp_off.avg)
+                print('SSIM_GFP_ON: ', self.ssim_gfp_on.avg)
 
 
     def summary(self):
         result = [
                 '--SUMMARY about noon frames--',
-                'Total images: {}'.format(self.count),
+                'Total images: {}'.format(3199),
                 'Elapsed Time: {}'.format(time.time() - self.start),
-                'psnr_esp_off: {}'.format(self.psnr_esp_off.avg),
-                'psnr_esp_on: {}'.format(self.psnr_esp_on.avg),
-                'psnr_gfp_off: {}'.format(self.psnr_gfp_off.avg),
-                'psnr_gfp_on: {}'.format(self.psnr_gfp_on.avg),
-                'ssim_esp_off: {}'.format(self.ssim_esp_off.avg),
-                'ssim_esp_on: {}'.format(self.ssim_esp_on.avg),
-                'ssim_gfp_off: {}'.format(self.ssim_gfp_off.avg),
-                'ssim_gfp_on: {}'.format(self.ssim_gfp_on.avg)
+                'PSNR_ESP_OFF: {}'.format(self.psnr_esp_off.avg),
+                'PSNR_ESP_ON: {}'.format(self.psnr_esp_on.avg),
+                'PSNR_GFP_OFF: {}'.format(self.psnr_gfp_off.avg),
+                'PSNR_GFP_ON: {}'.format(self.psnr_gfp_on.avg),
+                'SSIM_ESP_OFF: {}'.format(self.ssim_esp_off.avg),
+                'SSIM_ESP_ON: {}'.format(self.ssim_esp_on.avg),
+                'SSIM_GFP_OFF: {}'.format(self.ssim_gfp_off.avg),
+                'SSIM_GFP_ON: {}'.format(self.ssim_gfp_on.avg)
                 ]
 
         with open(self.doc_path, mode='w') as f:
