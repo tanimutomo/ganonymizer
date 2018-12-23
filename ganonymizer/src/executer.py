@@ -131,7 +131,7 @@ class Executer:
                 # process
                 input = copy.deepcopy(frame)
                 if self.use_local_masks is not None:
-                    mask = cv2.imread(os.path.join(self.use_local_masks, 'mask_{}.png'.format(count))
+                    mask = cv2.imread(os.path.join(self.use_local_masks, 'mask_{}.png'.format(count)))
                     elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask)
                 else:
                     elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask)
