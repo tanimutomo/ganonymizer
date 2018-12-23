@@ -101,7 +101,7 @@ def check_mask_position(rand_mask, mask):
     if np.max(rand_mask) == 0:
         print('Checks is False')
         return False
-    sum_masks = rand_mask + mask
+    sum_masks = rand_mask.astype('uint16') + mask.astype('uint16')
 
     print('--sum masks--')
     print('shape: ', sum_masks.shape)
