@@ -4,7 +4,7 @@ from .src.executer import Executer
 
 def main():
     from .src.utils.video2frame import vid2frm
-    infile = '../data/videos/inter10_noon.avi'
+    infile = 'ganonymizer/data/videos/inter10_noon.avi'
     vid2frm(infile)
 
     # config = get_config()
