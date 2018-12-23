@@ -13,6 +13,10 @@ class CreateRandMask:
         self.position = random.choice([0, 1, 2, 3, 4, 5, 6, 7])
         self.distance = random.choice([0, 1, 2, 3])
         self.masksize = random.randint(50, 200)
+        print('--sample--')
+        print('position: ', self.position)
+        print('distance: ', self.distance)
+        print('masksize: ', self.masksize)
         self.calc_center_from_edge()
 
     def large_sampling(self):
@@ -36,6 +40,9 @@ class CreateRandMask:
         elif self.position in [5, 6, 7]:
             self.center[1] = self.distance + int(self.masksize / 2)
 
+        print('--center--')
+        print('center: ', self.center)
+
     def calc_center_from_large(self):
         self.center = self.position
 
@@ -57,7 +64,7 @@ class CreateRandMask:
 def check_mask_position(rand_mask, mask):
     assert rand_mask.shape == mask.shape
 
-    print('--CHECK about rand_mask--')
+    print('--rand_mask--')
     print('shape: ', rand_mask.shape)
     print('max: ', np.max(rand_mask))
     print('min: ', np.min(rand_mask))
