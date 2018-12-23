@@ -84,13 +84,19 @@ def check_mask_position(rand_mask, mask):
     print('max: ', np.max(rand_mask + rand_mask))
     print('--rand_mask * 2--')
     print('max: ', np.max(rand_mask * 2))
+    print('--np.add(rand_mask, rand_mask)--')
+    print('max: ', np.max(np.add(rand_mask, rand_mask)))
 
     print('--GT mask--')
     print('shape: ', mask.shape)
     print('max: ', np.max(mask))
     print('min: ', np.min(mask))
+    print('--GT_mask + GT_mask--')
+    print('max: ', np.max(mask + mask))
     print('--GT mask * 2--')
     print('max: ', np.max(mask * 2))
+    print('--np.add(GT_mask, GT_mask)--')
+    print('max: ', np.max(np.add(mask, mask)))
 
     if np.max(rand_mask) == 0:
         print('Checks is False')
