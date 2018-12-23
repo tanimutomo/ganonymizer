@@ -6,7 +6,7 @@ from scipy.ndimage.measurements import find_objects
 
 
 def find_bbox(mask, obj_rec):
-    bbox = find_objects(mask / 255)
+    bbox = find_objects(mask)
     print('bbox: ', bbox)
     while True:
         try:
