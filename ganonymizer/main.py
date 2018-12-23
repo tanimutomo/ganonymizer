@@ -84,7 +84,7 @@ def get_config():
             'save_outimage': None,
 
             # the dir where you want to save mask images. if you don't save the mask, set None.
-            'save_mask': 'ganonymizer/data/videos/noon/mask',
+            'save_mask': 'ganonymizer/data/videos/noon/large_mask',
 
 
             # For network pretrained models path
