@@ -49,8 +49,8 @@ class CreateRandMask:
     def create_mask(self, rand_mask):
         tl_y = self.center[0] - int(self.masksize / 2)
         tl_x = self.center[1] - int(self.masksize / 2)
-        br_y = self.center[0] - int(self.masksize / 2)
-        br_x = self.center[1] - int(self.masksize / 2)
+        br_y = self.center[0] + int(self.masksize / 2)
+        br_x = self.center[1] + int(self.masksize / 2)
 
         print('--bbox--')
         print('bbox: {}, {}, {}, {}'.format(tl_y, tl_x, br_y, br_x))
@@ -73,10 +73,13 @@ def check_mask_position(rand_mask, mask):
     print('min: ', np.min(rand_mask))
 
     if np.max(rand_mask) == 0:
+        print('Checks is False')
         return False
     sum_masks = rand_mask + mask
     if np.max(sum_masks) == 510:
+        print('Checks is False')
         return False
+    print('Checks is True')
     return True
 
 

@@ -195,6 +195,7 @@ class Executer:
             if self.random_mask in ['edge', 'large']:
                 print('[INFO] Create random {} mask...'.format(self.random_mask))
                 start_calc_random_mask = time.time()
+                loop_count = 1
                 rand_mask = np.zeros((input.shape[0], input.shape[1], 3))
                 rand_mask_creater = CreateRandMask(rand_mask.shape[0], rand_mask.shape[1])
                 while True:
@@ -206,6 +207,8 @@ class Executer:
 
                     if check_mask_position(rand_mask, mask):
                         continue
+                    loop_count += 1
+                    print(loop_count)
 
                 mask = rand_mask
                 print('[TIME] CalcRandMask elapsed time: {:.3f}'.format(
