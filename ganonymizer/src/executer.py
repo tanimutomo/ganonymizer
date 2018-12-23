@@ -205,7 +205,7 @@ class Executer:
                     rand_mask = rand_mask_creater.create_mask(rand_mask)
 
                     if check_mask_position(rand_mask, mask):
-                        break
+                        continue
 
                 mask = rand_mask
                 print('[TIME] CalcRandMask elapsed time: {:.3f}'.format(

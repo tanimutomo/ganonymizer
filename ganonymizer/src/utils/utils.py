@@ -51,6 +51,7 @@ class CreateRandMask:
         tl_x = self.center[1] - int(self.masksize / 2)
         br_y = self.center[0] - int(self.masksize / 2)
         br_x = self.center[1] - int(self.masksize / 2)
+        print('bbox: {}, {}, {}, {}'.format(tl_y, tl_x, br_y, br_x))
 
         mask_part = rand_mask[tl_y:br_y, tl_x:br_x]
         if mask_part.shape[0] > 0 and mask_part.shape[1] > 0:
