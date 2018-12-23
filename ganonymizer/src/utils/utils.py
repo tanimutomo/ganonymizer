@@ -10,8 +10,8 @@ class CreateRandMask:
     
     def edge_sampling(self):
         # 0(top), 1(top-left), 2(left), 3(bottom-left), 4(bottom), 5(bottom-right), 6(right), 7(top-right)
-        self.position = random.choise([0, 1, 2, 3, 4, 5, 6, 7])
-        self.distance = random.choise([0, 1, 2, 3])
+        self.position = random.choice([0, 1, 2, 3, 4, 5, 6, 7])
+        self.distance = random.choice([0, 1, 2, 3])
         self.masksize = random.randint(50, 200)
         self.calc_center_from_edge()
 
