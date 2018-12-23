@@ -62,7 +62,7 @@ def get_config():
             # the mask filename should be mask_{count_num}.png.
             # Note that this {count_num} start 1, not 0.
             # if you dont't use local masks, set None.
-            'use_local_masks': 'ganonymizer/data/videos/noon',
+            'use_local_masks': None, # 'ganonymizer/data/videos/noon',
 
 
             # For design of the output image or video

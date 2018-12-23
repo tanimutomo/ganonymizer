@@ -194,7 +194,17 @@ class Executer:
 
             if self.random_mask in ['edge', 'large']:
                 rand_mask = np.zeros((input.shape[0], input.shape[1], 3))
-                rand_mask = create_rand_mask(rand_mask, mask, self.random_mask)
+                rand_mask_creater = CreateRandMask(rand_mask.shape[0], rand_mask.shape[1])
+                while True:
+                    if self.random_mask == 'edge':
+                        rand_mask_creater.edge_sampling()
+                    elif self.random_mask == 'large':
+                        rand_mask_creater.large_sampling()
+                    rand_mask = rand_mask_creater.create_mask(rand_mask)
+
+                    if check_mask_position(rand_mask, mask):
+                        break
+
                 mask = rand_mask
 
             origin_mask = copy.deepcopy(mask)

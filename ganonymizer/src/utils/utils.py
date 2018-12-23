@@ -3,16 +3,17 @@ import cv2
 import random
 import numpy as np
 
-class CreateRandEdgeMask:
-    def __init__(self, rand_mask, mask):
-        self.height = rand_mask.shape[0]
-        self.width = rand_mask.shape[1]
+class CreateRandMask:
+    def __init__(self, height, width):
+        self.height = height
+        self.width = width
     
     def edge_sampling(self):
         # 0(top), 1(top-left), 2(left), 3(bottom-left), 4(bottom), 5(bottom-right), 6(right), 7(top-right)
         self.position = random.choise([0, 1, 2, 3, 4, 5, 6, 7])
         self.distance = random.choise([0, 1, 2, 3])
         self.masksize = random.randint(50, 200)
+        self.calc_center_from_edge()
 
     def large_sampling(self):
         self.masksize = random.randint(120, 400)
@@ -20,6 +21,7 @@ class CreateRandEdgeMask:
                 random.randint(int(self.masksize / 2), self.height - self.masksize),
                 random.randint(int(self.masksize / 2), self.width - self.masksize)
                 ]
+        self.calc_center_from_large()
 
     def calc_center_from_edge(self):
         self.center = [0, 0] # [h, w]
@@ -37,8 +39,35 @@ class CreateRandEdgeMask:
     def calc_center_from_large(self):
         self.center = self.position
 
-    def create_mask(self):
-        pass
+    def create_mask(self, rand_mask):
+        tl_y = self.center[0] - int(self.masksize / 2)
+        tl_x = self.center[1] - int(self.masksize / 2)
+        br_y = self.center[0] - int(self.masksize / 2)
+        br_x = self.center[1] - int(self.masksize / 2)
+
+        mask_part = rand_mask[tl_y:br_y, tl_x:br_x]
+        if mask_part.shape[0] > 0 and mask_part.shape[1] > 0:
+            rand_mask[tl_y:br_y, tl_x:br_x] = np.ones((mask_part.shape[0], mask_part.shape[1], 3)) * 255
+            # mask = mask.astype('uint8')
+
+        rand_mask = rand_mask.astype('uint8')
+        return mask
+
+
+def check_mask_position(rand_mask, mask):
+    assert rand_mask.shape == mask.shape
+
+    print('--CHECK about rand_mask--')
+    print('shape: ', rand_mask.shape)
+    print('max: ', np.max(rand_mask))
+    print('min: ', np.min(rand_mask))
+
+    if np.max(rand_mask) == 0:
+        return False
+    sum_masks = rand_mask + mask
+    if np.max(sum_masks) == 510:
+        return False
+    return True
 
 
 def video_writer(video, output_name, fps, width, height):
