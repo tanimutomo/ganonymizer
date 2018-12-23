@@ -251,7 +251,6 @@ class Executer:
         #     boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
         # reconstruct
-        print(obj_rec)
         output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                 input, mask, obj_rec, width_max, height_max)
 
