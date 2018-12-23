@@ -42,7 +42,7 @@ class CreateRandMask:
     def calc_center_from_large(self):
         self.center = self.position
 
-    def create_mask(self, rand_mask):
+    def create_mask(self, rand_mask, obj_rec):
         tl_y = self.center[0] - int(self.masksize / 2)
         tl_x = self.center[1] - int(self.masksize / 2)
         br_y = self.center[0] + int(self.masksize / 2)
@@ -52,9 +52,10 @@ class CreateRandMask:
         if mask_part.shape[0] > 0 and mask_part.shape[1] > 0:
             rand_mask[tl_y:br_y, tl_x:br_x] = np.ones((mask_part.shape[0], mask_part.shape[1], 3)) * 255
             # mask = mask.astype('uint8')
-
         rand_mask = rand_mask.astype('uint8')
-        return rand_mask
+        obj_rec.append([tl_y, tl_x, br_y - tl_y, br_x - tl_x])
+
+        return rand_mask, obj_rec
 
 
 def check_mask_position(rand_mask, mask):

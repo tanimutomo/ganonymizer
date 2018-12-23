@@ -169,6 +169,7 @@ class Executer:
 
         # detect
         if mask is not None:
+            print('[INFO] Use local masks')
             pass
         elif len(self.manual_mask) > 0:
             mask, obj_rec = create_mask(input.shape, self.manual_mask)
@@ -203,8 +204,9 @@ class Executer:
                         rand_mask_creater.edge_sampling()
                     elif self.random_mask == 'large':
                         rand_mask_creater.large_sampling()
+                    obj_rec = []
                     rand_mask = np.zeros((input.shape[0], input.shape[1], 3))
-                    rand_mask = rand_mask_creater.create_mask(rand_mask)
+                    rand_mask, obj_rec = rand_mask_creater.create_mask(rand_mask, obj_rec)
 
                     if check_mask_position(rand_mask, mask):
                         break
@@ -230,6 +232,7 @@ class Executer:
                         loop_count
                         ))
 
+
                 mask = rand_mask
                 # print('[TIME] CreateRandMask elapsed time: {:.3f}'.format(
                 #     time.time() - start_calc_random_mask))
@@ -248,6 +251,7 @@ class Executer:
         #     boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
         # reconstruct
+        print(obj_rec)
         output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                 input, mask, obj_rec, width_max, height_max)
 

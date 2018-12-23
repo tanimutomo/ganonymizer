@@ -22,7 +22,7 @@ def get_config():
             # The input image, when you apply GANonymizer to an image.
             'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
 
-            'output': '_gfp_off',
+            'output': '_esp_on',
 
 
             # For network configuration
@@ -37,7 +37,7 @@ def get_config():
             'large_thresh': 10000,
 
             # The threshold for prepadding processing
-            'prepad_thresh': 0,
+            'prepad_thresh': 4,
 
             'fps': 5.0,
 
@@ -62,13 +62,13 @@ def get_config():
 
             # select from [edge, large, None]
             # make a random mask and save its mask for evaluating the ESP or GFP
-            'random_mask': 'large',
+            'random_mask': None,
 
             # if you use local masks in video processing, specify the directory where series masks are saved.
             # the mask filename should be mask_{count_num}.png.
             # Note that this {count_num} start 1, not 0.
             # if you dont't use local masks, set None.
-            'use_local_masks': None, # 'ganonymizer/data/videos/noon',
+            'use_local_masks': 'ganonymizer/data/videos/noon/edge_mask',
 
 
             # For design of the output image or video
@@ -90,7 +90,7 @@ def get_config():
             'save_outimage': None,
 
             # the dir where you want to save mask images. if you don't save the mask, set None.
-            'save_mask': 'ganonymizer/data/videos/noon/large_mask',
+            'save_mask': None, # 'ganonymizer/data/videos/noon/large_mask',
 
 
             # For network pretrained models path
