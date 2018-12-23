@@ -56,7 +56,7 @@ def get_config():
 
             # select from [edge, large, None]
             # make a random mask and save its mask for evaluating the ESP or GFP
-            'random_mask': 'large',
+            'random_mask': None,
 
             # if you use local masks in video processing, specify the directory where series masks are saved.
             # the mask filename should be mask_{count_num}.png.
@@ -84,7 +84,7 @@ def get_config():
             'save_outimage': None,
 
             # the dir where you want to save mask images. if you don't save the mask, set None.
-            'save_mask': 'ganonymizer/data/videos/noon/large_mask',
+            'save_mask': 'ganonymizer/data/videos/noon/original_mask',
 
 
             # For network pretrained models path
