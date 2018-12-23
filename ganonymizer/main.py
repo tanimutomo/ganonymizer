@@ -10,19 +10,19 @@ def main():
 
 def get_config():
     config = {
-            'video': '', # os.path.join(os.getcwd(), 'ganonymizer/data/videos/ex_small6_inter10_noon.avi'),
+            'video': os.path.join(os.getcwd(), 'ganonymizer/data/videos/inter10_noon.avi'),
             # The input image, when you apply GANonymizer to an image.
-            'image': os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
-            'output': '1',
+            'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
+            'output': 'no',
 
-            'segmentation': True,
+            'segmentation': False,
             # minimum probability to filter weak detections
             'conf': 0.5,
             'nms': 0.4,
             # The threshold for PMD processing
-            'large_thresh': 120,
+            'large_thresh': 10000,
             # The threshold for prepadding processing
-            'prepad_thresh': 4,
+            'prepad_thresh': 0,
             'fps': 5.0,
             'show': False,
             'postproc': False,
