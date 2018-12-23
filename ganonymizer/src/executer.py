@@ -149,7 +149,7 @@ class Executer:
                 if self.save_outframe != None:
                     cv2.imwrite('{}out_{}.png'.format(self.save_outframe, count), output)
                 if self.save_mask is not None:
-                    cv2.imwrite(os.path.join(self.save_mask, 'mask_{}.png'.format(count), mask))
+                    cv2.imwrite(os.path.join(self.save_mask, 'mask_{}.png'.format(count)), mask)
 
                 # print the process info per iteration
                 total_time, count = self.print_info_per_process(begin_process, elapsed, count, total_time, frames)
@@ -208,10 +208,12 @@ class Executer:
                     if check_mask_position(rand_mask, mask):
                         break
                     loop_count += 1
-                    print(loop_count)
+                    print('loop_count: ', loop_count)
+                    if loopcount >= 100:
+                        break
 
                 mask = rand_mask
-                print('[TIME] CalcRandMask elapsed time: {:.3f}'.format(
+                print('[TIME] CreateRandMask elapsed time: {:.3f}'.format(
                     time.time() - start_calc_random_mask))
 
             origin_mask = copy.deepcopy(mask)
