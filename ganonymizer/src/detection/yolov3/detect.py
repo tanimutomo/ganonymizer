@@ -63,7 +63,7 @@ def yolo_detecter(img, model, conf, nms, rec, device, detected_obj):
         
         if type(prediction) == int:
             i += 1
-            return []
+            return [], detected_obj
 
         prediction[:,0] += i*batch_size
           
@@ -96,8 +96,6 @@ def yolo_detecter(img, model, conf, nms, rec, device, detected_obj):
     for out in output:
         out = summary(out, classes)
         rec, detected_obj = selection(out, rec, privacy, detected_obj)
-
-    print(rec, detected_obj)
 
     return rec, detected_obj
 
