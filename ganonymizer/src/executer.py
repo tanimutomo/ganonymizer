@@ -268,7 +268,7 @@ class Executer:
 
         if self.detection_summary_file is not None:
             with open(self.detection_summary_file, mode='a') as f:
-                f.write('\ncount: {}'.format(count))
+                f.write('\n\ncount: {}\n'.format(count))
                 f.write('\n'.join(detected_obj))
 
         return elapsed, output, original, origin_mask
