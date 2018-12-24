@@ -40,3 +40,8 @@ def vid2frm(infile, out_dir):
 # for i in range(frames):
 #     writer.write(video[i])
 # writer.release()
+
+if __name__ == '__main__':
+    infile = '../../data/videos/noon/out_esp_gfp_on_inter10_noon.avi'
+    out_dir = '../../data/videos/noon/out_on'
+    vid2frm(infile, out_dir)

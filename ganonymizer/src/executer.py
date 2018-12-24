@@ -267,7 +267,7 @@ class Executer:
             cv2.waitKey(0)
 
         if self.detection_summary_file is not None:
-            with open(self.detection_summary_file, mode='w') as f:
+            with open(self.detection_summary_file, mode='a') as f:
                 f.write('\ncount: {}'.format(count))
                 f.write('\n'.join(detected_obj))
 
