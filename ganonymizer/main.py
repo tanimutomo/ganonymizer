@@ -29,7 +29,7 @@ def get_config():
             # The input image, when you apply GANonymizer to an image.
             'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
 
-            'output': '_esp_gfp_on',
+            'output': '_concat_on',
 
 
             # For network configuration
@@ -85,9 +85,9 @@ def get_config():
 
             'concat_all': False,
 
-            'concat_inout': False,
+            'concat_inout': True,
 
-            'detection_summary_file': 'ganonymizer/data/videos/noon/detection.txt',
+            'detection_summary_file': None, #'ganonymizer/data/videos/noon/detection.txt',
 
             # For saving images and videos
 
