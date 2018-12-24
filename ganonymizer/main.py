@@ -85,7 +85,7 @@ def get_config():
 
             'concat_all': False,
 
-            'concat_inout': False,
+            'concat_inout': True,
 
             'detection_summary_file': None, #'ganonymizer/data/videos/noon/half_detection.txt',
 
