@@ -98,7 +98,8 @@ def yolo_detecter(img, model, conf, nms, rec, device, detected_obj):
         rec, detected_obj = selection(out, rec, privacy, detected_obj)
 
     print(rec, detected_obj)
-    return rec, detected_obj
+
+    return [rec, detected_obj]
 
 
 def prep_image(img, inp_dim):
