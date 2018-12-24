@@ -42,6 +42,6 @@ def vid2frm(infile, out_dir):
 # writer.release()
 
 if __name__ == '__main__':
-    infile = '../../data/videos/noon/out_esp_gfp_on_inter10_noon.avi'
-    out_dir = '../../data/videos/noon/out_on'
+    infile = '../../data/videos/half_noon/half_inter10_noon.avi'
+    out_dir = '../../data/videos/half_noon/input'
     vid2frm(infile, out_dir)

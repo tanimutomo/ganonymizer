@@ -29,7 +29,7 @@ def get_config():
             # The input image, when you apply GANonymizer to an image.
             'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
 
-            'output': 'out_on',
+            'output': 'off',
 
 
             # For network configuration
@@ -41,10 +41,10 @@ def get_config():
             'nms': 0.4,
 
             # The threshold for PMD processing
-            'large_thresh': 120,
+            'large_thresh': 12000,
 
             # The threshold for prepadding processing
-            'prepad_thresh': 4,
+            'prepad_thresh': 0,
 
             'fps': 5.0,
 
@@ -87,7 +87,7 @@ def get_config():
 
             'concat_inout': False,
 
-            'detection_summary_file': 'ganonymizer/data/videos/noon/half_detection.txt',
+            'detection_summary_file': None, #'ganonymizer/data/videos/noon/half_detection.txt',
 
             # For saving images and videos
 
