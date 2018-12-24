@@ -39,16 +39,16 @@ class GANonymizer:
         return mask, obj_rec, elapsed_seg
 
 
-    def detect(self, input, obj_rec):
+    def detect(self, input, obj_rec, detected_obj):
         ### detection privacy using SSD
         print('[INFO] Detecting objects related to privacy...')
         begin_ssd = time.time()
-        obj_rec = yolo_detecter(input, self.detecter, 
-                self.conf, self.nms, obj_rec, self.device)
+        obj_rec, detected_obj = yolo_detecter(input, self.detecter, 
+                self.conf, self.nms, obj_rec, self.device, detected_obj)
         elapsed_ssd = time.time() - begin_ssd
         print('[TIME] YOLO-V3 elapsed time: {:.3f}'.format(elapsed_ssd))
         
-        return obj_rec, elapsed_ssd
+        return obj_rec, elapsed_ssd, detected_obj
 
     
     def create_detected_mask(self, input, mask, obj_rec):

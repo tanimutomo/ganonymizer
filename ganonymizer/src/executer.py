@@ -44,6 +44,7 @@ class Executer:
         self.concat_inout = config['concat_inout']
         self.random_mask = config['random_mask']
         self.use_local_masks = config['use_local_masks']
+        self.detection_summary_file = config['detection_summary_file']
 
 
     def execute(self):
@@ -132,9 +133,9 @@ class Executer:
                 input = copy.deepcopy(frame)
                 if self.use_local_masks is not None:
                     mask = cv2.imread(os.path.join(self.use_local_masks, 'mask_{}.png'.format(count)))
-                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask)
+                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask=mask, count=count)
                 else:
-                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed)
+                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed, count=count)
 
                 # append frame to video
                 if self.concat_all:
@@ -163,9 +164,10 @@ class Executer:
         cv2.destroyAllWindows()
 
 
-    def process_input(self, input, elapsed, mask=None):
+    def process_input(self, input, elapsed, mask=None, count=None):
         original = copy.deepcopy(input)
         obj_rec = []
+        detected_obj = []
 
         # detect
         if mask is not None:
@@ -188,7 +190,7 @@ class Executer:
             #     original = write_boxline(original, origin_mask, boxline)
 
         else:
-            obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
+            obj_rec, elapsed[1], detected_obj = self.ganonymizer.detect(input, obj_rec, detected_obj)
             obj_rec = extend_rec(obj_rec, input)
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
@@ -263,6 +265,11 @@ class Executer:
             disp = np.concatenate([original, output, origin_mask], axis=1)
             cv2.imshow('Display', disp)
             cv2.waitKey(0)
+
+        if self.detection_summary_file is not None:
+            with open(self.detection_summary_file, mode='w') as f:
+                f.write('\ncount: {}'.format(count))
+                f.write('\n'.join(detected_obj))
 
         return elapsed, output, original, origin_mask
 
