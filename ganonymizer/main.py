@@ -29,7 +29,7 @@ def get_config():
             # The input image, when you apply GANonymizer to an image.
             'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
 
-            'output': '_gfp_off_pp',
+            'output': '_esp_gfp_off',
 
 
             # For network configuration
@@ -41,7 +41,7 @@ def get_config():
             'nms': 0.4,
 
             # The threshold for PMD processing
-            'large_thresh': 120,
+            'large_thresh': 12000,
 
             # The threshold for prepadding processing
             'prepad_thresh': 0,
@@ -50,7 +50,7 @@ def get_config():
 
             'show': False,
 
-            'postproc': True,
+            'postproc': False,
 
 
             # For mask setting (this configs mainly for evaluating GANonymizer, ESP and GFP)
@@ -75,7 +75,7 @@ def get_config():
             # the mask filename should be mask_{count_num}.png.
             # Note that this {count_num} start 1, not 0.
             # if you dont't use local masks, set None.
-            'use_local_masks': 'ganonymizer/data/videos/noon/large_mask',
+            'use_local_masks': None, # 'ganonymizer/data/videos/noon/large_mask',
 
 
             # For design of the output image or video
