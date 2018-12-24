@@ -87,7 +87,7 @@ def get_config():
 
             'concat_inout': False,
 
-            'detection_summary_file': 'ganonymizer/data/videos/noon/detection.txt'
+            'detection_summary_file': 'ganonymizer/data/videos/noon/detection.txt',
 
             # For saving images and videos
 
