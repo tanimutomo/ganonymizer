@@ -95,8 +95,9 @@ def yolo_detecter(img, model, conf, nms, rec, device, detected_obj):
 
     for out in output:
         out = summary(out, classes)
-        rec = selection(out, rec, privacy, detected_obj)
+        rec, detected_obj = selection(out, rec, privacy, detected_obj)
 
+    print(rec, detected_obj)
     return rec, detected_obj
 
 
