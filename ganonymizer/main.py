@@ -24,12 +24,12 @@ def main():
 def get_config():
     config = {
             # For Input and Output
-            'video': os.path.join(os.getcwd(), 'ganonymizer/data/videos/inter10_noon.avi'),
+            'video': os.path.join(os.getcwd(), 'ganonymizer/data/videos/half_inter10_noon.avi'),
 
             # The input image, when you apply GANonymizer to an image.
             'image': '', # os.path.join(os.getcwd(), 'ganonymizer/data/images/zurich_small.png'),
 
-            'output': '_for_detect_txt',
+            'output': 'out_on',
 
 
             # For network configuration
@@ -87,7 +87,7 @@ def get_config():
 
             'concat_inout': False,
 
-            'detection_summary_file': 'ganonymizer/data/videos/noon/detection.txt',
+            'detection_summary_file': 'ganonymizer/data/videos/noon/half_detection.txt',
 
             # For saving images and videos
 
