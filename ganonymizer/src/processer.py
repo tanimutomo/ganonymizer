@@ -133,26 +133,11 @@ class GANonymizer:
     def PMD(self, input, mask, obj_rec, width_max, height_max):
         ### pseudo mask division
         is_pmd = False
-        # max = 0
-        # old_recs = len(obj_rec)
-        # for r in obj_rec:
-        #     y, x, h, w = r
-        #     if y < 0 or y >= input.shape[0] or \
-        #             x < 0 or x >= input.shape[1] or \
-        #             h > large_thresh or w > large_thresh:
-        #         # h > input.shape[0]*0.8 or w > input.shape[1]/2:
-        #         obj_rec.remove(r)
-        # print(len(obj_rec) - old_recs)
 
         for r in obj_rec:
             y, x, h, w = r
             if w > self.large_thresh and h > self.large_thresh:
                 is_pmd = True
-        #         square_size = min([w, h])
-        #         if square_size > max:
-        #             max = square_size
-        #         print(r)
-        
 
         if is_pmd:
             print('[INFO] Pseudo Mask Division Processing...')
