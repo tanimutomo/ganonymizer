@@ -111,6 +111,7 @@ dmypy.json
 
 .DS_Store
 ganonymizer/data/
+ganonymizer/src/others/
 ganonymizer/src/detection/ssd/cfgs/*
 ganonymizer/src/detection/ssd/weights/*
 ganonymizer/src/detection/yolov3/cfgs/*
