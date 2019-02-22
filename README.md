@@ -1,10 +1,13 @@
 # GANonymizer
+*GANonymizer Image Annonymization Method Using Object Detection and Generative Adversarial Networks*
+
 ## Note
-This code is based on the following repository. Also we use the pre-trained models used in that repository.
+The code of this repository is based on the following repositories. Also we use the pre-trained models opend publicly in their repository.
 1. https://github.com/weiliu89/caffe/tree/ssd 
 2. https://github.com/satoshiiizuka/siggraph2017_inpainting
 3. https://github.com/ayooshkathuria/pytorch-yolo-v3
 
+<!--
 ## Preparation
 1. git clone
 2. download cfgs and weights for (SSD512 or YOLOV3) and GLCIC
@@ -26,6 +29,7 @@ GLCIC model we use is [Iizuka's model](https://github.com/satoshiiizuka/siggraph
 ## Usage
 1. custom config in ganonymizer/main.py
 2. ```python -m ganonymizer.main```
+-->
 
 
 ## Reference
