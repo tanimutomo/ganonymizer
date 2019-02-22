@@ -109,9 +109,8 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-ganonymizer/data/for_fig/*
-ganonymizer/data/images/*
-ganonymizer/data/videos/*
+.DS_Store
+ganonymizer/data/
 ganonymizer/src/detection/ssd/cfgs/*
 ganonymizer/src/detection/ssd/weights/*
 ganonymizer/src/detection/yolov3/cfgs/*
