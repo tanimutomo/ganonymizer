@@ -110,6 +110,8 @@ venv.bak/
 dmypy.json
 
 .DS_Store
+kronos-config.yml
+
 ganonymizer/data/
 ganonymizer/src/others/
 ganonymizer/src/detection/ssd/cfgs/*
