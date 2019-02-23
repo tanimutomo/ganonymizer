@@ -32,7 +32,7 @@ def get_parser():
     return args
 
 def gl_inpaint(input_img, mask, datamean, model, postproc, device):
-# load data
+    # load data
     # print('image.shape: {}'.format(image.shape))
     # input_img = cv2.imread(image)
     I = torch.from_numpy(cvimg2tensor(input_img)).float().to(device)
