@@ -1,1 +1,8 @@
-tensorflow
+numpy
+scipy
+pyamg
+opencv-python
+opencv-contrib-python
+torch==0.4.1
+torchvision
+pandas

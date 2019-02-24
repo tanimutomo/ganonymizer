@@ -5,7 +5,10 @@ num_use_gpu: 1
 
 # gitURL and branch of the project
 git_url: 'https://github.com/tanimutomo/ganonymizer.git'
-git_branch: 'feature/demo_realtime'
+git_branch: 'cityscapes'
+
+# your home directory path in remote server
+home_dir: '/home/tanimu' # ex) '/home/username'
 
 # project directory path
 pj_root: '/home/tanimu/Project'
@@ -17,8 +20,8 @@ data_dir: ''
 origin_data: ''
 
 # If you fix the GPU server and GPU number you use, please specify them
-fix_server: ''
-fix_gpu: []
+fix_server: 'chasca'
+fix_gpu: [1]
 
 # ssh config path
 ssh_config_path: '~/.ssh/config'
