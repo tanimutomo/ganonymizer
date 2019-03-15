@@ -12,7 +12,7 @@ def get_config():
     config = {
             'video': '', # os.path.join(os.getcwd(), 'ganonymizer/data/videos/ex_small6_inter10_noon.avi'),
             # The input image, when you apply GANonymizer to an image.
-            'image': os.path.join(os.getcwd(), 'ganonymizer/data/images/example_01.jpg'),
+            'image': os.path.join(os.getcwd(), 'ganonymizer/data/images/ex_02.png'),
             'output': '1',
 
             'segmentation': False,
