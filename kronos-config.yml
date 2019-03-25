@@ -5,7 +5,7 @@ num_use_gpu: 1
 
 # gitURL and branch of the project
 git_url: 'https://github.com/tanimutomo/ganonymizer.git'
-git_branch: 'feature/segmentation'
+git_branch: 'feature/calc_psnr_ssim'
 
 # your home directory path in remote server
 home_dir: '/home/tanimu' # ex) '/home/username'

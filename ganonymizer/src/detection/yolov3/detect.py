@@ -16,7 +16,7 @@ from .darknet import Darknet
 from .utils.preprocess import prep_image, inp_to_image
 
 
-def yolo_detecter(img, model, conf, nms, rec, device):    
+def yolo_detecter(img, model, conf, nms, rec, device, detected_obj):
     yolov3_path = 'ganonymizer/src/detection/yolov3'
     images = img
     batch_size = 1
@@ -63,7 +63,7 @@ def yolo_detecter(img, model, conf, nms, rec, device):
         
         if type(prediction) == int:
             i += 1
-            return []
+            return [], detected_obj
 
         prediction[:,0] += i*batch_size
           
@@ -95,9 +95,9 @@ def yolo_detecter(img, model, conf, nms, rec, device):
 
     for out in output:
         out = summary(out, classes)
-        rec = selection(out, rec, privacy)
+        rec, detected_obj = selection(out, rec, privacy, detected_obj)
 
-    return rec
+    return rec, detected_obj
 
 
 def prep_image(img, inp_dim):
@@ -132,16 +132,17 @@ def summary(x, classes):
     return [left_up, right_down, label]
 
 
-def selection(x, rec, privacy):
+def selection(x, rec, privacy, detected_obj):
     if x[2] in privacy:
         print('[DETECT] {}'.format(x[2]))
+        detected_obj.append(x[2])
         up = x[0][1].item()
         left = x[0][0].item()
         height = (x[1][1] - up).item()
         width = (x[1][0] - left).item()
         rec.append([up, left, height, width])
 
-    return rec
+    return rec, detected_obj
 
 
 

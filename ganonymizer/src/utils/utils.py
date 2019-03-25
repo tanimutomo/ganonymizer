@@ -1,6 +1,90 @@
 import os
 import cv2
+import random
 import numpy as np
+from scipy.ndimage.measurements import find_objects
+
+
+def find_bbox(mask, obj_rec):
+    bbox = find_objects((mask / 255).astype('uint8'))
+
+    for ys, xs, ch in bbox:
+        y = ys.start
+        x = xs.start
+        h = ys.stop - y
+        w = xs.stop - x
+        obj_rec.append([y, x, h, w])
+
+    return obj_rec
+
+
+class CreateRandMask:
+    def __init__(self, height, width):
+        self.height = height
+        self.width = width
+    
+    def edge_sampling(self):
+        # 0(top), 1(top-left), 2(left), 3(bottom-left), 4(bottom), 5(bottom-right), 6(right), 7(top-right)
+        self.position = random.choice([0, 1, 2, 3, 4, 5, 6, 7])
+        self.distance = random.choice([0, 1, 2, 3])
+        self.masksize = random.randint(50, 200)
+        self.calc_center_from_edge()
+
+    def large_sampling(self):
+        self.masksize = random.randint(120, 400)
+        self.position = [
+                random.randint(int(self.masksize / 2), self.height - self.masksize),
+                random.randint(int(self.masksize / 2), self.width - self.masksize)
+                ]
+        self.calc_center_from_large()
+
+    def calc_center_from_edge(self):
+        self.center = [0, 0] # [h, w]
+        if self.position in [0, 1, 7]:
+            self.center[0] = self.distance + int(self.masksize / 2)
+        elif self.position in [2, 6]:
+            self.center[0] = int(self.height / 2)
+        else:
+            self.center[0] = self.height - (self.distance + int(self.masksize / 2))
+
+        if self.position in [0, 4]:
+            self.center[1] = int(self.width / 2)
+        elif self.position in [1, 2, 3]:
+            self.center[1] = self.width - (self.distance + int(self.masksize / 2))
+        else:
+            self.center[1] = self.distance + int(self.masksize / 2)
+
+    def calc_center_from_large(self):
+        self.center = self.position
+
+    def create_mask(self, rand_mask, obj_rec):
+        tl_y = self.center[0] - int(self.masksize / 2)
+        tl_x = self.center[1] - int(self.masksize / 2)
+        br_y = self.center[0] + int(self.masksize / 2)
+        br_x = self.center[1] + int(self.masksize / 2)
+
+        mask_part = rand_mask[tl_y:br_y, tl_x:br_x]
+        if mask_part.shape[0] > 0 and mask_part.shape[1] > 0:
+            rand_mask[tl_y:br_y, tl_x:br_x] = np.ones((mask_part.shape[0], mask_part.shape[1], 3)) * 255
+            # mask = mask.astype('uint8')
+        rand_mask = rand_mask.astype('uint8')
+        obj_rec.append([tl_y, tl_x, br_y - tl_y, br_x - tl_x])
+
+        return rand_mask, obj_rec
+
+
+def check_mask_position(rand_mask, mask):
+    assert rand_mask.shape == mask.shape
+
+    if np.max(rand_mask) == 0:
+        print('Checks is False')
+        return False
+    sum_masks = rand_mask.astype('uint16') + mask.astype('uint16')
+
+    if np.max(sum_masks) == 510:
+        return False
+    return True
+
 
 def video_writer(video, output_name, fps, width, height):
     video_name = video.split('/')[-1]
@@ -12,7 +96,7 @@ def video_writer(video, output_name, fps, width, height):
 
     return writer
 
-def concat_inout(input, original, output):
+def concat_all(input, original, output):
     output_f2 = cv2.resize(output, None, fx=2, fy=2)
     concat = np.concatenate([input, original], axis=0)
     concat = np.concatenate([concat, output_f2], axis=1)

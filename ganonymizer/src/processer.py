@@ -39,25 +39,24 @@ class GANonymizer:
         return mask, obj_rec, elapsed_seg
 
 
-    def detect(self, input, obj_rec):
+    def detect(self, input, obj_rec, detected_obj):
         ### detection privacy using SSD
         print('[INFO] Detecting objects related to privacy...')
         begin_ssd = time.time()
-        obj_rec = yolo_detecter(input, self.detecter, 
-                self.conf, self.nms, obj_rec, self.device)
+        obj_rec, detected_obj = yolo_detecter(input, self.detecter, self.conf, self.nms, obj_rec, self.device, detected_obj)
         elapsed_ssd = time.time() - begin_ssd
         print('[TIME] YOLO-V3 elapsed time: {:.3f}'.format(elapsed_ssd))
         
-        return obj_rec, elapsed_ssd
+        return obj_rec, elapsed_ssd, detected_obj
 
     
     def create_detected_mask(self, input, mask, obj_rec):
         for rec in obj_rec:
-            ul_y, ul_x, dr_y, dr_x = \
+            tl_y, tl_x, br_y, br_x = \
                     rec[0], rec[1], rec[0] + rec[2], rec[1] + rec[3]
-            cut_img = input[ul_y:dr_y, ul_x:dr_x]
+            cut_img = input[tl_y:br_y, tl_x:br_x]
             if cut_img.shape[0] > 1 and cut_img.shape[1] > 1:
-                mask[ul_y:dr_y, ul_x:dr_x] = np.ones((cut_img.shape[0], cut_img.shape[1], 3)) * 255
+                mask[tl_y:br_y, tl_x:br_x] = np.ones((cut_img.shape[0], cut_img.shape[1], 3)) * 255
                 mask = mask.astype('uint8')
 
         mask = mask.astype('uint8')
