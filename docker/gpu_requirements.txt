@@ -2,6 +2,6 @@ numpy
 scipy
 pyamg
 opencv-python
-torch
+torch==0.4.1
 torchvision
 pandas

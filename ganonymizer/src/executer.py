@@ -76,14 +76,6 @@ class Executer:
             save_path = os.path.join(os.getcwd(), 'ganonymizer/data/images/concat{}_{}'.format(self.output, in_name))
             cv2.imwrite(save_path, concat)
         else:
-            # img_path = self.image.split('/')
-            # dir = copy.deepcopy(img_path)
-            # dir.pop()
-            # dir = '/'.join(dir) + '/'
-            # name = img_path[-1].split('.')[0]
-            # ext = img_path[-1].split('.')[-1]
-            # save_path = dir +  name + ext
-            # print(save_path)
             in_name = self.image.split('/')[-1]
             save_path = os.path.join(os.getcwd(), 'ganonymizer/data/images/out{}_{}'.format(self.output, in_name))
             cv2.imwrite(save_path, output)
