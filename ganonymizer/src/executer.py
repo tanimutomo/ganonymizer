@@ -5,7 +5,7 @@ import copy
 import numpy as np
 
 from .utils.set import set_networks, set_device
-from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout
+from .utils.utils import video_writer, load_video, adjust_imsize, concat_inout, extend_rec
 from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
 from .utils.auxiliary_layer import max_mask_size, detect_large_mask
 from .processer import GANonymizer
@@ -149,12 +149,18 @@ class Executer:
         elif self.center_mask is not 0:
             mask, obj_rec = center_mask(input.shape, self.center_mask)
         elif self.segmentation:
-            mask, elapsed[1] = self.ganonymizer.segment(input)
+            mask, obj_rec, elapsed[1] = self.ganonymizer.segment(input, obj_rec)
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                     input, mask, obj_rec)
+            if self.boxline > 0:
+                print('check2')
+                origin_mask = copy.deepcopy(mask)
+                boxline = create_boxline(mask, obj_rec, self.boxline, original)
+                original = write_boxline(original, origin_mask, boxline)
         else:
             obj_rec, elapsed[1] = self.ganonymizer.detect(input, obj_rec)
+            obj_rec = extend_rec(obj_rec, input)
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
             origin_mask = copy.deepcopy(mask)
@@ -165,16 +171,17 @@ class Executer:
                 width_max, height_max = 0, 0
             # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
 
-            origin_mask = copy.deepcopy(mask)
-            if self.boxline > 0:
-                boxline = np.zeros((original.shape))
-                boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
+            # origin_mask = copy.deepcopy(mask)
+            # if self.boxline > 0:
+            #     boxline = np.zeros((original.shape))
+            #     boxline = create_boxline(mask, obj_rec, boxline, self.boxline)
 
             # reconstruct
             output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                     input, mask, obj_rec, width_max, height_max)
 
             if self.boxline > 0:
+                boxline = create_boxline(mask, obj_rec, self.boxline, original)
                 original = write_boxline(original, origin_mask, boxline)
                 # output = write_boxline(output, origin_mask, boxline)
 

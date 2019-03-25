@@ -56,6 +56,8 @@ def edge_mask(size, mask_info):
 
 
 def write_boxline(input, mask, boxline):
+    print('input: ', np.max(input), np.min(input))
+    print('mask: ', np.max(mask), np.min(mask))
     output = input + boxline
     for i, ch in enumerate([0, 151, 239]):
         output[:,:,i] = np.where(output[:,:,i] > 255, ch, output[:,:,i]) 
@@ -63,12 +65,16 @@ def write_boxline(input, mask, boxline):
     return output.astype('uint8')
 
 
-def create_boxline(mask, obj_rec, boxline, width):
+def create_boxline(mask, obj_rec, width, original):
+    boxline = np.zeros((original.shape))
     for rec in obj_rec:
         ul_y, ul_x, dr_y, dr_x = \
                 rec[0], rec[1], rec[0] + rec[2], rec[1] + rec[3]
         boxline[ul_y-width:dr_y+width, ul_x-width:dr_x+width, :] = 255
     
+    cv2.imwrite('./ganonymizer/data/images/for_seg_bbox/boxline_seg.png', boxline)
+    cv2.imwrite('./ganonymizer/data/images/for_seg_bbox/mask_seg.png', mask)
+    cv2.imwrite('./ganonymizer/data/images/for_seg_bbox/boxline-mask_seg.png', boxline - mask)
     return boxline - mask
 
 

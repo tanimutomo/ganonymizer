@@ -6,6 +6,7 @@ import copy
 import torch
 import pickle
 import numpy as np
+from scipy.ndimage.measurements import find_objects
 
 from .model.deeplabv3 import DeepLabV3
 from .utils.utils import label_img_to_color
@@ -57,6 +58,28 @@ def detect_deeplabv3(input, network, device):
 
         return pred_label_img
 
+
+def calc_bbox(pred, mask, obj_rec):
+    bbox_mask = np.where(mask[:,:,0] == 255, pred, 0)
+    bbox = find_objects(bbox_mask)
+    while True:
+        try:
+            bbox.remove(None)
+        except:
+            break
+
+    for ys, xs in bbox:
+        y = ys.start
+        x = xs.start
+        h = ys.stop - y
+        w = xs.stop - x
+        obj_rec.append([y, x, h, w])
+
+    print('obj_rec: ', obj_rec)
+
+    return obj_rec
+
+
 def create_mask(pred):
     condition = (pred == 11) | (pred == 12) | (pred == 13) | (pred == 14) | \
             (pred == 15) | (pred == 16) | (pred == 17) | (pred == 18) | (pred == 19)
@@ -64,6 +87,7 @@ def create_mask(pred):
     mask = np.stack((mask, mask, mask), axis=2)
     mask = mask.astype('uint8')
     return mask
+
 
 def display(img, pred_label_img, mask):
     img = cv2.imread(img, -1) # (shape: (512, 1024, 3))
