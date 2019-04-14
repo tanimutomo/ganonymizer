@@ -2,34 +2,48 @@
 *GANonymizer Image Annonymization Method Using Object Detection and Generative Adversarial Networks*
 
 ## Note
-The code of this repository is based on the following repositories. Also we use the pre-trained models opend publicly in their repository.
+The code of this repository is leverated on the following repositories.
+Also we use the pre-trained models opend publicly in their repository.
 1. https://github.com/weiliu89/caffe/tree/ssd 
 2. https://github.com/satoshiiizuka/siggraph2017_inpainting
 3. https://github.com/ayooshkathuria/pytorch-yolo-v3
 
-<!--
+## Requirements
+Written in the `docker/gpu_requirements.txt`.
+
 ## Preparation
 1. git clone
 2. download cfgs and weights for (SSD512 or YOLOV3) and GLCIC
 ```
-# cd project root
 cd ganonymizer
-# SSD cfgs
+```
+### SSD cfgs
+```
 wget https://www.ht.sfc.keio.ac.jp/~tanimu/ganonymizer/ssd/cfgs/deploy.prototxt -P ganonymizer/src/detection/ssd/cfgs 
-# SSD weights
+```
+### SSD weights
+```
 wget https://www.ht.sfc.keio.ac.jp/~tanimu/ganonymizer/ssd/weights/VGG_VOC0712Plus_SSD_512x512_iter_240000.caffemodel -P ganonymizer/src/detection/ssd/weights
-# GLCIC weights
+```
+### YOLO-V3 (this link is the author page of YOLOV3.)
+```
+wget https://pjreddie.com/media/files/yolov3.weights -P ganonymizer/src/detection/yolov3/weights
+```
+### GLCIC weights
+```
 wget https://www.ht.sfc.keio.ac.jp/~tanimu/ganonymizer/glcic/weights/completionnet_places2.pth -P ganonymizer/src/inpaint/glcic/weights
 ```
 In terms of SSD, We use [Weiliu's SSD model](https://github.com/weiliu89/caffe/tree/ssd). You can download SSD's cfgs and weights from [this](https://github.com/weiliu89/caffe/tree/ssd).  
-GLCIC model we use is [Iizuka's model](https://github.com/satoshiiizuka/siggraph2017_inpainting).  
-    - We convert the model's type from torch7 to pytorch.
+GLCIC model we use is [Iizuka's model](https://github.com/satoshiiizuka/siggraph2017_inpainting). We convert the model's type from torch7 to pytorch.
 
 
-## Usage
+## Usage (Docker)
+1. Install Docker and Docker-compose
 1. custom config in ganonymizer/main.py
-2. ```python -m ganonymizer.main```
--->
+1. Build the container
+`docker-compose -f ./docker/docker-compose-{cpu/gpu}.yml build {/--gpu}`
+1. Execute GANonymizer to the input image specified in the main.py
+`docker-compose -f ./docker/docker-compose-{cpu/gpu}.yml run experiment python3 main.py`
 
 
 ## Reference
