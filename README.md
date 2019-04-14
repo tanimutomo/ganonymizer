@@ -1,5 +1,6 @@
 # GANonymizer
 *GANonymizer Image Annonymization Method Using Object Detection and Generative Adversarial Networks*
+Improved version, GANonymizerV2 is available [here](https://github.com/tanimutomo/ganonymizerv2).
 
 ## Note
 The code of this repository is leverated on the following repositories.
