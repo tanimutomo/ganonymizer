@@ -84,11 +84,11 @@ class Executer:
         elif self.concat_all:
             concat = concat_all(image, image_designed, output)
             in_name = self.image.split('/')[-1]
-            save_path = os.path.join(os.getcwd(), 'ganonymizer/data/images/concat{}_{}'.format(self.output, in_name))
+            save_path = os.path.join(os.getcwd(), 'data/images/concat{}_{}'.format(self.output, in_name))
             cv2.imwrite(save_path, concat)
         else:
             in_name = self.image.split('/')[-1]
-            save_path = os.path.join(os.getcwd(), 'ganonymizer/data/images/out{}_{}'.format(self.output, in_name))
+            save_path = os.path.join(os.getcwd(), 'data/images/out{}_{}'.format(self.output, in_name))
             cv2.imwrite(save_path, output)
 
 
@@ -263,7 +263,8 @@ class Executer:
                 f.write('\n\ncount: {}\n'.format(count))
                 f.write('\n'.join(detected_obj))
 
-        return elapsed, output, original, origin_mask
+        # return elapsed, output, original, origin_mask
+        return elapsed, output, original
 
 
     def print_info_per_process(self, begin, elapsed, count, total, frames):

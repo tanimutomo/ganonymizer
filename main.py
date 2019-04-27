@@ -29,7 +29,7 @@ def get_config():
             # The input image, when you apply to an image.
             'image': os.path.join(os.getcwd(), 'data/images/example_01.jpg'),
 
-            'output': '_concat_off',
+            'output': '1',
 
 
             # For network configuration
