@@ -110,21 +110,21 @@ venv.bak/
 dmypy.json
 
 .DS_Store
-ganonymizer/data/
-ganonymizer/src/others/
+data/
+src/others/
 #ganonymizer/src/detection/ssd/cfgs/*
-ganonymizer/src/detection/ssd/weights/*
+src/detection/ssd/weights/*
 #ganonymizer/src/detection/yolov3/cfgs/*
-ganonymizer/src/detection/yolov3/imgs/*
-ganonymizer/src/detection/yolov3/weights/*
+src/detection/yolov3/imgs/*
+src/detection/yolov3/weights/*
 #ganonymizer/src/inpaint/glcic/cfgs/*
-ganonymizer/src/inpaint/glcic/weights/*
+src/inpaint/glcic/weights/*
 takuro/
 opencv-semantic-segmentation/
-ganonymizer/src/segmentation/deeplabv3/image/
+src/segmentation/deeplabv3/image/
 others/
 generative_inpaint/
-ganonymizer/src/detection/yolov2/
+src/detection/yolov2/
 
 *.sh
 *.swp

@@ -1,9 +1,9 @@
 import cv2
 import torch
 
-from ..inpaint.glcic.completionnet_places2 import completionnet_places2
-from ..detection.yolov3.darknet import Darknet
-from ..segmentation.deeplabv3.model.deeplabv3 import DeepLabV3
+from .inpaint.glcic.completionnet_places2 import completionnet_places2
+from .detection.yolov3.darknet import Darknet
+from .segmentation.deeplabv3.model.deeplabv3 import DeepLabV3
 
 def set_networks(segmentation, detect_cfg, detect_weight, segment_weight, res_type, res_path, inpaint_weight, device):
     print('[INFO] Loading model...')

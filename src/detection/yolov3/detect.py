@@ -17,7 +17,7 @@ from .utils.preprocess import prep_image, inp_to_image
 
 
 def yolo_detecter(img, model, conf, nms, rec, device, detected_obj):
-    yolov3_path = 'ganonymizer/src/detection/yolov3'
+    yolov3_path = 'src/detection/yolov3'
     images = img
     batch_size = 1
     confidence = conf
