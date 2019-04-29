@@ -5,6 +5,17 @@ import numpy as np
 from scipy.ndimage.measurements import find_objects
 
 
+class Config(dict):
+    def __init__(self, config):
+        self._conf = config
+ 
+    def __getattr__(self, name):
+        if self._conf.get(name) is not None:
+            return self._conf[name]
+
+        return None
+
+
 def find_bbox(mask, obj_rec):
     bbox = find_objects((mask / 255).astype('uint8'))
 

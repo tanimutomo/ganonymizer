@@ -9,18 +9,23 @@ from .detection.yolov3.detect import yolo_detecter
 from .segmentation.deeplabv3.segment import detect_deeplabv3, create_mask, calc_bbox
 
 class GANonymizer:
-    def __init__(self, segmentation, conf, nms, postproc, large_thresh,
-            prepad_thresh, device, detecter, inpainter, datamean):
-        self.segmentation = segmentation
-        self.conf = conf
-        self.nms = nms
+    def __init__(self, config, device, detecter, inpainter, datamean):
+        self.config = config
         self.device = device
         self.detecter = detecter
         self.inpainter = inpainter
         self.datamean = datamean
-        self.postproc = postproc
-        self.large_thresh = large_thresh
-        self.prepad_thresh = prepad_thresh
+
+        # self.segmentation = segmentation
+        # self.conf = conf
+        # self.nms = nms
+        # self.device = device
+        # self.detecter = detecter
+        # self.inpainter = inpainter
+        # self.datamean = datamean
+        # self.postproc = postproc
+        # self.large_thresh = large_thresh
+        # self.prepad_thresh = prepad_thresh
 
         self.time_ssd = 0
         self.time_glcic = 0
@@ -43,7 +48,7 @@ class GANonymizer:
         ### detection privacy using SSD
         print('[INFO] Detecting objects related to privacy...')
         begin_ssd = time.time()
-        obj_rec, detected_obj = yolo_detecter(input, self.detecter, self.conf, self.nms, obj_rec, self.device, detected_obj)
+        obj_rec, detected_obj = yolo_detecter(input, self.detecter, self.config.conf, self.config.nms, obj_rec, self.device, detected_obj)
         elapsed_ssd = time.time() - begin_ssd
         print('[TIME] YOLO-V3 elapsed time: {:.3f}'.format(elapsed_ssd))
         
@@ -72,10 +77,10 @@ class GANonymizer:
             print('[INFO] Removing the detected objects...')
             self.origin = copy.deepcopy(input).shape
 
-            if self.segmentation:
+            if self.config.segmentation:
                 begin_glcic = time.time()
                 output = gl_inpaint(input, mask, self.datamean, \
-                        self.inpainter, self.postproc, self.device)
+                        self.inpainter, self.config.postproc, self.device)
                 elapsed_glcic = time.time() - begin_glcic
                 print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
             else:
@@ -88,7 +93,7 @@ class GANonymizer:
 
                 begin_glcic = time.time()
                 output = gl_inpaint(input, mask, self.datamean, \
-                        self.inpainter, self.postproc, self.device)
+                        self.inpainter, self.config.postproc, self.device)
                 elapsed_glcic = time.time() - begin_glcic
                 print('[TIME] GLCIC elapsed time: {:.3f}'.format(elapsed_glcic))
 
@@ -111,7 +116,7 @@ class GANonymizer:
 
     def prepadding(self, input, mask, is_prepad):
         ### prepadding
-        thresh = self.prepad_thresh
+        thresh = self.config.prepad_thresh
         i, j, k = np.where(mask>=10)
         h, w = input.shape[0], input.shape[1]
         if  (h - 1) - i.max() < thresh or \
@@ -137,20 +142,20 @@ class GANonymizer:
 
         for r in obj_rec:
             y, x, h, w = r
-            if w > self.large_thresh and h > self.large_thresh:
+            if w > self.config.large_thresh and h > self.config.large_thresh:
                 is_pmd = True
 
         if is_pmd:
             print('[INFO] Pseudo Mask Division Processing...')
-            h_sml = calc_sml_size(self.large_thresh, input.shape[0], height_max)
-            w_sml = calc_sml_size(self.large_thresh, input.shape[1], width_max)
+            h_sml = calc_sml_size(self.config.large_thresh, input.shape[0], height_max)
+            w_sml = calc_sml_size(self.config.large_thresh, input.shape[1], width_max)
             
             input_sml = cv2.resize(input, (w_sml, h_sml))
             mask_sml = cv2.resize(mask, (w_sml, h_sml))
-            out_sml = gl_inpaint(input_sml, mask_sml, self.datamean, self.inpainter, self.postproc, self.device)
+            out_sml = gl_inpaint(input_sml, mask_sml, self.datamean, self.inpainter, self.config.postproc, self.device)
             out_sml = cv2.resize(out_sml, (input.shape[1], input.shape[0]))
             out_sml = (out_sml * 255).astype('uint8')
 
-            input, mask = pseudo_mask_division(input, out_sml, mask, obj_rec, self.large_thresh)
+            input, mask = pseudo_mask_division(input, out_sml, mask, obj_rec, self.config.large_thresh)
 
         return input, mask

@@ -5,26 +5,24 @@ from .inpaint.glcic.completionnet_places2 import completionnet_places2
 from .detection.yolov3.darknet import Darknet
 from .segmentation.deeplabv3.model.deeplabv3 import DeepLabV3
 
-def set_networks(segmentation, detect_cfg, detect_weight, segment_weight, res_type, res_path, inpaint_weight, device):
+def set_networks(config, device):
     print('[INFO] Loading model...')
-    # detect_model = cv2.dnn.readNetFromCaffe(detect_cfgs, detect_weights)
+    # detect_model = cv2.dnn.readNetFromCaffe(config.detect_cfgs, config.detect_weights)
     #Set up the neural network
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    if segmentation:
-        detecter = DeepLabV3(res_type, res_path, device)
-        param = torch.load(segment_weight, map_location=device)
+    if config.segmentation:
+        detecter = DeepLabV3(config.resnet_type, config.resnet_path, device)
+        param = torch.load(config.segment_weights, map_location=device)
         detecter.load_state_dict(param)
         detecter.to(device) # (set in evaluation mode, this affects BatchNorm and dropout)
         detecter.eval() # (set in evaluation mode, this affects BatchNorm and dropout)
     else:
-        detecter = Darknet(detect_cfg)
-        detecter.load_weights(detect_weight)
+        detecter = Darknet(config.detect_cfgs)
+        detecter.load_weights(config.detect_weights)
         detecter.to(device)
         detecter.eval()
 
     inpainter = completionnet_places2
-    param = torch.load(inpaint_weight)
+    param = torch.load(config.inpaint_weights)
     inpainter.load_state_dict(param)
     inpainter.eval()
     inpainter.to(device)
