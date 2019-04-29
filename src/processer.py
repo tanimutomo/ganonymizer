@@ -123,7 +123,7 @@ class GANonymizer:
                 (w - 1) - j.max() < thresh or \
                 i.min() < thresh or j.min() < thresh:
             print('[INFO] Prepadding Processing...')
-            input, mask, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad)
+            input, mask, is_prepad = pre_padding(input, mask, thresh, j, i, is_prepad, self.config.prepad_px)
 
         return input, mask, is_prepad
 

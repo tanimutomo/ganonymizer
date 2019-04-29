@@ -28,7 +28,7 @@ def get_config():
             'video': '', # os.path.join(os.getcwd(), 'data/videos/half_inter10_noon.avi'),
 
             # The input image, when you apply to an image.
-            'image': os.path.join(os.getcwd(), 'data/images/example_01.jpg'),
+            'image': os.path.join(os.getcwd(), 'data/images/1224.png'),
 
             'output': '1',
 
@@ -100,6 +100,11 @@ def get_config():
 
             # the dir where you want to save mask images. if you don't save the mask, set None.
             'save_mask': None, # 'data/videos/noon/large_mask',
+
+            # The experiment for pre padding
+            # choose in ['default', 'random', 'random_pick', 'edge', 'opposite']
+            # default is 'edge'
+            'prepad_px': 'opposite',
 
 
             # For network pretrained models path

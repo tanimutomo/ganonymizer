@@ -41,7 +41,7 @@ def calc_sml_size(large_thresh, origin, max):
 
     return sml
 
-def pre_padding(input, mask, thresh, wi, hi, is_prepad):
+def pre_padding(input, mask, thresh, wi, hi, is_prepad, prepad_px):
     s_w, e_w, s_h, e_h = wi.min(), wi.max(), hi.min(), hi.max()
     size = input.shape
 
@@ -50,45 +50,45 @@ def pre_padding(input, mask, thresh, wi, hi, is_prepad):
         return input, mask, is_prepad
     else:
         if (size[0] - 1) - e_h < thresh:
-            input, mask = _prepad(input, mask, e_h, s_h, 0, thresh)
+            input, mask = _prepad(input, mask, e_h, s_h, 0, thresh, prepad_px)
             is_prepad['hd'] = True
 
         if (size[1] - 1) - e_w < thresh:
-            input, mask = _prepad(input, mask, e_w, s_w, 1, thresh)
+            input, mask = _prepad(input, mask, e_w, s_w, 1, thresh, prepad_px)
             is_prepad['wr'] = True
 
         if s_h < thresh:
-            input, mask = _prepad(input, mask, s_h, e_h, 0, thresh)
+            input, mask = _prepad(input, mask, s_h, e_h, 0, thresh, prepad_px)
             is_prepad['hu'] = True
 
         if s_w < thresh:
-            input, mask = _prepad(input, mask, s_w, e_w, 1, thresh)
+            input, mask = _prepad(input, mask, s_w, e_w, 1, thresh, prepad_px)
             is_prepad['wl'] = True
 
         return input, mask, is_prepad
 
 
-def _prepad(input, mask, edg, opp, direction, thresh):
+def _prepad(input, mask, edg, opp, direction, thresh, prepad_px):
     begin = 0
     end = input.shape[direction] - 1
     if direction == 0:
         if edg > opp:
             if end == edg:
-                pad = _create_padding_px(input, 0, opp-1, (1, -1, 3))
+                pad = _create_padding_px(input, 0, opp-1, (1, -1, 3), prepad_px, opp-1)
                 input, mask = _concat_pad(input, mask, pad, direction)
 
             elif end - edg < thresh:
                 pad_width = thresh
-                pad = _create_padding_px(input, 0, end, (1, -1, 3))
+                pad = _create_padding_px(input, 0, end, (1, -1, 3), prepad_px, opp-1)
                 input, mask = _concat_pad(input, mask, pad, direction)
         
         elif edg < opp:
             if begin == edg:
-                pad = _create_padding_px(input, 0, opp+1, (1, -1, 3))
+                pad = _create_padding_px(input, 0, opp+1, (1, -1, 3), prepad_px, opp+1)
                 input, mask = _concat_pad(input, mask, pad, direction)
 
             elif edg - begin < thresh:
-                pad = _create_padding_px(input, 0, begin, (1, -1, 3))
+                pad = _create_padding_px(input, 0, begin, (1, -1, 3), prepad_px, opp+1)
                 input, mask = _concat_pad(input, mask, pad, direction)
         else:
             raise RuntimeError('Not prepadding despite this image need prepadding')
@@ -96,20 +96,20 @@ def _prepad(input, mask, edg, opp, direction, thresh):
     elif direction == 1:
         if edg > opp:
             if end == edg:
-                pad = _create_padding_px(input, 1, opp-1, (-1, 1, 3))
+                pad = _create_padding_px(input, 1, opp-1, (-1, 1, 3), prepad_px, opp-1)
                 input, mask = _concat_pad(input, mask, pad, direction)
 
             elif end - edg < thresh:
-                pad = _create_padding_px(input, 1, end, (-1, 1, 3))
+                pad = _create_padding_px(input, 1, end, (-1, 1, 3), prepad_px, opp-1)
                 input, mask = _concat_pad(input, mask, pad, direction)
         
         elif edg < opp:
             if begin == edg:
-                pad = _create_padding_px(input,  1, opp+1, (-1, 1, 3))
+                pad = _create_padding_px(input,  1, opp+1, (-1, 1, 3), prepad_px, opp+1)
                 input, mask = _concat_pad(input, mask, pad, direction)
 
             elif edg - begin < thresh:
-                pad = _create_padding_px(input, 1,  begin, (-1, 1, 3))
+                pad = _create_padding_px(input, 1,  begin, (-1, 1, 3), prepad_px, opp+1)
                 input, mask = _concat_pad(input, mask, pad, direction)
         else:
             raise RuntimeError('Not prepadding despite this image need prepadding')
@@ -119,11 +119,35 @@ def _prepad(input, mask, edg, opp, direction, thresh):
     return input, mask
 
 
-def _create_padding_px(base, axis, pos, shape):
-    if axis == 0:
-        return base[pos, :, :].reshape(shape)
-    elif axis == 1:
-        return base[:, pos, :].reshape(shape)
+def _create_padding_px(base, axis, pos, shape, prepad_px, opp):
+    if prepad_px == 'edge' or prepad_px == 'default':
+        if axis == 0:
+            return base[pos, :, :].reshape(shape)
+        elif axis == 1:
+            return base[:, pos, :].reshape(shape)
+
+    elif prepad_px == 'random':
+        if axis == 0:
+            return np.random.randint(0, 255, size=base[pos, :, :].shape,
+                    dtype=np.uint8).reshape(shape)
+        elif axis == 1:
+            return np.random.randint(0, 255, size=base[:, pos, :].shape,
+                    dtype=np.uint8).reshape(shape)
+
+    elif prepad_px == 'random_pick':
+        if axis == 0:
+            pos = np.random.randint(0, base.shape[0] - 1)
+            return base[pos, :, :].reshape(shape)
+        elif axis == 1:
+            pos = np.random.randint(0, base.shape[1] - 1)
+            return base[:, pos, :].reshape(shape)
+
+    elif prepad_px == 'opposite':
+        if axis == 0:
+            return base[opp, :, :].reshape(shape)
+        elif axis == 1:
+            return base[:, opp, :].reshape(shape)
+
 
 
 def _concat_pad(input, mask, pad, axis):
