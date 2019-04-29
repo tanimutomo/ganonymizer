@@ -1,6 +1,7 @@
 import os
 
 from src.executer import Executer
+from src.utils.util import Config
 
 
 def evaluate():
@@ -16,7 +17,7 @@ def v2f():
     vid2frm(infile, out_dir)
 
 def main():
-    config = get_config()
+    config = Config(get_config())
     executer = Executer(config)
     executer.execute()
 
@@ -113,7 +114,7 @@ def get_config():
             'inpaint_weights': os.path.join(os.getcwd(), 
                 'src/inpaint/glcic/weights/completionnet_places2.pth'),
 
-            'segmentation_weight': os.path.join(os.getcwd(), 
+            'segmentation_weights': os.path.join(os.getcwd(), 
                 'src/segmentation/deeplabv3/pretrained_models/model_13_2_2_2_epoch_580.pth'),
 
             'resnet_type': 18,
