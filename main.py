@@ -28,7 +28,7 @@ def get_config():
             'video': '', # os.path.join(os.getcwd(), 'data/videos/half_inter10_noon.avi'),
 
             # The input image, when you apply to an image.
-            'image': os.path.join(os.getcwd(), 'data/images/example_01.jpg'),
+            'image': os.path.join(os.getcwd(), 'data/images/road_off0.png'),
 
             'output': '1',
 
@@ -61,8 +61,8 @@ def get_config():
             # The [ulx,uly,rdx,rdy] of the mask you create
             'manual_mask': [],
 
-            # The [position(edge/corner), distance(between edges), size] of the mask you want to create
-            'edge_mask': [corner, 2, 100],
+            # The int list [position(0:edge, 1:corner), distance(between edges), size] of the mask you want to create
+            'edge_mask': [1, 2, 100],
 
             # The size of the mask you create
             'center_mask': 0,
