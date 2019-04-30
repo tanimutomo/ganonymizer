@@ -165,9 +165,9 @@ class Executer:
         if mask is not None:
             print('[INFO] Use local masks')
             obj_rec = find_bbox(mask, obj_rec)
-        elif len(self.config.manual_mask) > 0:
+        elif not self.config.manual_mask:
             mask, obj_rec = create_mask(input.shape, self.config.manual_mask)
-        elif len(self.config.edge_mask) > 0:
+        elif not self.config.edge_mask:
             mask, obj_rec = edge_mask(input.shape, self.config.edge_mask)
         elif self.config.center_mask is not 0:
             mask, obj_rec = center_mask(input.shape, self.config.center_mask)

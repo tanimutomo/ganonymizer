@@ -62,7 +62,7 @@ def get_config():
             'manual_mask': [],
 
             # The [position(edge/corner), distance(between edges), size] of the mask you want to create
-            'edge_mask': [],
+            'edge_mask': [corner, 2, 100],
 
             # The size of the mask you create
             'center_mask': 0,
