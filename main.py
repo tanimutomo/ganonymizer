@@ -28,10 +28,9 @@ def get_config():
             'video': '', # os.path.join(os.getcwd(), 'data/videos/half_inter10_noon.avi'),
 
             # The input image, when you apply to an image.
-            'image': os.path.join(os.getcwd(), 'data/images/1224.png'),
+            'image': os.path.join(os.getcwd(), 'data/images/example_01.jpg'),
 
             'output': '1',
-
 
             # For network configuration
 
@@ -104,8 +103,11 @@ def get_config():
             # The experiment for pre padding
             # choose in ['default', 'random', 'random_pick', 'edge', 'opposite']
             # default is 'edge'
-            'prepad_px': 'opposite',
+            'prepad_px': 'default',
 
+            # THe experiment for the PMD
+            'pmd_div_num': 16, # choose in [4, 9, 16]
+            'lattice_width': 'normal', # choose in ['thin', 'normal', 'thick']
 
             # For network pretrained models path
 

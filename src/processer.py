@@ -156,6 +156,7 @@ class GANonymizer:
             out_sml = cv2.resize(out_sml, (input.shape[1], input.shape[0]))
             out_sml = (out_sml * 255).astype('uint8')
 
-            input, mask = pseudo_mask_division(input, out_sml, mask, obj_rec, self.config.large_thresh)
+            input, mask = pseudo_mask_division(input, out_sml, mask, obj_rec,
+                    self.config.large_thresh, self.config.pmd_div_num, self.config.lattice_width)
 
         return input, mask
