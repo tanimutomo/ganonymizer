@@ -2,6 +2,7 @@ import os
 
 from src.executer import Executer
 from src.utils.util import Config
+from src.utils.crop_img import imcrop
 
 
 def evaluate():
@@ -21,7 +22,7 @@ def main():
     executer = Executer(config)
     executer.execute()
 
-def create_exp_figs():
+def create_exp_figs(crop=False):
     esp_px_config = Config(get_config())
     esp_px = ['edge', 'opposite', 'random', 'random_pick']
     for name in esp_px:
@@ -31,6 +32,14 @@ def create_exp_figs():
         esp_px_config.det = 'data/experiment_fig_with_line'
         executer = Executer(esp_px_config)
         executer.execute()
+        if crop:
+            imcrop(
+                    os.path.join(os.getcwd(), esp_px_config.det, 
+                        'out_{}_{}'.format(esp_px_config.output, 
+                            esp_px_config.image.split('/')[-1])),
+                    'left',
+                    200
+                    )
 
     gfp_div_config = Config(get_config())
     gfp_div = [[4, 9, 16], ['thin', 'normal', 'thick']]
@@ -43,6 +52,14 @@ def create_exp_figs():
             gfp_div_config.det = 'data/experiment_fig_with_line'
             executer = Executer(gfp_div_config)
             executer.execute()
+            if crop:
+                imcrop(
+                        os.path.join(os.getcwd(), gfp_div_config.det, 
+                            'out_{}_{}'.format(gfp_div_config.output, 
+                                gfp_div_config.image.split('/')[-1])),
+                        'center',
+                        400
+                        )
 
     esp_thresh_config = Config(get_config())
     esp_thresh = [0, 1, 2, 3, 4, 5, 6, 10, 20]
@@ -53,6 +70,14 @@ def create_exp_figs():
         esp_thresh_config.det = 'data/experiment_fig_with_line'
         executer = Executer(esp_thresh_config)
         executer.execute()
+        if crop:
+            imcrop(
+                    os.path.join(os.getcwd(), esp_thresh_config.det, 
+                        'out_{}_{}'.format(esp_thresh_config.output, 
+                            esp_thresh_config.image.split('/')[-1])),
+                    'left',
+                    200
+                    )
 
     gfp_thresh_config = Config(get_config())
     gfp_thresh = [80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 200, 250, 300]
@@ -63,6 +88,14 @@ def create_exp_figs():
         gfp_thresh_config.det = 'data/experiment_fig_with_line'
         executer = Executer(gfp_thresh_config)
         executer.execute()
+        if crop:
+            imcrop(
+                    os.path.join(os.getcwd(), gfp_thresh_config.det, 
+                        'out_{}_{}'.format(gfp_thresh_config.output, 
+                            gfp_thresh_config.image.split('/')[-1])),
+                    'center',
+                    300
+                    )
 
 
 def get_config():
@@ -176,8 +209,8 @@ def get_config():
     return config
 
 if __name__ == '__main__':
-    # create_exp_figs()
-    main()
+    create_exp_figs(crop=True)
+    # main()
     # v2f()
     # evaluate()
 
