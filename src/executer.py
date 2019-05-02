@@ -5,8 +5,10 @@ import copy
 import numpy as np
 
 from .set import set_networks, set_device
-from .utils.util import video_writer, load_video, adjust_imsize, concat_all, extend_rec, CreateRandMask, check_mask_position, find_bbox
-from .utils.mask_design import create_mask, center_mask, edge_mask, create_boxline, write_boxline
+from .utils.util import video_writer, load_video, adjust_imsize, \
+        concat_all, extend_rec, CreateRandMask, check_mask_position, find_bbox
+from .utils.mask_design import create_mask, center_mask, edge_mask, \
+        create_boxline, write_boxline, draw_rectangle
 from .utils.auxiliary_layer import max_mask_size
 from .processer import GANonymizer
 
@@ -84,11 +86,13 @@ class Executer:
         elif self.config.concat_all:
             concat = concat_all(image, image_designed, output)
             in_name = self.config.image.split('/')[-1]
-            save_path = os.path.join(os.getcwd(), 'data/images/concat{}_{}'.format(self.config.output, in_name))
+            save_path = os.path.join(os.getcwd(), self.config.det, 
+                    'concat_{}_{}'.format(self.config.output, in_name))
             cv2.imwrite(save_path, concat)
         else:
             in_name = self.config.image.split('/')[-1]
-            save_path = os.path.join(os.getcwd(), 'data/images/out{}_{}'.format(self.config.output, in_name))
+            save_path = os.path.join(os.getcwd(), self.config.det,
+                    'out_{}_{}'.format(self.config.output, in_name))
             cv2.imwrite(save_path, output)
 
 
@@ -169,7 +173,7 @@ class Executer:
             mask, obj_rec = create_mask(input.shape, self.config.manual_mask)
         elif self.config.edge_mask:
             mask, obj_rec = edge_mask(input.shape, self.config.edge_mask)
-        elif self.config.center_mask is not 0:
+        elif self.config.center_mask != 0:
             mask, obj_rec = center_mask(input.shape, self.config.center_mask)
         elif self.config.segmentation:
             mask, obj_rec, elapsed[1] = self.ganonymizer.segment(input, obj_rec)
@@ -249,9 +253,10 @@ class Executer:
                 input, mask, obj_rec, width_max, height_max)
 
         if self.config.boxline > 0:
-            boxline = create_boxline(mask, obj_rec, self.config.boxline, original)
-            original = write_boxline(original, origin_mask, boxline)
+            # boxline = create_boxline(mask, obj_rec, self.config.boxline, original)
+            # original = write_boxline(original, origin_mask, boxline)
             # output = write_boxline(output, origin_mask, boxline)
+            output = draw_rectangle(output, obj_rec, self.config.boxline)
 
         if self.config.show:
             disp = np.concatenate([original, output, origin_mask], axis=1)
