@@ -5,8 +5,8 @@ import copy
 import numpy as np
 
 from .set import set_networks, set_device
-from .utils.util import video_writer, load_video, adjust_imsize, \
-        concat_all, extend_rec, CreateRandMask, check_mask_position, find_bbox
+from .utils.util import video_writer, load_video, adjust_imsize, concat_all, \
+        extend_rec, CreateRandMask, check_mask_position, find_bbox, enhance_img
 from .utils.mask_design import create_mask, center_mask, edge_mask, \
         create_boxline, write_boxline, draw_rectangle
 from .utils.auxiliary_layer import max_mask_size
@@ -251,6 +251,9 @@ class Executer:
         # reconstruct
         output, elapsed[2], elapsed[3] = self.ganonymizer.reconstruct(
                 input, mask, obj_rec, width_max, height_max)
+
+        if self.config.enhance > 0:
+            output = enhance_img(output, self.config.enhance)
 
         if self.config.boxline > 0:
             # boxline = create_boxline(mask, obj_rec, self.config.boxline, original)
