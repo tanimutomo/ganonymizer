@@ -52,3 +52,8 @@ def _load_img(impath):
     return cv2.imread(impath)
 
 
+if __name__ == '__main__':
+    impath = 'data/images/ex04_esp.png'
+    imcrop(impath, 'left', 200)
+    
+
