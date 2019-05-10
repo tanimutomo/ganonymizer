@@ -16,6 +16,12 @@ class Config(dict):
         return None
 
 
+def enhance_img(img, factor):
+    img =(255 - img.astype(np.int32)) * factor
+    img = np.where(img > 255, 255, img)
+    return (255 - img).astype(np.uint8)
+
+
 def find_bbox(mask, obj_rec):
     bbox = find_objects((mask / 255).astype('uint8'))
 

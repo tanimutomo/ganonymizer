@@ -41,54 +41,55 @@ def calc_sml_size(large_thresh, origin, max):
 
     return sml
 
-def pre_padding(input, mask, thresh, wi, hi, is_prepad):
+def pre_padding(input, mask, thresh, wi, hi, is_prepad, prepad_px):
     s_w, e_w, s_h, e_h = wi.min(), wi.max(), hi.min(), hi.max()
     size = input.shape
 
-    if (e_h > size[0] - thresh+1 and s_h < thresh) or (e_w > size[1] - thresh+1 and s_w < thresh):
-        print('[INFO] Not enable to pre_padding because Mask is too large')
-        return input, mask, is_prepad
-    else:
-        if (size[0] - 1) - e_h < thresh:
-            input, mask = _prepad(input, mask, e_h, s_h, 0, thresh)
-            is_prepad['hd'] = True
+    # print(s_w, e_w, s_h, e_h, thresh, size)
+    # if (e_h > size[0] - thresh+1 and s_h < thresh) or (e_w > size[1] - thresh+1 and s_w < thresh):
+    #     print('[INFO] Not enable to pre_padding because Mask is too large')
+    #     return input, mask, is_prepad
+    # else:
+    if (size[0] - 1) - e_h < thresh:
+        input, mask = _prepad(input, mask, e_h, s_h, 0, thresh, prepad_px)
+        is_prepad['hd'] = True
 
-        if (size[1] - 1) - e_w < thresh:
-            input, mask = _prepad(input, mask, e_w, s_w, 1, thresh)
-            is_prepad['wr'] = True
+    if (size[1] - 1) - e_w < thresh:
+        input, mask = _prepad(input, mask, e_w, s_w, 1, thresh, prepad_px)
+        is_prepad['wr'] = True
 
-        if s_h < thresh:
-            input, mask = _prepad(input, mask, s_h, e_h, 0, thresh)
-            is_prepad['hu'] = True
+    if s_h < thresh:
+        input, mask = _prepad(input, mask, s_h, e_h, 0, thresh, prepad_px)
+        is_prepad['hu'] = True
 
-        if s_w < thresh:
-            input, mask = _prepad(input, mask, s_w, e_w, 1, thresh)
-            is_prepad['wl'] = True
+    if s_w < thresh:
+        input, mask = _prepad(input, mask, s_w, e_w, 1, thresh, prepad_px)
+        is_prepad['wl'] = True
 
-        return input, mask, is_prepad
+    return input, mask, is_prepad
 
 
-def _prepad(input, mask, edg, opp, direction, thresh):
+def _prepad(input, mask, edg, opp, direction, thresh, prepad_px):
     begin = 0
     end = input.shape[direction] - 1
     if direction == 0:
         if edg > opp:
             if end == edg:
-                pad = _create_padding_px(input, 0, opp-1, (1, -1, 3))
+                pad = _create_padding_px(input, 0, opp-1, (1, -1, 3), prepad_px, opp-1)
                 input, mask = _concat_pad(input, mask, pad, direction)
 
             elif end - edg < thresh:
                 pad_width = thresh
-                pad = _create_padding_px(input, 0, end, (1, -1, 3))
+                pad = _create_padding_px(input, 0, end, (1, -1, 3), prepad_px, opp-1)
                 input, mask = _concat_pad(input, mask, pad, direction)
         
         elif edg < opp:
             if begin == edg:
-                pad = _create_padding_px(input, 0, opp+1, (1, -1, 3))
+                pad = _create_padding_px(input, 0, opp+1, (1, -1, 3), prepad_px, opp+1)
                 input, mask = _concat_pad(input, mask, pad, direction)
 
             elif edg - begin < thresh:
-                pad = _create_padding_px(input, 0, begin, (1, -1, 3))
+                pad = _create_padding_px(input, 0, begin, (1, -1, 3), prepad_px, opp+1)
                 input, mask = _concat_pad(input, mask, pad, direction)
         else:
             raise RuntimeError('Not prepadding despite this image need prepadding')
@@ -96,20 +97,20 @@ def _prepad(input, mask, edg, opp, direction, thresh):
     elif direction == 1:
         if edg > opp:
             if end == edg:
-                pad = _create_padding_px(input, 1, opp-1, (-1, 1, 3))
+                pad = _create_padding_px(input, 1, opp-1, (-1, 1, 3), prepad_px, opp-1)
                 input, mask = _concat_pad(input, mask, pad, direction)
 
             elif end - edg < thresh:
-                pad = _create_padding_px(input, 1, end, (-1, 1, 3))
+                pad = _create_padding_px(input, 1, end, (-1, 1, 3), prepad_px, opp-1)
                 input, mask = _concat_pad(input, mask, pad, direction)
         
         elif edg < opp:
             if begin == edg:
-                pad = _create_padding_px(input,  1, opp+1, (-1, 1, 3))
+                pad = _create_padding_px(input,  1, opp+1, (-1, 1, 3), prepad_px, opp+1)
                 input, mask = _concat_pad(input, mask, pad, direction)
 
             elif edg - begin < thresh:
-                pad = _create_padding_px(input, 1,  begin, (-1, 1, 3))
+                pad = _create_padding_px(input, 1,  begin, (-1, 1, 3), prepad_px, opp+1)
                 input, mask = _concat_pad(input, mask, pad, direction)
         else:
             raise RuntimeError('Not prepadding despite this image need prepadding')
@@ -119,11 +120,35 @@ def _prepad(input, mask, edg, opp, direction, thresh):
     return input, mask
 
 
-def _create_padding_px(base, axis, pos, shape):
-    if axis == 0:
-        return base[pos, :, :].reshape(shape)
-    elif axis == 1:
-        return base[:, pos, :].reshape(shape)
+def _create_padding_px(base, axis, pos, shape, prepad_px, opp):
+    if prepad_px == 'edge' or prepad_px == 'default':
+        if axis == 0:
+            return base[pos, :, :].reshape(shape)
+        elif axis == 1:
+            return base[:, pos, :].reshape(shape)
+
+    elif prepad_px == 'random':
+        if axis == 0:
+            return np.random.randint(0, 255, size=base[pos, :, :].shape,
+                    dtype=np.uint8).reshape(shape)
+        elif axis == 1:
+            return np.random.randint(0, 255, size=base[:, pos, :].shape,
+                    dtype=np.uint8).reshape(shape)
+
+    elif prepad_px == 'random_pick':
+        if axis == 0:
+            pos = np.random.randint(0, base.shape[0] - 1)
+            return base[pos, :, :].reshape(shape)
+        elif axis == 1:
+            pos = np.random.randint(0, base.shape[1] - 1)
+            return base[:, pos, :].reshape(shape)
+
+    elif prepad_px == 'opposite':
+        if axis == 0:
+            return base[opp, :, :].reshape(shape)
+        elif axis == 1:
+            return base[:, opp, :].reshape(shape)
+
 
 
 def _concat_pad(input, mask, pad, axis):
@@ -155,78 +180,98 @@ def cut_padding(out, origin, is_prepad):
     return out
 
 
-def pseudo_mask_division(input, out_sml, mask, rec, thresh):
+def pseudo_mask_division(input, out_sml, mask, rec, thresh, div_num, lattice_width):
+    print('[INFO] {} division and {} lattice width'.format(str(div_num), lattice_width))
     for r in rec:
         y, x, h, w = r
-        # input[y+int(h/4):y+int(h*3/4), x+int(w/4):x+int(w*3/4), :] = out256[y+int(h/4):y+int(h*3/4), x+int(w/4):x+int(w*3/4), :]
-        # mask[y+int(h/4):y+int(h*3/4), x+int(w/4):x+int(w*3/4), :] = 0
-
-        # interval = 60
-        inter_h, inter_w = int(h / 4), int(w / 4)
-        # inter_h = int(input.shape[0] / comp_size[0])
-        # inter_w = int(input.shape[1] / comp_size[1])
-        # print('[INFO] interval of interpolation is: {}'.format(interval))
         if w > thresh and h > thresh:
+            if div_num == 4:
+                # decide the interval and lattice width
+                if lattice_width == 'thin':
+                    inter_h, inter_w = int(h * (7/16)), int(w * (7/16))
+                    patch_size = int(h / 8)
+                elif lattice_width == 'normal':
+                    inter_h, inter_w = int(h * (3/8)), int(w * (3/8))
+                    patch_size = int(h / 4)
+                elif lattice_width == 'thick':
+                    inter_h, inter_w = int(h / 4), int(w / 4)
+                    patch_size = int(h / 2)
+
+                # the padding for mask division
+                if h > thresh:
+                    input[y+inter_h:y+inter_h+patch_size, x:x+w, :] = \
+                            out_sml[y+inter_h:y+inter_h+patch_size, x:x+w, :]
+                    mask[y+inter_h:y+inter_h+patch_size, x:x+w, :] = 0
+
+                if w > thresh:
+                    input[y:y+h, x+inter_w:x+inter_w+patch_size, :] = \
+                            out_sml[y:y+h, x+inter_w:x+inter_w+patch_size, :]
+                    mask[y:y+h, x+inter_w:x+inter_w+patch_size, :] = 0
+
+            elif div_num == 9:
+                # decide the interval and lattice width
+                if lattice_width == 'thin':
+                    inter_h, inter_w = int(h * (7/24)), int(w * (7/24))
+                    patch_size = int(h / 16)
+                elif lattice_width == 'normal':
+                    inter_h, inter_w = int(h / 4), int(w / 4)
+                    patch_size = int(h / 8)
+                elif lattice_width == 'thick':
+                    inter_h, inter_w = int(h / 6), int(w / 6)
+                    patch_size = int(h / 4)
+
+                # the padding for mask division
+                if h > thresh:
+                    input[y+inter_h:y+inter_h+patch_size, x:x+w, :] = \
+                            out_sml[y+inter_h:y+inter_h+patch_size, x:x+w, :]
+                    mask[y+inter_h:y+inter_h+patch_size, x:x+w, :] = 0
+                    input[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = \
+                            out_sml[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :]
+                    mask[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = 0
+
+                if w > thresh:
+                    input[y:y+h, x+inter_w:x+inter_w+patch_size, :] = \
+                            out_sml[y:y+h, x+inter_w:x+inter_w+patch_size, :]
+                    mask[y:y+h, x+inter_w:x+inter_w+patch_size, :] = 0
+                    input[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :] = \
+                            out_sml[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :]
+                    mask[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :] = 0
+            elif div_num == 16:
+                # decide the interval and lattice width
+                if lattice_width == 'thin':
+                    inter_h, inter_w = int(h * (29/128)), int(w * (29/128))
+                    patch_size = int(h / 32)
+                elif lattice_width == 'normal':
+                    inter_h, inter_w = int(h * (13/64)), int(w * (13/64))
+                    patch_size = int(h / 16)
+                elif lattice_width == 'thick':
+                    inter_h, inter_w = int(h * (5/32)), int(w * (5/32))
+                    patch_size = int(h / 8)
+
+                # the padding for mask division
+                if h > thresh:
+                    input[y+inter_h:y+inter_h+patch_size, x:x+w, :] = \
+                            out_sml[y+inter_h:y+inter_h+patch_size, x:x+w, :]
+                    mask[y+inter_h:y+inter_h+patch_size, x:x+w, :] = 0
+                    input[y + 2*inter_h + patch_size : y + 2*inter_h + 2*patch_size, x:x+w, :] = \
+                            out_sml[y + 2*inter_h + patch_size : y + 2*inter_h + 2*patch_size, x:x+w, :]
+                    mask[y + 2*inter_h + patch_size : y + 2*inter_h + 2*patch_size, x:x+w, :] = 0
+                    input[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = \
+                            out_sml[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :]
+                    mask[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = 0
+
+                if w > thresh:
+                    input[y:y+h, x+inter_w:x+inter_w+patch_size, :] = \
+                            out_sml[y:y+h, x+inter_w:x+inter_w+patch_size, :]
+                    mask[y:y+h, x+inter_w:x+inter_w+patch_size, :] = 0
+                    input[y:y+h, x + 2*inter_w + patch_size : x + 2*inter_w + 2*patch_size, :] = \
+                            out_sml[y:y+h, x+inter_w:x+inter_w+patch_size, :]
+                    mask[y:y+h, x + 2*inter_w + patch_size : x + 2*inter_w + 2*patch_size, :] = 0
+                    input[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :] = \
+                            out_sml[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :]
+                    mask[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :] = 0
+
             print('[INFO] Devided small mask size: (h: {}, w: {})'.format(inter_h, inter_w))
-            # print(r)
-            # raise RuntimeError('Include Large Mask')
-            # print('rec: ', y, x, h, w)
-
-            py = y + inter_h
-            patch_size = int(h / 8)
-            if h > thresh:
-                # print('input.shape: {}'.format(input.shape))
-                # print('out256.shape: {}'.format(out256.shape))
-                input[y+inter_h:y+inter_h+patch_size, x:x+w, :] = out_sml[y+inter_h:y+inter_h+patch_size, x:x+w, :]
-                mask[y+inter_h:y+inter_h+patch_size, x:x+w, :] = 0
-                input[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = out_sml[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :]
-                mask[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = 0
-                # print('vertical_up_interbar: ', y+inter_h, x, (y+inter_h+patch_size)-(y+inter_h), w)
-                # print('vertical_down_interbar: ', y+h-inter_h-patch_size, x, y+h-inter_h-y+h-inter_h-patch_size, w)
-
-            if w > thresh:
-                input[y:y+h, x+inter_w:x+inter_w+patch_size, :] = out_sml[y:y+h, x+inter_w:x+inter_w+patch_size, :]
-                mask[y:y+h, x+inter_w:x+inter_w+patch_size, :] = 0
-                input[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :] = out_sml[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :]
-                mask[y:y+h, x+w-inter_w-patch_size:x+w-inter_w, :] = 0
-                # print('horizontal_left_interbar: ', y, x+inter_w, h, (x+inter_w+patch_size)-(x+inter_w))
-                # print('horizontal_right_interbar: ', y, x+w-inter_w-patch_size, h, x+w-inter_w-x+w-inter_w-patch_size)
-
-            # while py + patch_size < y + h:
-            #     input[y+inter_h:y+inter_h+patch_size, x:x+w, :] = out256[y+inter_h:y+inter_h+patch_size, x:x+w, :]
-            #     mask[y+inter_h:y+inter_h+patch_size, x:x+w, :] = 0
-            #     input[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = out256[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :]
-            #     mask[y+h-inter_h-patch_size:y+h-inter_h, x:x+w, :] = 0
-            #     py += inter_h
-            #     py += 2 * inter_h
-
-            # px = x + inter_w
-            # while px + patch_size < x + w:
-            #     input[y:y+h, px:px+patch_size, :] = out256[y:y+h, px:px+patch_size, :]
-            #     mask[y:y+h, px:px+patch_size, :] = 0
-            #     px += inter_w
-                # px += 2 * inter_w
-
-            # while py + patch_size < y + h:
-            #     if indent:
-            #         px = x + patch_size
-            #     else:
-            #         px = x
-
-            #     while px + patch_size < x + w:
-            #         input[py:py+patch_size, px:px+patch_size, :] = out256[py:py+patch_size, px:px+patch_size, :]
-            #         mask[py:py+patch_size, px:px+patch_size, :] = 0
-            #         # input[py, px, :] = out256[py, px, :]
-            #         # mask[py, px, :] = 0
-            #         # input[py:py+inter_h, px:px+inter_w, :] = out256[py:py+inter_h, px:px+inter_w, :]
-            #         # mask[py:py+inter_h, px:px+inter_w, :] = 0
-            #         px += inter_w
-            #     py += inter_h
-            #     if indent:
-            #         indent = False
-            #     else:
-            #         indent = True
-        
     return input, mask
 
 

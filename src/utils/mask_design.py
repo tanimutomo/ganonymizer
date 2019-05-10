@@ -29,18 +29,19 @@ def center_mask(size, mask_size):
 
 
 def edge_mask(size, mask_info):
-    mask_info = mask_info.split(',')
     position = mask_info[0]
-    distance = int(mask_info[1])
-    mask_size = int(mask_info[2])
+    distance = mask_info[1]
+    mask_size = mask_info[2]
 
     c_h, c_v = size[0]//2, size[1]//2
     base = mask_size // 2
     
-    if position == 'edge':
+    # create the mask at the edge
+    if position == 0:
         ul_y, ul_x = c_h - base, size[1] - distance - mask_size
         dr_y, dr_x = c_h + base, size[1] - distance
-    elif position == 'corner':
+    # create the mask at the corner
+    elif position == 1:
         dr_y, dr_x = size[0] - distance, size[1] - distance
         ul_y, ul_x = dr_y - mask_size, dr_x - mask_size
     else:
@@ -56,8 +57,7 @@ def edge_mask(size, mask_info):
 
 
 def write_boxline(input, mask, boxline):
-    # print('input: ', np.max(input), np.min(input))
-    # print('mask: ', np.max(mask), np.min(mask))
+    print('write_boxline')
     output = input + boxline
     for i, ch in enumerate([0, 151, 239]):
         output[:,:,i] = np.where(output[:,:,i] > 255, ch, output[:,:,i]) 
@@ -77,6 +77,14 @@ def create_boxline(mask, obj_rec, width, original):
     cv2.imwrite('./ganonymizer/data/images/for_seg_bbox/boxline-mask_seg.png', boxline - mask)
 
     return boxline - mask
+
+
+def draw_rectangle(img, obj_rec, width):
+    out = img.copy()
+    for rec in obj_rec:
+        out = cv2.rectangle(out, (rec[1], rec[0]),
+                (rec[1]+rec[3], rec[0]+rec[2]), (0, 151, 239), width)
+    return out
 
 
 def get_parser():

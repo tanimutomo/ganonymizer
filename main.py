@@ -1,7 +1,9 @@
 import os
+import glob
 
 from src.executer import Executer
 from src.utils.util import Config
+from src.utils.crop_img import imcrop
 
 
 def evaluate():
@@ -16,10 +18,101 @@ def v2f():
     out_dir = 'data/videos/noon/out_gfp_on'
     vid2frm(infile, out_dir)
 
+
 def main():
     config = Config(get_config())
     executer = Executer(config)
     executer.execute()
+
+
+def execute_to_dir():
+    config = Config(get_config())
+    config.det = 'data/noon_det_res'
+    config.boxline = 1
+    imlist = glob.glob('data/videos/noon/input/*.png')
+    for impath in imlist:
+        config.image = os.path.join(os.getcwd(), impath)
+        executer = Executer(config)
+        executer.execute()
+
+
+def create_exp_figs(crop=False):
+    esp_px_config = Config(get_config())
+    esp_px = ['edge', 'opposite', 'random', 'random_pick']
+    for name in esp_px:
+        esp_px_config.output = 'esp_px_{}'.format(name)
+        esp_px_config.prepad_px = name
+        esp_px_config.edge_mask = [0, 1, 120]
+        esp_px_config.det = 'data/white_cropped'
+        executer = Executer(esp_px_config)
+        executer.execute()
+        if crop:
+            imcrop(
+                    os.path.join(os.getcwd(), esp_px_config.det, 
+                        'out_{}_{}'.format(esp_px_config.output, 
+                            esp_px_config.image.split('/')[-1])),
+                    'left',
+                    200
+                    )
+
+    gfp_div_config = Config(get_config())
+    gfp_div = [[4, 9, 16], ['thin', 'normal', 'thick']]
+    for num in gfp_div[0]:
+        for wid in gfp_div[1]:
+            gfp_div_config.output = 'gfp_div_{}_{}'.format(num, wid)
+            gfp_div_config.pmd_div_num = num
+            gfp_div_config.lattice_width = wid
+            gfp_div_config.center_mask = 300
+            gfp_div_config.det = 'data/white_cropped'
+            executer = Executer(gfp_div_config)
+            executer.execute()
+            if crop:
+                imcrop(
+                        os.path.join(os.getcwd(), gfp_div_config.det, 
+                            'out_{}_{}'.format(gfp_div_config.output, 
+                                gfp_div_config.image.split('/')[-1])),
+                        'center',
+                        400
+                        )
+
+    esp_thresh_config = Config(get_config())
+    esp_thresh = [0, 1, 2, 3, 4, 5, 6, 10, 20]
+    for dst in esp_thresh:
+        esp_thresh_config.output = 'esp_thresh_corner_enhanced_3_{}'.format(dst)
+        esp_thresh_config.edge_mask = [1, dst, 120]
+        esp_thresh_config.prepad_thresh = -4
+        esp_thresh_config.det = 'data/white_cropped'
+        esp_thresh_config.enhance = 3
+        executer = Executer(esp_thresh_config)
+        executer.execute()
+        if crop:
+            imcrop(
+                    os.path.join(os.getcwd(), esp_thresh_config.det, 
+                        'out_{}_{}'.format(esp_thresh_config.output, 
+                            esp_thresh_config.image.split('/')[-1])),
+                    'bottom_left',
+                    200
+                    )
+
+    gfp_thresh_config = Config(get_config())
+    gfp_thresh = [80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 200, 250, 300]
+    for size in gfp_thresh:
+        gfp_thresh_config.output = 'gfp_thresh_enhanced_{}'.format(size)
+        gfp_thresh_config.center_mask = size
+        gfp_thresh_config.large_thresh = 120000
+        gfp_thresh_config.det = 'data/white_cropped'
+        gfp_thresh_config.enhance = 4
+        executer = Executer(esp_thresh_config)
+        executer = Executer(gfp_thresh_config)
+        executer.execute()
+        if crop:
+            imcrop(
+                    os.path.join(os.getcwd(), gfp_thresh_config.det, 
+                        'out_{}_{}'.format(gfp_thresh_config.output, 
+                            gfp_thresh_config.image.split('/')[-1])),
+                    'center',
+                    300
+                    )
 
 
 def get_config():
@@ -28,13 +121,31 @@ def get_config():
             'video': '', # os.path.join(os.getcwd(), 'data/videos/half_inter10_noon.avi'),
 
             # The input image, when you apply to an image.
-            'image': os.path.join(os.getcwd(), 'data/images/example_01.jpg'),
+            'image': os.path.join(os.getcwd(), 'data/images/white.png'),
+            'det': 'data/images',
 
-            'output': '1',
+            'output': '0',
 
+            # THe experiment for the PMD
+            'pmd_div_num': 9, # choose in [4, 9, 16]
+            'lattice_width': 'normal', # choose in ['thin', 'normal', 'thick']
+
+            # The experiment for pre padding
+            # choose in ['default', 'random', 'random_pick', 'edge', 'opposite']
+            # default is 'edge'
+            'prepad_px': 'default',
+
+            # The int list [position(0:edge, 1:corner), distance(between edges), size] of the mask you want to create
+            'edge_mask': [],
+
+            # The size of the mask you create
+            'center_mask': 0,
+
+            # The enhance color for experiment figs
+            # the factor multiplied to image
+            'enhance': 0,
 
             # For network configuration
-
             'segmentation': False,
             # minimum probability to filter weak detections
             'conf': 0.5,
@@ -61,12 +172,6 @@ def get_config():
 
             # The [ulx,uly,rdx,rdy] of the mask you create
             'manual_mask': [],
-
-            # The [position(edge/corner), distance(between edges), size] of the mask you want to create
-            'edge_mask': [],
-
-            # The size of the mask you create
-            'center_mask': 0,
 
             # select from [edge, large, None]
             # make a random mask and save its mask for evaluating the ESP or GFP
@@ -101,7 +206,6 @@ def get_config():
             # the dir where you want to save mask images. if you don't save the mask, set None.
             'save_mask': None, # 'data/videos/noon/large_mask',
 
-
             # For network pretrained models path
 
             # path to Caffe deploy prototxt file
@@ -126,8 +230,10 @@ def get_config():
     return config
 
 if __name__ == '__main__':
-    main()
+    # main()
     # v2f()
     # evaluate()
+    # create_exp_figs(crop=True)
+    execute_to_dir()
 
 
