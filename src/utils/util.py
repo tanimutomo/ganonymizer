@@ -105,7 +105,7 @@ def check_mask_position(rand_mask, mask):
 
 def video_writer(video, output_name, fps, width, height):
     video_name = video.split('/')[-1]
-    outfile = os.path.join(os.getcwd(), 'ganonymizer/data/videos/out{}_{}'.format(output_name, video_name))
+    outfile = os.path.join(os.getcwd(), 'data/videos/out{}_{}'.format(output_name, video_name))
 
     # video writer
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
