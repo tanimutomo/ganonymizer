@@ -3,6 +3,7 @@ import cv2
 import time
 import copy
 import numpy as np
+import datetime
 
 from .set import set_networks, set_device
 from .utils.util import video_writer, load_video, adjust_imsize, concat_all, \
@@ -56,6 +57,8 @@ class Executer:
         detecter, inpainter, datamean = set_networks(self.config, device)
         self.ganonymizer = GANonymizer(self.config, device, detecter, inpainter, datamean)
 
+        if self.config.camera:
+            self.realtime(self.config.realtime_show)
         if os.path.exists(self.config.video):
             self.apply_to_video()
         elif os.path.exists(self.config.image):
@@ -94,6 +97,61 @@ class Executer:
             save_path = os.path.join(os.getcwd(), self.config.det,
                     'out_{}_{}'.format(self.config.output, in_name))
             cv2.imwrite(save_path, output)
+
+
+    def realtime(self, show):
+        cap = cv2.VideoCapture(1)
+        width = int(cap.get(3))
+        height = int(cap.get(4))
+        origin_fps = cap.get(5)
+
+        # create video writer
+        now = datetime.datetime.now()
+        video_name = '{0:%m%d_%H%M_%S}.avi'.format(now)
+        writer = video_writer(video_name, False, self.config.fps, width, height)
+
+        count = 1
+        elapsed = [0, 0, 0, 0]
+        total_time = [0, 0, 0, 0]
+
+        while(cap.isOpened()):
+            print('')
+            begin_process = time.time()
+            ret, origin_frame = cap.read()
+            if ret:
+                print('-----------------------------------------------------')
+
+                # process
+                frame = copy.deepcopy(origin_frame)
+                elapsed, output, frame_designed = self.process_input(frame, elapsed, count=count)
+
+                # append frame to video
+                if self.config.concat_all:
+                    output = concat_all(origin_frame, frame_designed, output)
+                elif self.config.concat_inout:
+                    output = np.concatenate([origin_frame, output], axis=0)
+
+                writer.write(output)
+                if show:
+                    print('show image')
+                    cv2.imshow('Ouput', output)
+                    k = cv2.waitKey(1)
+                    if k == 27:
+                        break
+
+                # print the process info per iteration
+                total_time, count = self.print_info_per_process(begin_process,
+                                                                elapsed,
+                                                                count,
+                                                                total_time)
+
+            else:
+                break
+
+        ### Stop video process
+        cap.release()
+        writer.release()
+        cv2.destroyAllWindows()
 
 
     def apply_to_video(self):
@@ -275,7 +333,7 @@ class Executer:
         return elapsed, output, original
 
 
-    def print_info_per_process(self, begin, elapsed, count, total, frames):
+    def print_info_per_process(self, begin, elapsed, count, total, frames=-1):
         ### Print the elapsed time of processing
         elapsed[0] = time.time() - begin
         total[0] += elapsed[0]

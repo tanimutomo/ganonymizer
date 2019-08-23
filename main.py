@@ -118,6 +118,8 @@ def create_exp_figs(crop=False):
 def get_config():
     config = {
             # For Input and Output
+            'camera': True,
+            'realtime_show': True,
             'video': '', # os.path.join(os.getcwd(), 'data/videos/half_inter10_noon.avi'),
 
             # The input image, when you apply to an image.
@@ -230,10 +232,10 @@ def get_config():
     return config
 
 if __name__ == '__main__':
-    # main()
+    main()
     # v2f()
     # evaluate()
     # create_exp_figs(crop=True)
-    execute_to_dir()
+    # execute_to_dir()
 
 
