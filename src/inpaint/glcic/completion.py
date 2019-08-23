@@ -1,8 +1,8 @@
 import argparse
 import os
 import torch
-from torch.legacy import nn
-from torch.legacy.nn.Sequential import Sequential
+# from torch.legacy import nn
+# from torch.legacy.nn.Sequential import Sequential
 import cv2
 import numpy as np
 # from torch.utils.serialization import load_lua
