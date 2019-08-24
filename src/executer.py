@@ -18,88 +18,66 @@ class Executer:
     def __init__(self, config):
         self.config = config
 
-        # self.video = config['video']
-        # self.image = config['image']
-        # self.output = config['output']
-        # self.segmentation = config['segmentation']
-        # self.detect_cfg = config['detect_cfgs']
-        # self.detect_weight = config['detect_weights']
-        # self.segmentation_weight = config['segmentation_weight']
-        # self.res_type = config['resnet_type']
-        # self.res_path = config['resnet_path']
-        # self.inpaint_weight = config['inpaint_weights']
-
-        # self.fps = config['fps']
-        # self.conf = config['conf']
-        # self.nms = config['nms']
-        # self.postproc = config['postproc']
-        # self.large_thresh = config['large_thresh']
-        # self.prepad_thresh = config['prepad_thresh']
-
-        # self.show = config['show']
-        # self.mask = config['mask']
-        # self.manual_mask = config['manual_mask']
-        # self.edge_mask = config['edge_mask']
-        # self.center_mask = config['center_mask']
-        # self.boxline = config['boxline']
-        # self.save_outframe = config['save_outframe']
-        # self.save_outimage = config['save_outimage']
-        # self.save_mask = config['save_mask']
-        # self.concat_all = config['concat_all']
-        # self.concat_inout = config['concat_inout']
-        # self.random_mask = config['random_mask']
-        # self.use_local_masks = config['use_local_masks']
-        # self.detection_summary_file = config['detection_summary_file']
-
-
     def execute(self):
         device = set_device()
         detecter, inpainter, datamean = set_networks(self.config, device)
         self.ganonymizer = GANonymizer(self.config, device, detecter, inpainter, datamean)
 
-        if self.config.camera:
-            self.realtime(self.config.realtime_show)
-        if os.path.exists(self.config.video):
-            self.apply_to_video()
-        elif os.path.exists(self.config.image):
-            self.apply_to_image()
+        if self.config.exec == 'realtime_image':
+            self.realtime_image()
+        elif self.config.exec == 'realtime_video':
+            self.realtime_video()
+        elif self.config.exec == 'video' and os.path.exists(self.config.video):
+            self.video()
+        elif self.config.exec == 'image' and os.path.exists(self.config.image):
+            self.image()
         else:
-            print('[ERROR] Not selected an input source.')
+            raise RuntimeError('[ERROR] Not selected an input source.')
 
 
-    def apply_to_image(self):
-        # whole, yolov3, glcic, reconst
+    def realtime_image(self):
+        cap = cv2.VideoCapture(1)
+        width = int(cap.get(3))
+        height = int(cap.get(4))
+        origin_fps = cap.get(5)
+
+        # create video writer
+        now = datetime.datetime.now()
+        image_name = '{0:%m%d_%H%M_%S}.png'.format(now)
+        save_path = os.path.join(self.config.data_root,
+                                 'image',
+                                 image_name)
+
+        count = 1
         elapsed = [0, 0, 0, 0]
-        image = cv2.imread(self.config.image)
-        image = adjust_imsize(image)
-        input = copy.deepcopy(image)
+        cv2.namedWindow('Output')
 
-        # process
-        if os.path.exists(self.config.mask):
-            mask = cv2.imread(self.config.mask)
-            elapsed, output, image_designed = self.process_input(input, elapsed, mask)
-        else:
-            elapsed, output, image_designed = self.process_input(input, elapsed)
+        if cap.isOpened():
+            print('')
+            ret, origin_frame = cap.read()
+            if ret:
+                print('-----------------------------------------------------')
 
+                # process
+                frame = copy.deepcopy(origin_frame)
+                elapsed, output, frame_designed = self.process_input(frame, elapsed, count=count)
 
-        if self.config.save_outimage is not None:
-            dir = self.config.save_outimage.split(',')[0] + '/'
-            name = self.config.save_outimage.split(',')[1] + '.png'
-            cv2.imwrite(dir+name, output)
-        elif self.config.concat_all:
-            concat = concat_all(image, image_designed, output)
-            in_name = self.config.image.split('/')[-1]
-            save_path = os.path.join(os.getcwd(), self.config.det, 
-                    'concat_{}_{}'.format(self.config.output, in_name))
-            cv2.imwrite(save_path, concat)
-        else:
-            in_name = self.config.image.split('/')[-1]
-            save_path = os.path.join(os.getcwd(), self.config.det,
-                    'out_{}_{}'.format(self.config.output, in_name))
-            cv2.imwrite(save_path, output)
+                if self.config.output_type == 'concat_all':
+                    output = concat_all(origin_frame, frame_designed, output)
+                elif self.config.output_type == 'concat_inout':
+                    output = np.concatenate([origin_frame, output], axis=0)
 
+                cv2.imwrite(save_path, output)
+                if self.config.realtime_show:
+                    cv2.imshow('Ouput', output)
+                    k = cv2.waitKey(1)
+                    if k == 27:
+                        pass
 
-    def realtime(self, show):
+        cap.release()
+        cv2.destroyAllWindows()
+
+    def realtime_video(self):
         cap = cv2.VideoCapture(1)
         width = int(cap.get(3))
         height = int(cap.get(4))
@@ -126,14 +104,13 @@ class Executer:
                 elapsed, output, frame_designed = self.process_input(frame, elapsed, count=count)
 
                 # append frame to video
-                if self.config.concat_all:
+                if self.config.output_type == 'concat_all':
                     output = concat_all(origin_frame, frame_designed, output)
-                elif self.config.concat_inout:
+                elif self.config.output_type == 'concat_inout':
                     output = np.concatenate([origin_frame, output], axis=0)
 
                 writer.write(output)
-                if show:
-                    print('show image')
+                if self.config.realtime_show:
                     cv2.imshow('Ouput', output)
                     k = cv2.waitKey(1)
                     if k == 27:
@@ -154,7 +131,39 @@ class Executer:
         cv2.destroyAllWindows()
 
 
-    def apply_to_video(self):
+    def image(self):
+        # whole, yolov3, glcic, reconst
+        elapsed = [0, 0, 0, 0]
+        image = cv2.imread(self.config.image)
+        image = adjust_imsize(image)
+        input = copy.deepcopy(image)
+
+        # process
+        if os.path.exists(self.config.mask):
+            mask = cv2.imread(self.config.mask)
+            elapsed, output, image_designed = self.process_input(input, elapsed, mask)
+        else:
+            elapsed, output, image_designed = self.process_input(input, elapsed)
+
+
+        if self.config.save_outimage is not None:
+            dir = self.config.save_outimage.split(',')[0] + '/'
+            name = self.config.save_outimage.split(',')[1] + '.png'
+            cv2.imwrite(dir+name, output)
+        elif self.config.output_type == 'concat_all':
+            concat = concat_all(image, image_designed, output)
+            in_name = self.config.image.split('/')[-1]
+            save_path = os.path.join(os.getcwd(), self.config.det, 
+                    'concat_{}_{}'.format(self.config.output, in_name))
+            cv2.imwrite(save_path, concat)
+        else:
+            in_name = self.config.image.split('/')[-1]
+            save_path = os.path.join(os.getcwd(), self.config.det,
+                    'out_{}_{}'.format(self.config.output, in_name))
+            cv2.imwrite(save_path, output)
+
+
+    def video(self):
         # set variables
         video = np.array([])
         count = 1
@@ -167,9 +176,9 @@ class Executer:
         cap, origin_fps, frames, width, height = load_video(self.config.video)
         
         # video writer
-        if self.config.concat_all:
+        if self.config.output_type == 'concat_all':
             writer = video_writer(self.config.video, self.config.output, self.config.fps, width*3, height*2)
-        elif self.config.concat_inout:
+        elif self.config.output_type == 'concat_inout':
             writer = video_writer(self.config.video, self.config.output, self.config.fps, width, height*2)
         else:
             writer = video_writer(self.config.video, self.config.output, self.config.fps, width, height)
@@ -178,28 +187,26 @@ class Executer:
         while(cap.isOpened()):
             print('')
             begin_process = time.time()
-            ret, frame = cap.read()
+            ret, origin_frame = cap.read()
             if ret:
                 print('-----------------------------------------------------')
                 print('[INFO] Count: {}/{}'.format(count, frames))
 
                 # process
-                input = copy.deepcopy(frame)
+                frame = copy.deepcopy(frame)
                 if self.config.use_local_masks is not None:
                     mask = cv2.imread(os.path.join(self.config.use_local_masks, 'mask_{}.png'.format(count)))
-                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed, mask=mask, count=count)
+                    elapsed, output, frame_designed, mask = self.process_input(frame, elapsed, mask=mask, count=count)
                 else:
-                    elapsed, output, frame_designed, mask = self.process_input(input, elapsed, count=count)
+                    elapsed, output, frame_designed, mask = self.process_input(frame, elapsed, count=count)
 
                 # append frame to video
-                if self.config.concat_all:
-                    concat = concat_all(frame, frame_designed, output)
-                elif self.config.concat_inout:
-                    concat = np.concatenate([frame, output], axis=0)
-                else:
-                    concat = output
+                if self.config.output_type == 'concat_all':
+                    output = concat_all(origin_frame, frame_designed, output)
+                elif self.config.output_type == 'concat_inout':
+                    output = np.concatenate([origin_frame, output], axis=0)
 
-                writer.write(concat)
+                writer.write(output)
 
                 if self.config.save_outframe != None:
                     cv2.imwrite('{}out_{}.png'.format(self.config.save_outframe, count), output)
