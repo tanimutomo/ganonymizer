@@ -4,6 +4,7 @@ import time
 import copy
 import numpy as np
 import datetime
+import socket
 
 from .set import set_networks, set_device
 from .utils.util import video_writer, load_video, adjust_imsize, concat_all, \
@@ -36,27 +37,42 @@ class Executer:
 
 
     def realtime_image(self):
-        cap = cv2.VideoCapture(1)
-        width = int(cap.get(3))
-        height = int(cap.get(4))
-        origin_fps = cap.get(5)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(('127.0.0.1', 50007))
+            s.listen(1)
 
-        # create video writer
-        now = datetime.datetime.now()
-        image_name = '{0:%m%d_%H%M_%S}.png'.format(now)
-        save_path = os.path.join(self.config.data_root,
-                                 'image',
-                                 image_name)
+            cap = cv2.VideoCapture(1)
+            width = int(cap.get(3))
+            height = int(cap.get(4))
+            origin_fps = cap.get(5)
 
-        count = 1
-        elapsed = [0, 0, 0, 0]
-        cv2.namedWindow('Output')
+            count = 1
+            elapsed = [0, 0, 0, 0]
 
-        if cap.isOpened():
-            print('')
-            ret, origin_frame = cap.read()
-            if ret:
+            while cap.isOpened():
+                print('')
+                conn, addr = s.accept()
+                with conn:
+                    while True:
+                        data = conn.recv(1024)
+                        if data:
+                            break
+
+                ret, origin_frame = cap.read()
+                if not ret:
+                    break
+
+                # saved image name and path
+                recv_data = data.decode(encoding='utf-8')
+                # now = datetime.datetime.now()
+                # image_name = '{0:%m%d_%H%M_%S}.png'.format(now)
+                image_name = recv_data + '.png'
+                save_path = os.path.join(self.config.data_root,
+                                         'image',
+                                         image_name)
+
                 print('-----------------------------------------------------')
+                origin_frame = cv2.resize(origin_frame, dsize=None, fx=0.5, fy=0.5)
 
                 # process
                 frame = copy.deepcopy(origin_frame)
@@ -68,14 +84,13 @@ class Executer:
                     output = np.concatenate([origin_frame, output], axis=0)
 
                 cv2.imwrite(save_path, output)
-                if self.config.realtime_show:
-                    cv2.imshow('Ouput', output)
-                    k = cv2.waitKey(1)
-                    if k == 27:
-                        pass
 
-        cap.release()
-        cv2.destroyAllWindows()
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as cs:
+                    cs.connect(('127.0.0.1', 50008))
+                    cs.send(save_path.encode())
+
+            cap.release()
+            cv2.destroyAllWindows()
 
     def realtime_video(self):
         cap = cv2.VideoCapture(1)
