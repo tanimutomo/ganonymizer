@@ -130,7 +130,7 @@ def get_options():
     parser.add_argument('--exec', type=str, required=True,
                         choices=['realtime_image', 'realtime_video', 'image', 'video'],
                         help='specify the execution type')
-    parser.add_argument('--data_root', type=str, default='./data')
+    parser.add_argument('--data_root', type=str, default='/media/jetson/data')
 
     # settings for each execution type
     # realtime
@@ -152,8 +152,8 @@ def get_options():
     parser.add_argument('--fps', type=float, default=5.0)
     parser.add_argument('--show', action='store_true')
 
-    parser.add_argument('--output_type', type=str, default='concat_inout',
-                        choices=['concat_all', 'concat_inout', 'output'])
+    parser.add_argument('--output_type', type=str, default='raw',
+                        choices=['raw', 'concat_all', 'concat_inout'])
     parser.add_argument('--detection_summary_file', type=str)
 
     # For saving images and videos
