@@ -1,8 +1,9 @@
+import argparse
 import os
 import glob
 
 from src.executer import Executer
-from src.utils.util import Config
+# from src.utils.util import Config
 from src.utils.crop_img import imcrop
 
 
@@ -20,13 +21,15 @@ def v2f():
 
 
 def main():
-    config = Config(get_config())
+    # config = Config(get_config())
+    config = get_options()
     executer = Executer(config)
     executer.execute()
 
 
 def execute_to_dir():
-    config = Config(get_config())
+    # config = Config(get_config())
+    config = get_options()
     config.det = 'data/noon_det_res'
     config.boxline = 1
     imlist = glob.glob('data/videos/noon/input/*.png')
@@ -37,7 +40,8 @@ def execute_to_dir():
 
 
 def create_exp_figs(crop=False):
-    esp_px_config = Config(get_config())
+    # esp_px_config = Config(get_config())
+    esp_px_config = get_options()
     esp_px = ['edge', 'opposite', 'random', 'random_pick']
     for name in esp_px:
         esp_px_config.output = 'esp_px_{}'.format(name)
@@ -55,7 +59,8 @@ def create_exp_figs(crop=False):
                     200
                     )
 
-    gfp_div_config = Config(get_config())
+    # gfp_div_config = Config(get_config())
+    gfp_px_config = get_options()
     gfp_div = [[4, 9, 16], ['thin', 'normal', 'thick']]
     for num in gfp_div[0]:
         for wid in gfp_div[1]:
@@ -75,7 +80,8 @@ def create_exp_figs(crop=False):
                         400
                         )
 
-    esp_thresh_config = Config(get_config())
+    # esp_thresh_config = Config(get_config())
+    esp_thresh_config = get_options()
     esp_thresh = [0, 1, 2, 3, 4, 5, 6, 10, 20]
     for dst in esp_thresh:
         esp_thresh_config.output = 'esp_thresh_corner_enhanced_3_{}'.format(dst)
@@ -94,7 +100,8 @@ def create_exp_figs(crop=False):
                     200
                     )
 
-    gfp_thresh_config = Config(get_config())
+    # gfp_thresh_config = Config(get_config())
+    gfp_thresh_config = get_options()
     gfp_thresh = [80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 200, 250, 300]
     for size in gfp_thresh:
         gfp_thresh_config.output = 'gfp_thresh_enhanced_{}'.format(size)
@@ -115,121 +122,120 @@ def create_exp_figs(crop=False):
                     )
 
 
-def get_config():
-    config = {
-            # For Input and Output
-            'camera': True,
-            'realtime_show': True,
-            'video': '', # os.path.join(os.getcwd(), 'data/videos/half_inter10_noon.avi'),
+def get_options():
+    parser = argparse.ArgumentParser(description="Execution Settings")
 
-            # The input image, when you apply to an image.
-            'image': os.path.join(os.getcwd(), 'data/images/white.png'),
-            'det': 'data/images',
+    ##### MAIN SETTINGS #####
+    # For Input and Output
+    parser.add_argument('--exec', type=str, required=True,
+                        choices=['realtime_image', 'realtime_video', 'image', 'video'],
+                        help='specify the execution type')
+    parser.add_argument('--data_root', type=str, default='./data')
 
-            'output': '0',
+    # settings for each execution type
+    # realtime
+    parser.add_argument('--realtime_show', action='store_true')
 
-            # THe experiment for the PMD
-            'pmd_div_num': 9, # choose in [4, 9, 16]
-            'lattice_width': 'normal', # choose in ['thin', 'normal', 'thick']
+    # an input video path
+    parser.add_argument('--video', type=str, default='data/videos/half_inter10_noon.avi')
 
-            # The experiment for pre padding
-            # choose in ['default', 'random', 'random_pick', 'edge', 'opposite']
-            # default is 'edge'
-            'prepad_px': 'default',
-
-            # The int list [position(0:edge, 1:corner), distance(between edges), size] of the mask you want to create
-            'edge_mask': [],
-
-            # The size of the mask you create
-            'center_mask': 0,
-
-            # The enhance color for experiment figs
-            # the factor multiplied to image
-            'enhance': 0,
-
-            # For network configuration
-            'segmentation': False,
-            # minimum probability to filter weak detections
-            'conf': 0.5,
-
-            'nms': 0.4,
-
-            # The threshold for PMD processing
-            'large_thresh': 120,
-
-            # The threshold for prepadding processing
-            'prepad_thresh': 4,
-
-            'fps': 5.0,
-
-            'show': False,
-
-            'postproc': False,
+    # an input image path
+    parser.add_argument('--image', type=str, default='data/images/white.png',
+                        help='input image path')
 
 
-            # For mask setting (this configs mainly for evaluating GANonymizer, ESP and GFP)
+    ##### OUTPUT SETTINGS #####
+    parser.add_argument('--det', type=str, default='data/images',
+                        help='output dir for image')
+    parser.add_argument('--output', type=str, default='0')
 
-            # The mask image, when you apply Only reconstruction to an image.
-            'mask': 'path_to_mask_image',
+    parser.add_argument('--fps', type=float, default=5.0)
+    parser.add_argument('--show', action='store_true')
 
-            # The [ulx,uly,rdx,rdy] of the mask you create
-            'manual_mask': [],
+    parser.add_argument('--output_type', type=str, default='concat_inout',
+                        choices=['concat_all', 'concat_inout', 'output'])
+    parser.add_argument('--detection_summary_file', type=str)
 
-            # select from [edge, large, None]
-            # make a random mask and save its mask for evaluating the ESP or GFP
-            'random_mask': None,
+    # For saving images and videos
+    parser.add_argument('--save_outframe', type=str,
+                        help='{dir,filename(with extention)} that you want to save output image')
+    parser.add_argument('--save_outimage', type=str,
+                        help='{dir,filename(with extention)} that you want to save image')
+    parser.add_argument('--save_mask', type=str, # 'data/videos/noon/large_mask',
+                        help='the dir where you want to save mask images.'
+                             'if you dont save the mask, set None.')
 
-            # if you use local masks in video processing, specify the directory where series masks are saved.
-            # the mask filename should be mask_{count_num}.png.
-            # Note that this {count_num} start 1, not 0.
-            # if you dont't use local masks, set None.
-            'use_local_masks': None, # 'data/videos/noon/large_mask',
+
+    ##### GANONYMIZER SETTINGS #####
+    # The experiment for the PMD
+    parser.add_argument('--pmd_div_num', type=int, default=9, choices=[4, 9, 16])
+    parser.add_argument('--lattice_width', type=str, default='normal',
+                        choices=['thin', 'normal', 'thick'])
+    parser.add_argument('--prepad_px', type=str, default='default',
+                        choices=['default', 'random', 'random_pick', 'edge', 'opposite'],
+                        help='which prepad do you use')
+    parser.add_argument('--large_thresh', type=int, default=120,
+                        help='a threshold for applying pmd')
+    parser.add_argument('--prepad_thresh', type=int, default=4,
+                        help='a threshold for prepadding')
 
 
-            # For design of the output image or video
+    ##### NETWORK CONFIGURATIONS #####
+    parser.add_argument('--segmentation', action='store_true',
+                        help='use semantic segmentation (deeplabv3)')
 
-            # Write the bouding box at the reconstruction part
-            'boxline': 0,
+    # detection settings
+    parser.add_argument('--conf', type=float, default=0.5)
+    parser.add_argument('--nms', type=float, default=0.4)
 
-            'concat_all': False,
+    # GLCIC
+    parser.add_argument('--postproc', action='store_true')
 
-            'concat_inout': True,
+    # Network path
+    # YOLO
+    parser.add_argument('--detect_cfgs', type=str, default='src/detection/yolov3/cfgs/yolov3.cfg')
+    parser.add_argument('--detect_weights', type=str,
+                        default='src/detection/yolov3/weights/yolov3.weights')
+    # GLCIC
+    parser.add_argument('--inpaint_weights', type=str,
+                        default='src/inpaint/glcic/weights/completionnet_places2.pth')
+    # DeepLabV3
+    parser.add_argument('--segmentation_weights', type=str,
+                        default='src/segmentation/deeplabv3/pretrained_models/model_13_2_2_2_epoch_580.pth')
+    parser.add_argument('--resnet_type', type=int, default=18)
+    parser.add_argument('--resnet_path', type=str,
+                        default='src/segmentation/deeplabv3/pretrained_models/resnet')
 
-            'detection_summary_file': None, #'data/videos/noon/half_detection.txt',
 
-            # For saving images and videos
+    ##### EXPERIMENT SETTINGS #####
+    # mask settings
+    parser.add_argument('--edge_mask', type=int, nargs=3, default=[],
+                        help='[position(0:edge, 1:corner), distance(between edges), size] of the mask you want to create')
+    parser.add_argument('--center_mask', type=int, default=0,
+                        help='a size of the mask you create')
+    parser.add_argument('--manual_mask', type=int, nargs=4, default=[],
+                        help='[ulx,uly,rdx,rdy] of the mask you create')
+    parser.add_argument('--random_mask', type=str, choices=['edge', 'large'],
+                        help='make a random mask and save its mask for evaluating the ESP or GFP')
+    parser.add_argument('--mask', type=str,
+                        help='the mask image path (Image Processing Only)')
+    parser.add_argument('--use_local_masks', type=str, 
+                        help='if you use local masks in video processing,'
+                             'specify the directory path where series masks are saved.'
+                             'the mask filename should be mask_{count_num}.png.'
+                             'Note that this {count_num} start 1, not 0.'
+                             'if you dont use local masks, set None.')
 
-            # {dir,filename(with extention)} that you want to save output image
-            'save_outframe': None,
+    # For design of the output image or video
+    parser.add_argument('--enhance', type=int, default=0,
+                        help='a factor multiplied to output image for enhancing the experiment result')
+    parser.add_argument('--boxline', type=int, default=0,
+                        help='Write the bouding box at the reconstruction part')
 
-            # {dir,filename(with extention)} that you want to save image
-            'save_outimage': None,
 
-            # the dir where you want to save mask images. if you don't save the mask, set None.
-            'save_mask': None, # 'data/videos/noon/large_mask',
+    opt = parser.parse_args()
+    return opt
 
-            # For network pretrained models path
-
-            # path to Caffe deploy prototxt file
-            'detect_cfgs': os.path.join(os.getcwd(), 'src/detection/yolov3/cfgs/yolov3.cfg'),
-
-            # path to Caffe pre-trained
-            'detect_weights': os.path.join(os.getcwd(), 
-                'src/detection/yolov3/weights/yolov3.weights'),
-
-            'inpaint_weights': os.path.join(os.getcwd(), 
-                'src/inpaint/glcic/weights/completionnet_places2.pth'),
-
-            'segmentation_weights': os.path.join(os.getcwd(), 
-                'src/segmentation/deeplabv3/pretrained_models/model_13_2_2_2_epoch_580.pth'),
-
-            'resnet_type': 18,
-
-            'resnet_path': os.path.join(os.getcwd(),
-                'src/segmentation/deeplabv3/pretrained_models/resnet')
-            }
-
-    return config
 
 if __name__ == '__main__':
     main()
