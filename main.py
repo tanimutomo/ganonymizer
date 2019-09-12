@@ -130,7 +130,7 @@ def get_options():
     parser.add_argument('--exec', type=str, required=True,
                         choices=['realtime_image', 'realtime_video', 'image', 'video'],
                         help='specify the execution type')
-    parser.add_argument('--data_root', type=str, default='/media/jetson/data')
+    parser.add_argument('--data_root', type=str, default='/media/jetson/TOSHIBA EXT')
 
     # settings for each execution type
     # realtime
@@ -145,6 +145,7 @@ def get_options():
 
 
     ##### OUTPUT SETTINGS #####
+    parser.add_argument('--resize_factor', type=float)
     parser.add_argument('--det', type=str, default='data/images',
                         help='output dir for image')
     parser.add_argument('--output', type=str, default='0')
