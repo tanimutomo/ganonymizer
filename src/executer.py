@@ -41,15 +41,18 @@ class Executer:
             s.bind(('127.0.0.1', 50007))
             s.listen(1)
 
-            cap = cv2.VideoCapture(1)
-            width = int(cap.get(3))
-            height = int(cap.get(4))
-            origin_fps = cap.get(5)
+            while True:
+                cap = cv2.VideoCapture(1)
+                width = int(cap.get(3))
+                height = int(cap.get(4))
+                origin_fps = cap.get(5)
 
-            count = 1
-            elapsed = [0, 0, 0, 0]
+                if not cap.isOpened():
+                    break
 
-            while cap.isOpened():
+                count = 1
+                elapsed = [0, 0, 0, 0]
+
                 print('')
                 conn, addr = s.accept()
                 with conn:
@@ -72,12 +75,16 @@ class Executer:
                                          image_name)
 
                 print('-----------------------------------------------------')
-                origin_frame = cv2.resize(origin_frame, dsize=None, fx=0.5, fy=0.5)
+                if self.config.resize_factor:
+                    rf = self.config.resize_factor
+                    origin_frame = cv2.resize(origin_frame, dsize=None, fx=rf, fy=rf)
 
                 # process
                 frame = copy.deepcopy(origin_frame)
                 elapsed, output, frame_designed = self.process_input(frame, elapsed, count=count)
 
+                if elapsed[2] == 0:
+                    output = origin_frame
                 if self.config.output_type == 'concat_all':
                     output = concat_all(origin_frame, frame_designed, output)
                 elif self.config.output_type == 'concat_inout':
@@ -89,8 +96,7 @@ class Executer:
                     cs.connect(('127.0.0.1', 50008))
                     cs.send(save_path.encode())
 
-            cap.release()
-            cv2.destroyAllWindows()
+                cap.release()
 
     def realtime_video(self):
         cap = cv2.VideoCapture(1)
@@ -267,6 +273,10 @@ class Executer:
 
         else:
             obj_rec, elapsed[1], detected_obj = self.ganonymizer.detect(input, obj_rec, detected_obj)
+            if not obj_rec:
+                # No object is detected
+                return elapsed, False, original
+
             obj_rec = extend_rec(obj_rec, input)
             mask = np.zeros((input.shape[0], input.shape[1], 3))
             mask = self.ganonymizer.create_detected_mask(input, mask, obj_rec)
@@ -318,7 +328,10 @@ class Executer:
         origin_mask = copy.deepcopy(mask)
 
         if obj_rec != []:
-            width_max, height_max = max_mask_size(mask)
+            try:
+                width_max, height_max = max_mask_size(mask)
+            except:
+                width_max, height_max = 0, 0
         else:
             width_max, height_max = 0, 0
         # cv2.imwrite(os.path.join(os.getcwd(), 'ganonymizer/data/images/mask.png'), mask)
