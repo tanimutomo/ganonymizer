@@ -103,13 +103,18 @@ def check_mask_position(rand_mask, mask):
     return True
 
 
-def video_writer(video, output_name, fps, width, height):
-    video_name = video.split('/')[-1]
-    outfile = os.path.join(os.getcwd(), 'data/videos/out{}_{}'.format(output_name, video_name))
+def video_writer(inpath, output_name, fps, width, height, save_same_dir=False):
+    filename = inpath.split('/')[-1]
+    indir = inpath.split('/')[:-1]
+    if save_same_dir:
+        outpath = os.path.join('/'.join(indir), output_name + filename)
+    else:
+        outpath = os.path.join(os.getcwd(), 'data/videos/{}_{}'.format(output_name, filename))
+    print('[INFO] Save output video to {}'.format(outpath))
 
     # video writer
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    writer = cv2.VideoWriter(outfile, fourcc, fps, (width, height))
+    writer = cv2.VideoWriter(outpath, fourcc, fps, (width, height))
 
     return writer
 
