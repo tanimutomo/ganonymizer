@@ -17,10 +17,11 @@ def crop_vid(infile, outname, out_fps=None, start=None, end=None,
     if not out_fps:
         out_fps = fps
     if resize_factor:
-        new_h = int(h / resize_factor)
-        new_w = int(w / resize_factor)
+        h = int(h / resize_factor)
+        w = int(w / resize_factor)
 
-    writer = video_writer(infile, outname, out_fps, new_w, new_h)
+    outpath = './{}'.format(infile.split('/')[-1])
+    writer = video_writer(outpath, outname, out_fps, w, h, save_same_dir=True)
 
     count = 1
     while(cap.isOpened()):
@@ -29,7 +30,7 @@ def crop_vid(infile, outname, out_fps=None, start=None, end=None,
             print('count: {}'.format(count))
             if ret:
                 if resize_factor:
-                    frame = cv2.resize(frame, (new_w, new_h))
+                    frame = cv2.resize(frame, (w, h))
                 writer.write(frame)
             else:
                 break
@@ -41,6 +42,6 @@ def crop_vid(infile, outname, out_fps=None, start=None, end=None,
     writer.release()
 
 if __name__ == '__main__':
-    infile = '/Users/tanimu/projects/pytorch-yolo-v3/videos/ex01.avi'
-    crop_vid(infile, '_short', resize_factor=2)
+    infile = '../ganonymizerv2/src/data/video/input/gopro_1.avi'
+    crop_vid(infile, 'short_', end=500)
 
