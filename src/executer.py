@@ -17,42 +17,8 @@ class Executer:
     def __init__(self, config):
         self.config = config
 
-        # self.video = config['video']
-        # self.image = config['image']
-        # self.output = config['output']
-        # self.segmentation = config['segmentation']
-        # self.detect_cfg = config['detect_cfgs']
-        # self.detect_weight = config['detect_weights']
-        # self.segmentation_weight = config['segmentation_weight']
-        # self.res_type = config['resnet_type']
-        # self.res_path = config['resnet_path']
-        # self.inpaint_weight = config['inpaint_weights']
-
-        # self.fps = config['fps']
-        # self.conf = config['conf']
-        # self.nms = config['nms']
-        # self.postproc = config['postproc']
-        # self.large_thresh = config['large_thresh']
-        # self.prepad_thresh = config['prepad_thresh']
-
-        # self.show = config['show']
-        # self.mask = config['mask']
-        # self.manual_mask = config['manual_mask']
-        # self.edge_mask = config['edge_mask']
-        # self.center_mask = config['center_mask']
-        # self.boxline = config['boxline']
-        # self.save_outframe = config['save_outframe']
-        # self.save_outimage = config['save_outimage']
-        # self.save_mask = config['save_mask']
-        # self.concat_all = config['concat_all']
-        # self.concat_inout = config['concat_inout']
-        # self.random_mask = config['random_mask']
-        # self.use_local_masks = config['use_local_masks']
-        # self.detection_summary_file = config['detection_summary_file']
-
-
     def execute(self):
-        device = set_device()
+        device = set_device(self.config.gpu_id)
         detecter, inpainter, datamean = set_networks(self.config, device)
         self.ganonymizer = GANonymizer(self.config, device, detecter, inpainter, datamean)
 

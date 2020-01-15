@@ -59,7 +59,7 @@ def yolo_detecter(img, model, conf, nms, rec, device, detected_obj):
         with torch.no_grad():
             prediction = model(Variable(batch), device)
         
-        prediction = write_results(prediction, confidence, num_classes, nms = True, nms_conf = nms_thesh)
+        prediction = write_results(prediction, confidence, num_classes, device, nms = True, nms_conf = nms_thesh)
         
         if type(prediction) == int:
             i += 1

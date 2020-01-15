@@ -121,10 +121,13 @@ def get_config():
             'video': '', # os.path.join(os.getcwd(), 'data/videos/half_inter10_noon.avi'),
 
             # The input image, when you apply to an image.
-            'image': os.path.join(os.getcwd(), 'data/images/white.png'),
+            'image': os.path.join(os.getcwd(), 'data/images/example_01.jpg'),
             'det': 'data/images',
 
             'output': '0',
+
+            # device
+            'gpu_id': 1,
 
             # THe experiment for the PMD
             'pmd_div_num': 9, # choose in [4, 9, 16]
@@ -230,10 +233,10 @@ def get_config():
     return config
 
 if __name__ == '__main__':
-    # main()
+    main()
     # v2f()
     # evaluate()
     # create_exp_figs(crop=True)
-    execute_to_dir()
+    # execute_to_dir()
 
 

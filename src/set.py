@@ -30,7 +30,7 @@ def set_networks(config, device):
 
     return detecter, inpainter, datamean
 
-def set_device():
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+def set_device(gpu_id):
+    device = torch.device('cuda:{}'.format(gpu_id) if torch.cuda.is_available() else 'cpu')
     print('[INFO] Device is {}'.format(device))
     return device

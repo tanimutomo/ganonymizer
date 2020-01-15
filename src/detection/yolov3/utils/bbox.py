@@ -48,7 +48,7 @@ def sanity_fix(box):
         
     return box
 
-def bbox_iou(box1, box2):
+def bbox_iou(box1, box2, device):
     """
     Returns the IoU of two bounding boxes 
     
@@ -66,7 +66,7 @@ def bbox_iou(box1, box2):
     
     #Intersection area
     if torch.cuda.is_available():
-            inter_area = torch.max(inter_rect_x2 - inter_rect_x1 + 1,torch.zeros(inter_rect_x2.shape).cuda())*torch.max(inter_rect_y2 - inter_rect_y1 + 1, torch.zeros(inter_rect_x2.shape).cuda())
+            inter_area = torch.max(inter_rect_x2 - inter_rect_x1 + 1,torch.zeros(inter_rect_x2.shape).to(device))*torch.max(inter_rect_y2 - inter_rect_y1 + 1, torch.zeros(inter_rect_x2.shape).to(device))
     else:
             inter_area = torch.max(inter_rect_x2 - inter_rect_x1 + 1,torch.zeros(inter_rect_x2.shape))*torch.max(inter_rect_y2 - inter_rect_y1 + 1, torch.zeros(inter_rect_x2.shape))
     
