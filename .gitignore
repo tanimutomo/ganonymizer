@@ -111,7 +111,9 @@ dmypy.json
 
 .DS_Store
 data/
+.vscode/
 src/others/
+docker/
 #ganonymizer/src/detection/ssd/cfgs/*
 src/detection/ssd/weights/*
 #ganonymizer/src/detection/yolov3/cfgs/*
@@ -139,3 +141,6 @@ src/detection/yolov2/
 
 !example*
 !.gitkeep
+
+Pipfile
+kronos-config.yml
