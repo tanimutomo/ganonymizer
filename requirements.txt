@@ -3,6 +3,6 @@ scikit-image
 pandas
 scipy
 pyamg
-numpy==1.15.0
+numpy==1.22.0
 torch==0.4.1
 torchvision==0.1.9
